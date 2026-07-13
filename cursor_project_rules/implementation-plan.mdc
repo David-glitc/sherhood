@@ -65,5 +65,10 @@ Audit tests 16/16 (incl. fuzz 256 + invariant 128k calls); checklist in audit-ch
 Claim/list UX; CardMarketplace + royalty tests; create pot / market / leaderboard pages.
 Allocation EV + jurisdiction notes in cursor_project_rules; `/docs/allocation` published.
 
+### Sherhood RH prep — Done (2026-07-13)
+EntryRouter ETH/WETH→USDG + fee; StockTokenRegistry allowlist; Sherhood UI; RhDeploy.s.sol.
+Pushed to https://github.com/David-glitc/sherhood
+
+
 
 
