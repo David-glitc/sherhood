@@ -1,0 +1,101 @@
+---
+description: Allocation algorithm expected value — transparent IP docs
+alwaysApply: false
+---
+
+# Allocation Algorithm — Expected Value
+
+## Goal
+
+Assign every card a positive ownership weight such that:
+
+```
+Σ ownershipWeight_i = 1e18   (100% of the pot)
+ownershipWeight_i > 0        (floor: nobody wiped out)
+E[ownership_i | deposit_i] ≈ deposit_i / totalDeposited
+```
+
+Excitement comes from variance around fair share — not from zeroing losers.
+
+## Mechanism (RevealEngine v1)
+
+1. For each card `i` with deposit `d_i`, draw a multiplier from VRF:
+
+```
+m_i ∈ [0.50, 2.00]   (uniform in 0.01 steps; MULT_FLOOR=5000bps … MULT_CEIL=20000bps)
+raw_i = d_i × m_i
+```
+
+2. Normalize:
+
+```
+w_i = raw_i × 1e18 / Σ raw_j
+```
+
+3. Floor repair: if any `w_i == 0` after integer division, set to `1` and steal overflow from the largest weight so the sum remains `1e18`.
+
+4. Rarity from multiplier band:
+
+| Multiplier | Rarity |
+|------------|--------|
+| [0.50, 0.90) | Common |
+| [0.90, 1.20) | Rare |
+| [1.20, 1.60) | Epic |
+| [1.60, 2.00] | Legendary |
+
+## Expected value (transparent)
+
+For a single card with deposit `d` in a pot with total deposits `D`:
+
+- Multiplier mean under uniform [0.5, 2.0]:
+
+```
+E[m] = (0.5 + 2.0) / 2 = 1.25
+```
+
+- Because every card uses the same multiplier distribution and weights are normalized by Σ(d_j m_j):
+
+```
+E[w_i] ≈ (d_i / D) × 1e18
+```
+
+when deposits are fixed before the reveal (they are — funding is closed). The slight bias from integer flooring and the 1-wei floor is negligible for realistic pot sizes.
+
+**Larger deposits still have higher expected ownership.** Randomness only reshuffles relative shares within the multiplier band.
+
+## What users can lose / gain relative to fair share
+
+Relative outcome vs fair share `f_i = d_i/D`:
+
+```
+outcome_ratio ≈ m_i / m̄_pool
+```
+
+where `m̄_pool` is the deposit-weighted average multiplier of the pot.
+
+Approx extremes for an equal-deposit pot of many participants:
+
+- Worst case ~ 0.5 / 1.25 ≈ **0.4×** fair share  
+- Best case ~ 2.0 / 1.25 ≈ **1.6×** fair share  
+
+Nobody receives 0% of the pot.
+
+## Claim payout
+
+After assets are purchased:
+
+```
+assetPayout_i = assetAmount × w_i / 1e18
+```
+
+Rounding dust remains on the pot until all cards claim; owner may sweep dust.
+
+## Non-goals of this algorithm
+
+- Winner-take-all raffles  
+- Negative-EV casino house edges on the allocation itself (protocol fees are separate, disclosed entry/protocol bps)  
+- Hidden off-chain random seeds
+
+## Implementation reference
+
+`contracts/src/RevealEngine.sol` — `_allocate`, `_rarityFromMultiplier`

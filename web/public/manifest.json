@@ -1,0 +1,16 @@
+{
+  "name": "Sherwood",
+  "short_name": "Sherwood",
+  "description": "Open randomized gacha packs containing fractional Robinhood Chain Stock Tokens.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00c805",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

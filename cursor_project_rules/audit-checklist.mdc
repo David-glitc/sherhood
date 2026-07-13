@@ -1,0 +1,45 @@
+---
+description: Sherwood audit checklist — run before mainnet
+alwaysApply: false
+---
+
+# Audit Checklist — Pot Stack
+
+## Invariants (must always hold)
+- [ ] Σ card.ownershipWeight for a pot == 1e18 after reveal
+- [ ] Every revealed card has ownershipWeight > 0
+- [ ] pot.totalDeposited + entryFees == USDG held until purchase pull
+- [ ] After purchase: feesOwed == protocolFee + entryFees; sweep once only
+- [ ] After all claims: assetsClaimed + dust on pot == assetAmount
+- [ ] Card can be claimed at most once; only by NFT owner; only when Revealed
+
+## Access control
+- [ ] Only factory pots can mint cards
+- [ ] Only revealer can reveal; only pot can markClaimed
+- [ ] Only assetManager can pullForPurchase / markPurchased
+- [ ] purchasePulled prevents double pull
+- [ ] pause on factory blocks deposits/claims
+
+## Fee paths
+- [ ] Creation fee → Treasury.depositFeeUSDG
+- [ ] Entry + protocol fees → Pot.sweepFees → Treasury
+- [ ] protocolFeeBps capped (factory max + pot constructor)
+
+## Economic / game integrity
+- [ ] Expected ownership ≈ deposit / totalDeposited (multiplier mean ~1.25 — document EV)
+- [ ] No path zeroes a participant's claim
+- [ ] Cannot reveal before purchase; cannot claim before reveal
+
+## Ops / VRF
+- [ ] VRF consumer set; keyHash + subId configured
+- [ ] amountOutMinimum enforced on real router (never 0 on mainnet)
+- [ ] Operators scoped; owner key in cold storage
+
+## Test commands
+```bash
+cd contracts
+forge test --match-path 'test/Pot*.t.sol' -vv
+forge test --match-contract PotFuzzTest --fuzz-runs 500
+forge test --match-contract PotInvariantTest --invariant-runs 256
+../scripts/devnet-sim.sh
+```

@@ -1,0 +1,62 @@
+---
+description: Jurisdiction / compliance notes for Sherwood (non-code)
+alwaysApply: false
+---
+
+# Jurisdiction Review Notes — Sherwood
+
+**Status:** Internal product notes — not legal advice. Counsel must review before any public mainnet launch.
+
+## Product framing (compliance-relevant)
+
+Sherwood is designed as a **Fractional Asset Loot Protocol**:
+
+- Every participant receives an on-chain claim NFT.  
+- Randomness affects **claim size**, not whether you keep a claim.  
+- After reveal, the NFT represents ownership/claim rights on a funded asset pool.
+
+This is intentionally distinct from winner-take-all raffles or games where chance can wipe a stake to zero.
+
+## Risk categories to discuss with counsel
+
+1. **Securities / investment contract analysis**  
+   Pooled capital → asset purchase → fractional claims may trigger securities frameworks (e.g. Howey-style tests in the US). Tokenized stock exposure and “investment pot” language increase scrutiny.
+
+2. **Gambling / gaming licensing**  
+   Even with a floor claim, prize-like variance + consideration can be treated as gambling in some jurisdictions. Floor ownership + transparent EV docs are mitigants, not guarantees.
+
+3. **Broker-dealer / ATS / crowdfunding**  
+   Marketplace trading of claims tied to real-world assets may implicate intermediary rules.
+
+4. **RWA / custody**  
+   Who holds the underlying (on-chain tokenized equity vs off-chain brokerage)? Disclosure and custody model must match marketing.
+
+5. **Marketing language**  
+   Avoid “guaranteed returns”, “risk-free”, or “casino” framing. Prefer “fractional claim”, “allocation variance”, “collectible ownership NFT”.
+
+## Operational controls (engineering + ops)
+
+- [ ] Geo-blocking / allowlists if counsel requires  
+- [ ] Clear fee schedule (creation, entry, protocol bps, marketplace royalty)  
+- [ ] Publish allocation EV doc (`allocation-ev.mdc`) in-product  
+- [ ] No `amountOutMinimum = 0` on production swaps  
+- [ ] Pause switches tested; incident runbook  
+- [ ] External audit before mainnet TVL
+
+## Suggested launch posture
+
+| Stage | Posture |
+|-------|---------|
+| Local anvil / internal | Dev only |
+| Public testnet | Disclaimers; no real RWAs |
+| Mainnet crypto-only pots | Narrower asset set; counsel memo |
+| Tokenized equity / stock pots | Full securities + custody review |
+
+## Open questions for counsel
+
+1. Is a floor-ownership random allocation still “gambling” in target launch geos?  
+2. Does the claim NFT + underlying pool constitute an investment contract?  
+3. Can community-created pots be offered without issuer registration?  
+4. What KYC/AML is required for marketplace secondary sales?
+
+Update this file when counsel returns written guidance.

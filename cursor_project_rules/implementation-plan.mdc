@@ -1,0 +1,69 @@
+---
+description: Sherwood implementation plan — mark Done with two-line summary
+alwaysApply: true
+---
+
+# Implementation Plan — Fractional Asset Loot Protocol
+
+## Phase 0 — Knowledge base + product pivot scaffold
+- [x] cursor_project_rules (README, tech-stack, this plan)
+- [x] DEVELOPMENT.md changelog
+- [x] Decide: greenfield Pot stack vs evolve RaffleManager
+- [x] PRD locked as source of truth (ownership-for-all, not lose-everything)
+
+## Phase 1 — Tracer bullet (contracts)
+- [x] PotFactory + Pot: create, deposit, close on target/deadline
+- [x] Card NFT mint on deposit (unrevealed)
+- [x] RevealEngine: VRF → ownership weights sum to 1e18 (100%) + rarity tiers
+- [x] AssetManager stub: swap USDG → target token into pot vault
+- [x] Forge tests: funding, close, reveal conservation (Σ ownership = 100%)
+
+## Phase 2 — Tracer bullet (web)
+- [x] Pot discovery list (concurrent pots, progress bars)
+- [x] Deposit flow (USDG approve + join)
+- [x] Inventory: mystery → revealed card with ownership %
+- [x] Replace raffle landing copy with Fractional Asset Loot positioning
+- [x] Claim asset share + list-to-marketplace from inventory
+
+## Phase 3 — Marketplace + gamification (later)
+- [x] Card trading / royalties (`CardMarketplace`, 2.5% → Treasury)
+- [x] Achievements + leaderboards (`/leaderboard`)
+- [x] Community pot creation UI (`/create`)
+
+## Phase 4 — Compliance / allocation IP
+- [x] Transparent expected-value docs for allocation algorithm
+- [x] Floor ownership guarantee (every card > 0) — enforced in RevealEngine
+- [x] Jurisdiction review notes (non-code)
+
+## Phase 5 — Full business flow + fees + audit battery
+- [x] Fee paths: creation / entry / protocol → Treasury
+- [x] Claim/redeem ownership share of purchased assets
+- [x] Pause + double-pull/double-claim guards + operators
+- [x] Local anvil deploy + end-to-end simulate (`scripts/devnet-sim.sh`)
+- [x] Fuzz + invariant + attack tests; audit checklist
+
+## Done Log
+
+### Phase 0 (partial) — Done (2026-07-13)
+Created cursor_project_rules from Fractional Asset Loot PRD.
+Documented legacy raffle/pack as non-core; pending architecture fork decision.
+
+### Phase 0 decision + Phase 1 — Done (2026-07-13)
+Chose greenfield Pot stack; reuse USDG/VRF/Treasury/swap patterns from raffle prototype.
+Added PotFactory, Pot, PotCard, RevealEngine, AssetManager + PotProtocol forge tests (4/4 pass).
+Allocation: deposit-weighted multipliers [0.5x–2.0x], normalize to 1e18, floor > 0.
+
+### Phase 2 tracer — Done (2026-07-13)
+Web pot discovery + deposit hook, cards inventory, landing copy pivoted to Fractional Asset Loot.
+ABIs exported; PotDeploy.s.sol + env example for factory/card addresses.
+
+### Phase 5 — Done (2026-07-13)
+Wired Treasury fee collection, claim flow, pause/operators, localdevnet sim (`SIMULATION_OK`).
+Audit tests 16/16 (incl. fuzz 256 + invariant 128k calls); checklist in audit-checklist.mdc.
+
+### Phases 2–4 complete — Done (2026-07-13)
+Claim/list UX; CardMarketplace + royalty tests; create pot / market / leaderboard pages.
+Allocation EV + jurisdiction notes in cursor_project_rules; `/docs/allocation` published.
+
+
+

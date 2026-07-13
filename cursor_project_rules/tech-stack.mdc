@@ -1,0 +1,36 @@
+---
+description: Sherwood tech stack — Robinhood Chain, Foundry, Next.js
+alwaysApply: true
+---
+
+# Tech Stack
+
+## Brand
+
+- Product: **Sherhood** — https://sherhood.online
+- Positioning: Fractional Asset Loot Protocol on Robinhood Chain
+
+## Chain
+
+- Robinhood Chain mainnet (chainId **4663**); testnet **46630**
+- RPC: `https://rpc.mainnet.chain.robinhood.com`
+- Explorer: `https://robinhoodchain.blockscout.com`
+- Entry / settlement: USDG `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`
+- WETH: `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`
+- Randomness: Chainlink VRF v2
+- Asset buy + entry swap: Uniswap V3-style `exactInputSingle`
+- Canonical Stock Tokens: https://docs.robinhood.com/chain/contracts/ (via `StockTokenRegistry`)
+
+## Contracts (Foundry)
+
+- Solidity 0.8.24, Cancun, via_IR, OpenZeppelin, forge tests
+- Path: `contracts/`
+- Modules: PotFactory, Pot, PotCard, RevealEngine, AssetManager, Treasury, CardMarketplace, EntryRouter, StockTokenRegistry
+- Deploy: `script/RhDeploy.s.sol`
+
+## Web (Next.js)
+
+- Next.js App Router, React 19, Tailwind 4, Syne + DM Sans
+- Wallet: Dynamic Labs + wagmi + viem
+- Path: `web/`
+- Pay-in: ETH / WETH (EntryRouter auto-swap) or USDG

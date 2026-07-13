@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#000"/>
+  <rect x="540" y="180" width="120" height="26" rx="6" fill="#00c805" opacity="0.4"/>
+  <rect x="560" y="154" width="80" height="32" rx="8" fill="#00c805" opacity="0.6"/>
+  <path d="M600 120 L570 180 L585 180 L585 220 L615 220 L615 180 L630 180 L600 120Z" fill="#00c805"/>
+  <text x="600" y="290" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="700" fill="#fff" letter-spacing="4">SHERWOOD</text>
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="22" fill="#666" letter-spacing="2">Open a Pack</text>
+  <text x="600" y="390" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="16" fill="#444" letter-spacing="1">Fractional Stock Tokens · Gacha Pulls · Instant Buyback</text>
+  <rect x="420" y="450" width="360" height="2" rx="1" fill="#00c805" opacity="0.3"/>
+</svg>
