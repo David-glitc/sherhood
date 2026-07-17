@@ -1,26 +1,60 @@
 ---
 title: OpenSea
-description: Cards on OpenSea, royalties, and metadata refresh
+description: View and trade Sherhood cards on an external marketplace
 ---
 
 # OpenSea
 
-Sherhood cards can appear on OpenSea once the collection is submitted. Treat OpenSea as a satellite venue — [Trade](/marketplace) on sherhood.xyz remains the primary market because it shows derived value and claim/exit next to the listing.
+Sherhood cards can appear on OpenSea after the collection goes live. Use Sherhood Trade when you want basket value, claim actions, and listing status in one place.
 
-## Metadata
+## Find the official collection
 
-Each card’s metadata updates when it reveals (name, art, traits). Sealed cards show Unrevealed state; revealed cards show rarity, ownership weight, and constituents. After reveal, refresh the token on OpenSea so listings do not keep sealed art.
+Use the OpenSea link in the Sherhood navigation. Do not trust collection links from direct messages or search ads.
 
-**Claiming burns the card.** A redeemed card is removed from the collection entirely — you can never buy a worthless already-claimed shell on OpenSea. If a token disappears from a listing, its owner claimed or early-exited.
+Before buying, check:
+
+- The collection link came from sherhood.xyz.
+- The card belongs to the basket shown in its details.
+- The card still exists and has not been claimed or exited.
+- The wallet and network in OpenSea are correct.
+
+## Card details
+
+A sealed card shows its unrevealed artwork and basket information.
+
+A revealed card can show:
+
+- Rarity.
+- Ownership percentage.
+- Basket.
+- Stocks in the basket.
+- Original deposit.
+
+OpenSea may cache older card details. Use its metadata refresh action if a revealed card still shows sealed artwork.
+
+## Buying on OpenSea
+
+OpenSea checkout does not show all Sherhood basket information.
+
+Before buying:
+
+1. Copy the card ID.
+2. Find the same card in Sherhood.
+3. Review its basket, state, ownership, and displayed value.
+4. Return to OpenSea and confirm the final price and fees.
 
 ## Royalties
 
-Secondary sales carry a **2.5%** royalty to the protocol via the on-chain ERC-2981 standard, which OpenSea reads and applies at checkout. Royalties on Trade (sherhood.xyz) are enforced by the contract itself; on external venues they follow that venue's creator-fee policy. Prefer Trade when you want claim/exit next to the sale.
+The collection requests a 2.5% creator royalty. External marketplaces decide how creator fees are applied at checkout.
 
-## Filters that matter
+Sherhood Trade applies its royalty directly and shows the card’s basket context beside the listing.
 
-`State`, `Rarity`, `Basket`, `Ownership Weight`, `Constituents`, `Deposit (USDG)`.
+## Removed cards
 
-## Link
+Claiming or exiting removes the card permanently. It should disappear from marketplace listings.
 
-Once the collection is live, OpenSea appears in the app nav. Until then, use Trade on sherhood.xyz.
+## Next steps
+
+- [Compare Sherhood Trade and external listings](/docs/secondary-market).
+- [Understand card value](/docs/pricing).
+- [Review fees](/docs/fees).

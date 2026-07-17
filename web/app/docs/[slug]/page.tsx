@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const doc = getDocBySlug(slug)
     return docsMeta(doc.title, doc.description)
   } catch {
-    return docsMeta("Docs", "Sherhood protocol documentation")
+    return docsMeta("Help", "Learn how to use Sherhood")
   }
 }
 

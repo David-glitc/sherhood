@@ -1,33 +1,61 @@
 ---
-title: Pricing
-description: Derived card value from fair share or ownership × basket NAV
+title: Understanding card value
+description: Compare a card’s basket share with its market price
 ---
 
-# Pricing
+# Understanding card value
 
-Every card has a **derived value** — what the card is worth relative to the basket right now. Inventory and Trade show this next to every card.
+The app shows a value estimate beside each card. Use it as a reference when you list or buy. It is not a guaranteed sale price.
 
-## Formula
+## Sealed cards
 
-```
-if Unrevealed:  (your deposit / basket total) × basket NAV
-if Revealed:    your ownership % × basket NAV
-if Claimed:     0
-```
+Before reveal, the estimate uses:
 
-Basket NAV is the sum of spot price × holdings for each stock in the basket.
+- The card’s deposit.
+- The basket’s total deposits.
+- The latest basket value available to the app.
 
-## Fixed-price listings
+The final ownership percentage can be higher or lower after reveal.
 
-On [Trade](/marketplace):
+## Revealed cards
 
-1. **List** — set any ask in USDG.
-2. **Display** — ask + derived value + Unrevealed/Revealed state.
-3. **Buy** — pay ask; royalty skimmed; card transfers.
-4. **Cancel** — delist any time before a buy.
+After reveal, the estimate uses:
 
-No floor/ceiling. No partial fills.
+- The card’s ownership percentage.
+- The stock tokens held by the basket.
+- The latest available prices for those tokens.
 
-## Why show derived value
+This gives you a clearer view of the assets behind the card.
 
-Ask alone is noise. Ask next to derived value tells buyers whether they are paying a premium or a discount to fair share — especially for sealed cards.
+## Why the estimate can change
+
+Card value can move when:
+
+- Stock token prices change.
+- The basket’s displayed price data updates.
+- A sealed card reveals a different ownership percentage.
+- A marketplace listing includes a premium or discount.
+
+Market prices may be delayed or unavailable. Check the basket holdings and current prices before making a decision.
+
+## Compare a listing
+
+Before buying:
+
+1. Check whether the card is sealed or revealed.
+2. Open the basket and review its holdings.
+3. Compare the listing price with the displayed estimate.
+4. Review the royalty and network fee.
+5. Decide whether the uncertainty or premium fits your risk.
+
+Sellers can choose any asking price. Sherhood does not force a minimum or maximum listing price.
+
+## Claimed cards
+
+A claimed card has no remaining basket assets. Sherhood removes it permanently after claim so it cannot be listed again.
+
+## Next steps
+
+- [Buy or sell a card](/docs/secondary-market).
+- [Read reveal and rarity](/docs/allocation).
+- [Review marketplace fees](/docs/fees).

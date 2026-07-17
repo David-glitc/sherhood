@@ -383,3 +383,9 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - Refined profile, docs navigation, Telegram, header, and footer for keyboard access, active-page semantics, mobile scrolling, readable legal content, and responsive action layouts.
 - Stabilized stock chart effects and memoization; switched the cinematic hero to Framer Motion's reduced-motion signal.
 - Verification: ESLint clean, TypeScript clean, Next.js production build clean (30 static/dynamic routes generated).
+
+## 2026-07-17 11:20 (UTC+1) — Editorial landing + user docs rewrite
+
+- Rebuilt the landing page around the supplied black/lime editorial direction: asymmetric hero, animated sealed-card prism, stock-logo motion, live basket states, a border-led three-step flow, revealed ownership preview, flat FAQ rows, updated stock marquee, and high-contrast final CTA.
+- Rewrote all nine MDX pages as task-focused user guides. Removed formulas, contract APIs, deployment language, protocol architecture, and unexplained implementation terms; updated docs navigation to match the new user-facing titles.
+- Verification: ESLint clean, TypeScript clean, Next.js production build clean with all nine docs statically generated.

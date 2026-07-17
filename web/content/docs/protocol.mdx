@@ -1,51 +1,66 @@
 ---
-title: Protocol
-description: Baskets, cards, reveal, and claims
+title: How Sherhood works
+description: The user flow from funding a basket to claiming stock tokens
 ---
 
-# Protocol
+# How Sherhood works
 
-Sherhood turns pooled money into a multi-stock portfolio. Each joiner gets an NFT card that represents their claim.
+Sherhood lets many wallets fund one stock basket. Every deposit creates a card that becomes a claim on the basket after reveal.
 
-## Mental model
+## The full journey
 
-> Everyone keeps a claim. Luck decides **how large** that claim is — not whether you exist.
->
-> A second luck path picks **which stocks** the closed basket buys. Creators do not set the ticker list when they open a basket.
+| Stage | What you see |
+|-------|--------------|
+| **Funding** | An open basket with a goal, minimum deposit, and closing time |
+| **Card created** | A sealed card in your wallet after your deposit confirms |
+| **Basket closed** | Funding stops and the basket prepares its stock purchases |
+| **Stocks purchased** | The basket holds 2 to 5 Robinhood Chain stock tokens |
+| **Card revealed** | Your card shows its rarity and ownership percentage |
+| **Claim or trade** | Receive the stock tokens or sell the card |
 
-Cards mint when you deposit. Reveal only assigns weight and rarity.
+## What a basket holds
 
-## Lifecycle
+A basket starts with deposits in USDG. If you pay with ETH or WETH, Sherhood converts it to USDG first.
 
-| Stage | What happens |
-|-------|----------------|
-| **Create** | Platform or community opens a basket (goal, min, duration) |
-| **Funding** | Users deposit ETH / WETH / USDG; each deposit mints a mystery card |
-| **Close** | Goal met or duration expires (with deposits) |
-| **Purchase** | The basket luck-picks 2–5 stock tokens and buys them |
-| **Reveal** | Luck assigns ownership weights that sum to 100% |
-| **Claim / Trade** | Redeem a share of every holding, or sell the card |
+After funding closes, the basket buys several stock tokens from stocks Sherhood supports. You can see the final holdings on the basket page.
 
-## Basket rules
+## What your card represents
 
-- One basket buys a **portfolio** of 2–5 registered stock tokens when it fills.
-- Creators pick goal, min deposit, and duration — not tickers or fee rates.
-- Concurrent baskets can run in parallel.
-- Claiming redeems a proportional slice of **all** holdings in that basket.
+Each deposit creates one card.
 
-## What Sherhood is not
+Before reveal, the card records:
 
-- Not a winner-take-all raffle as the core product.
-- Not a bet where chance can wipe your deposit to zero.
-- Not off-chain custodial ownership without an on-chain claim NFT.
+- The basket you joined.
+- Your deposit amount.
+- Its sealed state.
 
-## Flow
+After reveal, the card also shows:
 
-```
-Connect wallet
-    → Fund basket (ETH / WETH / USDG)
-    → Mystery card minted
-    → Basket closes & luck-buys 2–5 stocks
-    → Reveal ownership %
-    → Claim portfolio share  or  Trade card
-```
+- Your ownership percentage.
+- Its rarity.
+- The basket’s stock tokens.
+- The amount of each token available when you claim.
+
+## What happens when you claim
+
+Claiming sends your share of every stock token held by the basket to your wallet.
+
+The card is removed permanently after a successful claim. It cannot be sold or claimed again.
+
+## What happens if funding does not complete
+
+If a basket reaches its deadline without enough funding, it can be cancelled. You can then request the refund shown for your card.
+
+## What to check before every action
+
+- Confirm you are on Robinhood Chain.
+- Check the basket address shown in the app.
+- Read the transaction details in your wallet.
+- Review fees and slippage.
+- Wait for the transaction to confirm before trying again.
+
+## Next steps
+
+- [Fund your first basket](/docs/getting-started).
+- [Understand reveal and rarity](/docs/allocation).
+- [Review exits and refunds](/docs/early-exit).

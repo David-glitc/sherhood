@@ -1,31 +1,66 @@
 ---
-title: Secondary market
-description: Mystery vs revealed trading, $SHRH boost, listing locks
+title: Buying and selling cards
+description: Use Sherhood Trade to list, buy, or cancel a fixed-price card sale
 ---
 
-# Secondary market
+# Buying and selling cards
 
-Cards trade on Sherhood Trade (fixed-price USDG) and can also appear on OpenSea. A mystery card and a revealed card are **different products**.
+Sherhood Trade lets you buy and sell cards for a fixed USDG price. Check the card state, basket, ownership, and value before you confirm.
 
-## Mystery vs revealed
+## Sealed and revealed cards
 
-| State | What you buy | Risk |
-|---|---|---|
-| **Unrevealed** | A lottery ticket on a basket | Ownership % and rarity unknown until reveal |
-| **Revealed** | A priced claim | Known weight × basket value; can claim stock tokens |
+| Card state | What you know |
+|------------|---------------|
+| **Sealed** | Deposit, basket, and current estimated value |
+| **Revealed** | Ownership percentage, rarity, basket holdings, and claim preview |
 
-Every listing shows **Unrevealed** or **Revealed**.
+A sealed card carries more uncertainty because its final ownership percentage is still hidden.
 
-## $SHRH boost on trade
+## List a card
 
-Boost requires escrowing enough `$SHRH` via `lockLuck` at **deposit** (sets `luckLocked` on the card) **and** still having that escrow at **reveal** (current holder). You cannot unlock in the same block you lock — that blocks same-tx flash loans. Mystery cards stay tradeable; the reveal-time escrow check follows whoever holds the card.
+1. Open [Cards](/inventory).
+2. Choose a card that is not claimed or already listed.
+3. Enter the USDG price.
+4. Select **List on Trade**.
+5. Confirm the transaction in your wallet.
 
-## Listing lock
+Your card stays in your wallet, but it is locked while the listing is active.
 
-While a card is listed on Trade, the NFT **cannot** be transferred, claimed, or early-exited. Cancel the listing first. Claiming **burns** the card — a redeemed card no longer exists, so worthless shells can never be traded here or on OpenSea.
+## Buy a card
 
-## Royalty
+1. Open [Trade](/marketplace).
+2. Review the card state and basket.
+3. Compare the asking price with the displayed card value.
+4. Confirm **Buy card**.
+5. Approve the USDG payment if your wallet asks.
 
-Trade takes **2.5%** to the protocol. OpenSea may display the same rate; enforcement off-app is optional per venue.
+The card transfers after the purchase confirms.
 
-See [OpenSea](/docs/opensea) and [Pricing](/docs/pricing).
+## Cancel a listing
+
+Open your listing on Trade and select **Cancel listing**. After cancellation confirms, you can transfer, claim, or exit the card again.
+
+## Listing restrictions
+
+A listed card cannot be:
+
+- Transferred to another wallet.
+- Claimed.
+- Exited.
+- Listed again.
+
+Cancel the listing first.
+
+## Fees
+
+Sherhood Trade charges a 2.5% royalty on the sale price. The seller receives the amount left after the royalty.
+
+## Claimed cards
+
+Claiming removes the card permanently. It disappears from Sherhood Trade and cannot be sold again.
+
+## Next steps
+
+- [Understand card value](/docs/pricing).
+- [Review OpenSea differences](/docs/opensea).
+- [Check fees](/docs/fees).

@@ -1,53 +1,76 @@
 ---
 title: Getting started
-description: Connect, fund a basket, mint a card, reveal and claim
+description: Fund your first basket and follow your card from sealed to revealed
 ---
 
 # Getting started
 
-Sherhood is a fractional stock-basket protocol on Robinhood Chain. You fund a **basket**, mint a **mystery card**, and after the basket buys a multi-stock portfolio, reveal sets how large your ownership slice is.
+This guide shows you how to fund a basket, receive a sealed card, and claim or trade it after reveal.
 
-Nobody is wiped to zero. Claim **size** is random; every card still owns something.
+## Quick start
 
-## 1. Connect a wallet
+1. Open [Baskets](/app) and connect your wallet.
+2. Choose an open basket.
+3. Select USDG, ETH, or WETH and enter an amount.
+4. Review the minimum deposit and slippage setting.
+5. Confirm **Fund basket** in your wallet.
 
-1. Open [sherhood.xyz](/app).
-2. Click **Connect** and pick your wallet.
-3. Switch to **Robinhood Chain** if your wallet asks.
+Your card appears in [Cards](/inventory) after the transaction confirms.
 
-Gas is paid in **ETH**. Settlement into baskets uses **USDG** (or ETH / WETH auto-swapped).
+## Before you fund
 
-## 2. Fund a basket
+You need:
 
-1. Go to **[Baskets](/app)**.
-2. Pick an open basket.
-3. Choose pay-in: **ETH**, **WETH**, or **USDG**.
-4. Enter an amount at or above the minimum, then **Fund**.
+- A wallet connected to Robinhood Chain.
+- ETH for network fees.
+- USDG, ETH, or WETH for the deposit.
 
-You receive a **mystery card** immediately. Ownership % stays hidden until reveal. Stocks are picked when the basket closes — not when you join.
+Sherhood is experimental software. Only fund an amount you can afford to lose.
 
-## 3. Wait for close and purchase
+## Choose a basket
 
-When the funding goal is hit (or the duration ends with deposits), the basket closes and luck-picks **2–5** stock tokens. Your card stays sealed until reveal.
+Each basket shows:
 
-## 4. Reveal
+- Its funding goal and current progress.
+- The minimum deposit.
+- When funding closes.
+- How many cards have been created.
 
-After purchase, reveal runs. Each card gets an **ownership weight** and a **rarity**. All weights sum to **100%**.
+Open the basket details page before you deposit. Check the basket address shown in the app and confirm that it is still accepting funds.
 
-Optional: hold enough **$SHRH** at deposit **and** at reveal for a luck boost (see [Allocation](/docs/allocation)). `$SHRH` launches soon.
+## Choose how to pay
 
-## 5. Claim or trade
+You can fund with:
 
-- **Claim** from [Cards](/inventory) to withdraw your share of every stock in the basket.
-- Or **list** the card on [Trade](/marketplace).
+- **USDG:** deposited directly into the basket.
+- **ETH:** converted to USDG before it enters the basket.
+- **WETH:** converted to USDG before it enters the basket.
 
-## Create your own basket
+For ETH and WETH, choose the maximum slippage you accept. A lower setting gives you more protection but may cause the transaction to fail during fast price changes.
 
-On [Create](/create) you set goal, min deposit, and duration. You do **not** pick which stocks the basket will buy. Community baskets pay a small create fee in USDG once.
+## Follow your card
 
-## Next reads
+Your card starts sealed. It shows the basket and your deposit, but not your final ownership percentage.
 
-- [Protocol](/docs/protocol) — full lifecycle
-- [Allocation](/docs/allocation) — how % and rarity work
-- [Fees](/docs/fees) — create fee, protocol take, trade royalty
-- [XP & streaks](/docs/xp) — points for every action
+When the basket closes:
+
+1. The basket buys 2 to 5 stock tokens.
+2. Your card reveals its rarity and ownership percentage.
+3. The card shows the stock tokens behind your claim.
+
+Open [Cards](/inventory) to follow its status.
+
+## Claim or trade
+
+After reveal, you can:
+
+- **Claim assets** to receive your share of every stock token held by the basket.
+- **List on Trade** to sell the card for a fixed USDG price.
+
+Claiming permanently removes the card because its assets have been redeemed.
+
+## Next steps
+
+- [Understand your card](/docs/allocation) before reveal.
+- [Review every fee](/docs/fees) before funding or trading.
+- [Learn how Trade works](/docs/secondary-market) before buying a listed card.

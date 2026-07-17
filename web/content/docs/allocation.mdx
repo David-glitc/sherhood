@@ -1,76 +1,61 @@
 ---
-title: Allocation
-description: How ownership weights and rarity are assigned
+title: Reveal and rarity
+description: What your sealed card reveals and how to read it
 ---
 
-# Allocation
+# Reveal and rarity
 
-After a basket buys its stock portfolio, Sherhood assigns every card a positive ownership weight.
+Reveal turns a sealed card into a readable ownership claim. You’ll see the basket’s stocks, your ownership percentage, and the card’s rarity.
 
-## Guarantees
+## Before reveal
 
-```
-Σ ownership = 100% of the basket
-every card ownership > 0
-```
+A sealed card shows your deposit and basket, but its final ownership percentage is hidden.
 
-Expected ownership tracks deposit size. Luck adds variance around fair share — it does not eject losers.
-
-## How reveal works
-
-1. Funding is closed; deposits are fixed. The basket already holds its stocks.
-2. For each card with deposit `d`, luck draws a multiplier:
-
-```
-m ∈ [0.50×, 2.00×]
-raw = d × m
-```
-
-3. Normalize across the basket so weights sum to 100%.
-4. Floor repair: every card gets at least a tiny share; the sum stays exactly 100%.
-5. Rarity follows the multiplier band:
-
-| Multiplier | Rarity |
-|------------|--------|
-| 0.50 – 0.90 | Common |
-| 0.90 – 1.20 | Rare |
-| 1.20 – 1.60 | Epic |
-| 1.60 – 2.00 | Legendary |
-
-## $SHRH luck boost
-
-When `$SHRH` is live, holding enough of it can boost your reveal multiplier (capped at the usual ceiling). Default boost: **+25%**.
-
-**Dual check (lock + reveal):**
-
-1. At **deposit** (when you lock into the basket), your wallet must already hold at least the threshold — that moment is recorded on the card.
-2. At **reveal**, the wallet that holds the card must still hold at least the threshold.
-
-Both must pass. Threshold is set by the protocol after `$SHRH` launches — target is the amount of `$SHRH` equal to about **0.055 ETH** at launch price.
-
-Stock **purchase** luck (which tickers get bought) is separate from this reveal boost.
-
-## Early exits and 100%
-
-If a card exits during funding, it is burned before reveal. Allocation only runs over remaining cards, so ownership still sums to exactly 100%. See [Early exit](/docs/early-exit).
-
-## Expected value
-
-Larger deposits still imply higher expected ownership. For a card depositing `d` into total `D`:
-
-```
-E[ownership] ≈ d / D
-```
-
-Rough relative outcomes vs fair share in a large equal-deposit basket:
-
-| Extremes | About |
-|----------|-------|
-| Soft floor | ~0.4× fair share |
-| Soft ceiling | ~1.6× fair share |
+Your deposit still matters. Larger deposits generally receive a larger expected share, while reveal adds variation between cards.
 
 ## After reveal
 
-- Open [Cards](/inventory) to see ownership % and rarity art.
-- **Claim** to withdraw your share of every stock held by the basket.
-- Or list on [Trade](/marketplace).
+Your card shows:
+
+- **Ownership:** the percentage of the basket assigned to the card.
+- **Rarity:** Common, Rare, Epic, or Legendary.
+- **Stocks in the basket:** the stock tokens held by the basket.
+- **Claim preview:** the token amounts available if you claim.
+
+All revealed cards together represent the full basket. Every active card receives a positive share.
+
+## What rarity means
+
+Rarity describes how the card performed at reveal relative to its deposit.
+
+| Rarity | What it signals |
+|--------|-----------------|
+| **Common** | A share near the lower end of the reveal range |
+| **Rare** | A share around the middle of the range |
+| **Epic** | A share above the middle of the range |
+| **Legendary** | A share near the upper end of the range |
+
+Rarity does not guarantee a market price. Check the ownership percentage and basket value before buying or listing a card.
+
+## $SHRH luck
+
+The $SHRH luck feature is not active until the token launches.
+
+When active, the app will show:
+
+- The required $SHRH amount.
+- When the balance must be held.
+- Whether the card qualifies.
+- The available luck boost.
+
+Do not buy $SHRH from an address that is not published in the Sherhood app and official channels.
+
+## Cards that leave before reveal
+
+A card that exits during funding is removed permanently and does not participate in reveal. The remaining active cards share the basket.
+
+## Next steps
+
+- [Check card value](/docs/pricing) before listing or buying.
+- [Claim or trade a revealed card](/docs/secondary-market).
+- [Review early exit rules](/docs/early-exit).

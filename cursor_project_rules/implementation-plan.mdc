@@ -86,6 +86,10 @@ Switched EntryRouter/AssetManager to SwapRouter02 ABI; RH router `0xcaf681a66d02
 Added shared responsive containers, product surfaces, focus and reduced-motion rules; rebuilt app, create, inventory, Trade, leaderboard, profile, docs, and Telegram layouts.
 Completed explicit loading, empty, error, connected/disconnected, pending, and success states; lint, TypeScript, and production build pass.
 
+### Editorial landing and user docs — Done (2026-07-17)
+Rebuilt the landing page around an asymmetric editorial hero, animated card object, flat information flow, responsive ownership preview, and clearer conversion path.
+Rewrote every MDX page as a user guide; removed formulas, contract internals, deployment language, and unexplained implementation terms. Lint, TypeScript, and production build pass.
+
 ### Domain sherhood.xyz + Vercel — Done (2026-07-13)
 Canonical domain sherhood.xyz; Vercel project web production deploy + RH env vars.
 CF A records script `scripts/cf-dns-sherhood.mjs` — pending refreshed API token (VPS IP allowlist).

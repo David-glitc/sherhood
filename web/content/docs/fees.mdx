@@ -1,55 +1,64 @@
 ---
 title: Fees
-description: Create fee, protocol take, trade royalty
+description: Fees you may pay when creating, funding, exiting, or trading
 ---
 
 # Fees
 
-Sherhood earns from a few explicit take rates. Creators do **not** configure protocol fees in the create form.
+Review the amount shown in the app and your wallet before every transaction. Network fees and Sherhood fees are separate.
 
-## Create fee
+## At a glance
 
-When you deploy a **community basket**, you pay a flat **create fee** in USDG once.
+| Action | Fee |
+|--------|-----|
+| Fund with USDG | Basket fees shown before confirmation |
+| Fund with ETH or WETH | Basket fees, conversion fee, and network fee |
+| Create a community basket | One-time USDG creation fee |
+| Exit during funding | 5% of the refundable deposit |
+| Buy or sell on Trade | 2.5% royalty on the sale price |
+| Claim a revealed card | Network fee |
 
-- Charged on [Create](/create)
-- Sent to the protocol treasury
-- Shown in the UI before you confirm
+Live values shown in the app take priority over examples in this guide.
 
-Platform baskets created by Sherhood may skip this fee.
+## Network fee
 
-## On deposits
+Every wallet transaction requires ETH for Robinhood Chain gas. Your wallet shows the estimated network fee before you confirm.
 
-| Fee | Who sets it | Typical default |
-|-----|-------------|-----------------|
-| Protocol fee | Protocol (bps of deposits, taken before the stock buy) | ~1% |
-| Entry fee | Protocol / pot config (flat per deposit) | often 0 |
-| EntryRouter fee | Protocol (bps when entering with ETH / WETH) | ~0.5% |
+## Funding with USDG
 
-ETH / WETH entries swap to USDG on Uniswap; the router fee is skimmed from swap output, then the net USDG is deposited into the basket.
+USDG enters the basket directly. The basket page shows any Sherhood fee before you fund.
 
-## Early exit
+## Funding with ETH or WETH
 
-While a basket is still funding, `earlyExit` burns the mystery card and refunds **95%** of the deposit in USDG. The remaining **5%** is an exit fee to the treasury. Entry fees already paid stay with the pot.
+ETH and WETH are converted to USDG before the deposit reaches the basket.
 
-Later windows (post-close haircut, post-reveal inventory spread) are specified in [Early exit](/docs/early-exit) and not all live yet.
+Your final amount depends on:
 
-## On secondary trades
+- The current ETH or WETH price.
+- Your selected slippage limit.
+- The conversion fee.
+- Any basket fees.
 
-[Trade](/marketplace) charges a **royalty** on sale price (default **2.5%**) paid to the treasury. The card contract also exposes the same **2.5% via EIP-2981** for OpenSea and aggregators. Cards themselves are minted by funding baskets — Trade is optional secondary only.
+If the conversion would return less than your minimum, the transaction is cancelled instead of depositing at a worse rate.
 
-Derived value (deposit share or ownership weight × basket NAV) is documented in [Pricing](/docs/pricing) — use it next to ask price when judging a trade.
+## Creating a basket
 
-## Example on $100k primary volume
+Community basket creators pay the USDG creation fee shown on the [Create](/create) page. You pay it once when the basket is created.
 
-| Stream | Rough take |
-|--------|------------|
-| Protocol 1% | ~$1,000 |
-| EntryRouter 0.5% (if all enter via ETH/WETH) | $0–$500 |
-| Early exit 5% on $10k exited deposits | ~$500 |
-| Marketplace 2.5% on $20k secondary | ~$500 |
+## Exiting during funding
 
-Exact numbers depend on live fee params after deploy.
+An early exit refunds 95% of the eligible deposit in USDG. The other 5% is the exit fee.
 
-## What you keep
+Fees paid when you originally entered are not refunded.
 
-Your card’s claim is on the **net** portfolio after protocol fees are pulled at purchase. Reveal still divides 100% of that remaining pool among card holders — claim pays out a slice of each holding.
+## Trading a card
+
+Sherhood Trade charges a 2.5% royalty on the sale price. The buyer pays the listed USDG amount, and the seller receives the amount left after the royalty.
+
+Other marketplaces may apply creator fees differently. Review their checkout before confirming.
+
+## Next steps
+
+- [Review early exits and refunds](/docs/early-exit).
+- [Compare a listing with card value](/docs/pricing).
+- [Learn how Trade works](/docs/secondary-market).

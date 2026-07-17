@@ -1,7 +1,6 @@
 import { CinematicHero } from "@/components/landing/cinematic-hero"
 import { HowItWorksSection } from "@/components/landing/how-it-works"
 import { CtaSection } from "@/components/landing/cta-section"
-import { ActivityStripe } from "@/components/landing/activity-stripe"
 import { LiveBasketsSection } from "@/components/landing/live-baskets"
 import { ValuePropsSection } from "@/components/landing/value-props"
 import { StocksMarqueeSection } from "@/components/landing/stocks-marquee"
@@ -27,7 +26,6 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <CinematicHero />
-      <ActivityStripe />
       <LiveBasketsSection />
       <HowItWorksSection />
       <ValuePropsSection />

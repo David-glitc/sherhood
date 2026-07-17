@@ -1,27 +1,60 @@
 ---
-title: Early exit
-description: Exit windows, fees, and cancel refunds
+title: Exits and refunds
+description: Leave during funding or recover funds from a cancelled basket
 ---
 
-# Early exit
+# Exits and refunds
 
-You can leave a basket before claiming — payout depends on **when** you exit.
+You can exit while a basket is still funding. If a basket misses its goal, you can request a full refund after cancellation.
 
-| Window | Payout | Adjustment | Notes |
-|---|---|---|---|
-| **Pre-close** (funding open) | Deposit refund | Flat **5%** exit fee | Burn mystery card; refund 95% USDG |
-| **Unmet goal after deadline** | Full deposit | **0%** fee | Call `cancel`, then `refund` per card |
-| **Post-close / post-reveal** | — | — | Not live — claim or Trade instead |
+## Exit during funding
 
-## Live today
+An early exit:
 
-- **Early exit** while funding: burn card, 5% fee, 95% USDG refund.
-- **Cancel + refund** if the deadline passes without hitting the funding goal (full principal).
-- **Listing lock:** a card listed on Trade cannot be transferred, claimed, or exited until you cancel the listing.
+- Permanently removes the sealed card.
+- Returns 95% of the eligible deposit in USDG.
+- Charges a 5% exit fee.
+- Keeps previously paid entry fees.
 
-## Not live
+The app shows the expected refund before you confirm.
 
-- Post-close / pre-reveal haircut exit
-- Post-reveal instant NAV exit
+## How to exit
 
-See also [Fees](/docs/fees) and [Pricing](/docs/pricing).
+1. Open the basket details page.
+2. Find **Your cards**.
+3. Choose the card you want to exit.
+4. Review the refund and fee.
+5. Confirm the transaction in your wallet.
+
+Wait for confirmation before trying another action with the same card.
+
+## Refund after an unmet goal
+
+If the basket reaches its deadline without meeting the required goal:
+
+1. The basket becomes eligible for cancellation.
+2. Open the basket details page.
+3. Request the refund for each card you own.
+
+This refund returns the eligible deposit without the 5% early-exit fee.
+
+## When exit is unavailable
+
+You cannot exit a card when:
+
+- The basket is no longer in the funding stage.
+- The card is listed for sale.
+- The card was already removed, claimed, or exited.
+- A recent exit is still inside the one-hour wait period.
+
+Cancel an active listing before trying to exit.
+
+## After the basket closes
+
+Instant post-close exits are not available. Wait for reveal, then claim the stock tokens or list the card on Trade.
+
+## Next steps
+
+- [Review fees](/docs/fees).
+- [Learn how card listings work](/docs/secondary-market).
+- [Read the full basket journey](/docs/protocol).

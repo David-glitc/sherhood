@@ -1,80 +1,67 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { Plus } from "lucide-react"
 
 const faqs = [
   {
-    q: "What do I need to start?",
-    a: "A wallet with ETH, WETH, or USDG on Robinhood Chain. Connect, pick an open basket, and deposit.",
+    question: "What do I need to fund a basket?",
+    answer: "Connect a wallet on Robinhood Chain. You need ETH for network fees and USDG, ETH, or WETH for the deposit.",
   },
   {
-    q: "What is a mystery card?",
-    a: "An NFT you get when you deposit. It hides your share of the basket until reveal. At reveal, it shows the exact percentage you own.",
+    question: "What does the sealed card represent?",
+    answer: "It records your deposit and your claim on the basket. After reveal, it shows the exact ownership percentage and stock amounts behind that claim.",
   },
   {
-    q: "Who picks the stocks?",
-    a: "The protocol does, when the basket fills. It picks 2 to 5 stock tokens from the pool. Nobody knows the picks before the buy.",
+    question: "Do I choose the stocks?",
+    answer: "No. You choose the basket and deposit amount. When funding closes, the basket buys 2 to 5 stocks from the supported pool.",
   },
   {
-    q: "Can I lose everything?",
-    a: "No card is revealed at zero. Your share can be smaller or bigger than your deposit, but every card gets a slice. Stock prices still move, so the value of the basket can go up or down.",
+    question: "Can the basket value fall?",
+    answer: "Yes. The value moves with the stock tokens held by the basket. Sherhood is experimental, and you can lose some or all of the value you deposit.",
   },
   {
-    q: "What is $SHRH?",
-    a: "The Sherhood token. Holding it at reveal time boosts your luck. It launches on Orynth soon.",
+    question: "Can I leave before reveal?",
+    answer: "You can exit while funding is open and receive the refund shown in the app. After funding closes, wait for reveal and then claim or trade.",
   },
   {
-    q: "Is this audited?",
-    a: "No. Sherhood is experimental software. Use money you can afford to lose. Read the terms before you deposit.",
+    question: "Is Sherhood audited?",
+    answer: "No external audit has been completed. Review the terms, contract addresses, fees, and transaction details before funding.",
   },
 ]
 
 export function FaqSection() {
   return (
-    <section className="page-container-narrow py-16 sm:py-24">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-12 text-center"
-      >
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Questions</h2>
-        <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
-          Short answers. Longer ones live in the docs.
-        </p>
-      </motion.div>
+    <section className="page-container-wide py-20 sm:py-28">
+      <div className="grid gap-12 lg:grid-cols-[minmax(16rem,0.65fr)_minmax(0,1.35fr)] lg:gap-20">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Before you fund</p>
+          <h2 className="mt-4 text-4xl font-semibold leading-none tracking-[-0.045em] sm:text-5xl">
+            Clear answers.
+            <span className="block text-muted-foreground">No hidden steps.</span>
+          </h2>
+          <p className="mt-5 max-w-sm text-sm leading-6 text-muted-foreground">
+            The user guide covers wallets, fees, exits, card value, and trading in more detail.
+          </p>
+          <Link href="/docs/getting-started" className="touch-target mt-5 inline-flex items-center text-sm font-semibold text-primary hover:underline">
+            Open the user guide
+          </Link>
+        </div>
 
-      <div className="flex flex-col gap-3">
-        {faqs.map((f, i) => (
-          <motion.details
-            key={f.q}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.05 }}
-            className="product-surface group px-5 py-4"
-          >
-            <summary className="touch-target flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-medium text-foreground [&::-webkit-details-marker]:hidden">
-              {f.q}
-              <span aria-hidden className="text-primary transition-transform group-open:rotate-45">+</span>
-            </summary>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-          </motion.details>
-        ))}
+        <div className="border-t border-border">
+          {faqs.map((faq) => (
+            <details key={faq.question} className="group border-b border-border">
+              <summary className="touch-target flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-base font-semibold text-foreground sm:py-6 sm:text-lg [&::-webkit-details-marker]:hidden">
+                {faq.question}
+                <Plus aria-hidden className="shrink-0 text-primary transition-transform duration-200 group-open:rotate-45" />
+              </summary>
+              <p className="max-w-2xl pb-6 pr-10 text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+                {faq.answer}
+              </p>
+            </details>
+          ))}
+        </div>
       </div>
-
-      <p className="mt-10 text-center text-sm text-white/35">
-        More in the{" "}
-        <Link href="/docs/getting-started" className="font-medium text-sherhood hover:underline">
-          docs
-        </Link>{" "}
-        and{" "}
-        <Link href="/legal/terms" className="font-medium text-sherhood hover:underline">
-          terms
-        </Link>
-        .
-      </p>
     </section>
   )
 }

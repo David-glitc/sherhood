@@ -1,40 +1,51 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
+import { ArrowRight } from "lucide-react"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export function CtaSection() {
+  const reduceMotion = useReducedMotion() ?? false
+
   return (
-    <section className="px-4 pb-16 pt-6 sm:pb-24 sm:pt-8">
+    <section className="page-container-wide pb-20 pt-8 sm:pb-28 sm:pt-12">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="glass-panel relative mx-auto flex max-w-2xl flex-col items-center overflow-hidden rounded-[28px] px-5 py-10 text-center sm:px-8 sm:py-12"
+        viewport={{ once: true, amount: 0.3 }}
+        className="relative overflow-hidden rounded-2xl border border-primary/35 bg-primary p-6 text-primary-foreground sm:p-10 lg:p-14"
       >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"
-        />
-        <h2 className="text-[30px] font-normal tracking-[-0.6px] text-[#e5e7eb] sm:text-[36px]">
-          Ready when you are
-        </h2>
-        <p className="mt-3 text-base leading-[22px] tracking-[-0.4px] text-[#999999]">
-          Connect a wallet. Fund a basket. Mint your card.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/app"
-            className="inline-flex min-h-11 items-center rounded-full bg-[#ccff00] px-8 py-4 text-base font-semibold text-black shadow-[0_0_36px_rgba(204,255,0,0.3)] transition hover:brightness-110"
-          >
-            Enter baskets
-          </Link>
-          <Link
-            href="/docs/getting-started"
-            className="inline-flex min-h-11 items-center rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-normal text-[#9e9e9e] backdrop-blur-xl transition hover:border-[#ccff00]/40 hover:text-[#e5e7eb]"
-          >
-            Read the docs
-          </Link>
+        <div aria-hidden className="hero-grid absolute inset-0 opacity-20" />
+        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em]">Your first card starts with one basket.</p>
+            <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-[0.95] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
+              Choose the basket. Set the amount. See what your card reveals.
+            </h2>
+          </div>
+          <div className="flex flex-col gap-3 min-[420px]:flex-row lg:flex-col">
+            <Link
+              href="/app"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "group h-12 min-w-44 justify-between bg-background px-5 text-foreground hover:bg-background/90"
+              )}
+            >
+              Explore baskets
+              <ArrowRight data-icon="inline-end" className="transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              href="/docs/getting-started"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "h-12 border-black/25 bg-transparent text-black hover:bg-black/10 hover:text-black"
+              )}
+            >
+              Read the user guide
+            </Link>
+          </div>
         </div>
       </motion.div>
     </section>
