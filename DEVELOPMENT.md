@@ -389,3 +389,11 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - Rebuilt the landing page around the supplied black/lime editorial direction: asymmetric hero, animated sealed-card prism, stock-logo motion, live basket states, a border-led three-step flow, revealed ownership preview, flat FAQ rows, updated stock marquee, and high-contrast final CTA.
 - Rewrote all nine MDX pages as task-focused user guides. Removed formulas, contract APIs, deployment language, protocol architecture, and unexplained implementation terms; updated docs navigation to match the new user-facing titles.
 - Verification: ESLint clean, TypeScript clean, Next.js production build clean with all nine docs statically generated.
+
+## 2026-07-17 12:55 (UTC+1) — Profile dashboard
+
+- New `/api/profile/[address]`: per-wallet on-chain history (deposits, claims, exits, creates, buys, sells, lists, delists), XP total with streak scoring, and a portfolio timeline of net USDG principal after deposits/exits/claims.
+- New `hooks/use-my-cards.ts`: shared hook for owned cards plus per-pot status, totals, and holdings.
+- Rebuilt `/profile` as a dashboard: stat tiles (deposited, cards, XP, streak), portfolio-over-time SVG area chart, aggregated claimable asset holdings, active pool list, horizontal card rail, active Trade listings with cancel, XP-tagged activity feed, and the existing wallet/legal/clear-data sections.
+- Deployed prior landing/docs work to production before starting (commit e8ad05f, sherhood.xyz verified).
+- Verification: ESLint clean, TypeScript clean, production build clean (31 routes).
