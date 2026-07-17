@@ -28,10 +28,27 @@ export const USDG_ADDRESS = getAddress(
   process.env.NEXT_PUBLIC_USDG_ADDRESS || "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168"
 )
 
+/** On-chain fee sink — TreasuryDirect forwards USDG to fee wallet on deposit. */
+export const TREASURY_ADDRESS = getAddress(
+  process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xdfa1c90107faf1a19e53e6eed9ee4aa6ad414085"
+)
+
+/** Protocol fee wallet — Treasury owner withdraws USDG here. */
+export const TREASURY_FEE_WALLET = getAddress(
+  process.env.NEXT_PUBLIC_TREASURY_FEE_WALLET || "0xc24f7118f55d0643a82a1594cbcbb7484011a251"
+)
+
 /** @deprecated Legacy raffle prototype — prefer potFactoryConfig */
 export const RAFFLE_MANAGER_ADDRESS = getAddress(
   process.env.NEXT_PUBLIC_RAFFLE_MANAGER_ADDRESS || "0x0000000000000000000000000000000000000000"
 )
+
+export const SHRH_ADDRESS = getAddress(
+  process.env.NEXT_PUBLIC_SHRH_ADDRESS || "0xa1c084c4f7387dfeac2a055d745efc0405867777"
+)
+
+export const CONTRACTS_LIVE =
+  POT_FACTORY_ADDRESS !== "0x0000000000000000000000000000000000000000"
 
 export const potFactoryConfig = {
   address: POT_FACTORY_ADDRESS,

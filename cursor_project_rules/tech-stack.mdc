@@ -7,8 +7,9 @@ alwaysApply: true
 
 ## Brand
 
-- Product: **Sherhood** — https://sherhood.online
+- Product: **Sherhood** — https://sherhood.xyz
 - Positioning: Fractional Asset Loot Protocol on Robinhood Chain
+- Product noun: **Baskets** (UI); contracts may still say Pot*
 
 ## Chain
 
@@ -31,6 +32,6 @@ alwaysApply: true
 ## Web (Next.js)
 
 - Next.js App Router, React 19, Tailwind 4, Syne + DM Sans
-- Wallet: Dynamic Labs + wagmi + viem
+- Wallet: **RainbowKit** + wagmi + viem (WalletConnect v2)
 - Path: `web/`
 - Pay-in: ETH / WETH (EntryRouter auto-swap) or USDG

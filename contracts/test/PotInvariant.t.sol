@@ -11,6 +11,7 @@ import {Treasury} from "../src/Treasury.sol";
 import {MockERC20} from "../src/mocks/MockERC20.sol";
 import {MockVRFCoordinator} from "../src/mocks/MockVRFCoordinator.sol";
 import {MockSwapRouter} from "../src/mocks/MockSwapRouter.sol";
+import {StockTokenRegistry} from "../src/StockTokenRegistry.sol";
 
 /// @dev Handler drives random deposits while pot is funding; invariants checked by suite.
 contract PotHandler is Test {
@@ -55,6 +56,7 @@ contract PotInvariantTest is Test {
     Treasury treasury;
     RevealEngine reveal;
     AssetManager assets;
+    StockTokenRegistry registry;
     MockVRFCoordinator vrf;
     MockSwapRouter router;
 
@@ -70,17 +72,19 @@ contract PotInvariantTest is Test {
         factory = new PotFactory(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(vrf));
         assets = new AssetManager(deployer, address(usdg), address(router));
+        registry = new StockTokenRegistry(deployer);
 
         card.setMinter(address(factory));
         card.setRevealer(address(reveal));
         factory.setAssetManager(address(assets));
         factory.setRevealEngine(address(reveal));
         factory.setTreasury(address(treasury));
-        factory.setRequireRegisteredStock(false);
+        assets.setStockRegistry(address(registry));
+        registry.setToken(address(nvda), true, "NVDA", 3000);
         reveal.setVRFConfig(bytes32("k"), 1, 500_000);
         vrf.setConsumer(address(reveal));
 
-        address potAddr = factory.createPot(address(nvda), 3000, 10_000e18, 30 days, 1e18, 0, 100);
+        address potAddr = factory.createPot(10_000e18, 30 days, 1e18, 0, 100);
         pot = Pot(potAddr);
         handler = new PotHandler(factory, pot, usdg);
 

@@ -1,0 +1,76 @@
+---
+title: Allocation
+description: How ownership weights and rarity are assigned
+---
+
+# Allocation
+
+After a basket buys its stock portfolio, Sherhood assigns every card a positive ownership weight.
+
+## Guarantees
+
+```
+Σ ownership = 100% of the basket
+every card ownership > 0
+```
+
+Expected ownership tracks deposit size. Luck adds variance around fair share — it does not eject losers.
+
+## How reveal works
+
+1. Funding is closed; deposits are fixed. The basket already holds its stocks.
+2. For each card with deposit `d`, luck draws a multiplier:
+
+```
+m ∈ [0.50×, 2.00×]
+raw = d × m
+```
+
+3. Normalize across the basket so weights sum to 100%.
+4. Floor repair: every card gets at least a tiny share; the sum stays exactly 100%.
+5. Rarity follows the multiplier band:
+
+| Multiplier | Rarity |
+|------------|--------|
+| 0.50 – 0.90 | Common |
+| 0.90 – 1.20 | Rare |
+| 1.20 – 1.60 | Epic |
+| 1.60 – 2.00 | Legendary |
+
+## $SHRH luck boost
+
+When `$SHRH` is live, holding enough of it can boost your reveal multiplier (capped at the usual ceiling). Default boost: **+25%**.
+
+**Dual check (lock + reveal):**
+
+1. At **deposit** (when you lock into the basket), your wallet must already hold at least the threshold — that moment is recorded on the card.
+2. At **reveal**, the wallet that holds the card must still hold at least the threshold.
+
+Both must pass. Threshold is set by the protocol after `$SHRH` launches — target is the amount of `$SHRH` equal to about **0.055 ETH** at launch price.
+
+Stock **purchase** luck (which tickers get bought) is separate from this reveal boost.
+
+## Early exits and 100%
+
+If a card exits during funding, it is burned before reveal. Allocation only runs over remaining cards, so ownership still sums to exactly 100%. See [Early exit](/docs/early-exit).
+
+## Expected value
+
+Larger deposits still imply higher expected ownership. For a card depositing `d` into total `D`:
+
+```
+E[ownership] ≈ d / D
+```
+
+Rough relative outcomes vs fair share in a large equal-deposit basket:
+
+| Extremes | About |
+|----------|-------|
+| Soft floor | ~0.4× fair share |
+| Soft ceiling | ~1.6× fair share |
+
+## After reveal
+
+- Open [Cards](/inventory) to see ownership % and rarity art.
+- **Claim** to withdraw your share of every stock held by the basket.
+- Or list on [Trade](/marketplace).

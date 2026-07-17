@@ -51,16 +51,6 @@
     "name": "createCommunityPot",
     "inputs": [
       {
-        "name": "targetToken",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "swapFee",
-        "type": "uint24",
-        "internalType": "uint24"
-      },
-      {
         "name": "fundingGoal",
         "type": "uint256",
         "internalType": "uint256"
@@ -99,16 +89,6 @@
     "type": "function",
     "name": "createPot",
     "inputs": [
-      {
-        "name": "targetToken",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "swapFee",
-        "type": "uint24",
-        "internalType": "uint24"
-      },
       {
         "name": "fundingGoal",
         "type": "uint256",
@@ -172,6 +152,32 @@
   },
   {
     "type": "function",
+    "name": "depositCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "entryRouter",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getPots",
     "inputs": [],
     "outputs": [
@@ -179,6 +185,25 @@
         "name": "",
         "type": "address[]",
         "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "hasDeposited",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
@@ -364,6 +389,34 @@
   },
   {
     "type": "function",
+    "name": "protocolStats",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "pools",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "depositVolume",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "deposits",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "users",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "renounceOwnership",
     "inputs": [],
     "outputs": [],
@@ -428,6 +481,19 @@
   },
   {
     "type": "function",
+    "name": "setEntryRouter",
+    "inputs": [
+      {
+        "name": "entryRouter_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "setFeeParams",
     "inputs": [
       {
@@ -472,6 +538,19 @@
   },
   {
     "type": "function",
+    "name": "setStockRegistry",
+    "inputs": [
+      {
+        "name": "registry_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "setTreasury",
     "inputs": [
       {
@@ -482,6 +561,32 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "stockRegistry",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalDepositVolume",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -505,6 +610,19 @@
         "name": "",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "uniqueDepositors",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -551,6 +669,19 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EntryRouterUpdated",
+    "inputs": [
+      {
+        "name": "entryRouter",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
       }
     ],
     "anonymous": false
@@ -623,12 +754,6 @@
         "internalType": "address"
       },
       {
-        "name": "targetToken",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
         "name": "fundingGoal",
         "type": "uint256",
         "indexed": false,
@@ -673,6 +798,19 @@
     "inputs": [
       {
         "name": "revealEngine",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "StockRegistryUpdated",
+    "inputs": [
+      {
+        "name": "registry",
         "type": "address",
         "indexed": false,
         "internalType": "address"

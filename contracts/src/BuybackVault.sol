@@ -47,8 +47,10 @@ contract BuybackVault is Ownable, ReentrancyGuard {
         address feed = priceFeeds[token];
         require(feed != address(0), "BuybackVault: no price feed");
         AggregatorV3Interface priceFeed = AggregatorV3Interface(feed);
-        (, int256 answer, , , ) = priceFeed.latestRoundData();
+        (uint80 roundId, int256 answer,, uint256 updatedAt, uint80 answeredInRound) = priceFeed.latestRoundData();
         require(answer > 0, "BuybackVault: invalid price");
+        require(updatedAt > block.timestamp - 1 hours, "BuybackVault: stale");
+        require(answeredInRound >= roundId, "BuybackVault: round incomplete");
         price = uint256(answer);
         decimals = priceFeed.decimals();
     }

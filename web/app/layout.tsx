@@ -1,19 +1,15 @@
 import type { Metadata } from "next"
-import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google"
+import { Poppins, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { ClientProviders } from "@/components/client-providers"
 import { Header } from "@/components/layout/header"
+import { SiteFooter } from "@/components/layout/page-shell"
 
-const syne = Syne({
-  variable: "--font-syne",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-})
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 })
 
 const jetbrains = JetBrains_Mono({
@@ -22,45 +18,49 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Sherhood — Fractional Asset Loot on Robinhood Chain",
+  title: "Sherhood — Baskets on Robinhood Chain",
   description:
-    "Join investment pots, mint mystery cards, reveal your fractional ownership of real Stock Tokens. Pay with ETH, WETH, or USDG.",
-  metadataBase: new URL("https://sherhood.online"),
+    "Fund a stock basket, mint a mystery card, reveal your fractional ownership. Pay with ETH, WETH, or USDG.",
+  metadataBase: new URL("https://sherhood.xyz"),
   openGraph: {
     title: "Sherhood",
-    description: "Own a slice of the pot. Reveal decides how much.",
-    url: "https://sherhood.online",
+    description: "Fund baskets. Mint cards. Reveal how much you own.",
+    url: "https://sherhood.xyz",
     siteName: "Sherhood",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "Sherhood" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Sherhood" }],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Sherhood",
-    description: "Fractional Asset Loot Protocol on Robinhood Chain.",
-    images: ["/og-image.svg"],
+    description: "Fractional stock baskets on Robinhood Chain.",
+    images: ["/og-image.png"],
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/logo-mark-192.png",
+    shortcut: "/logo-mark-192.png",
+    apple: "/apple-touch-icon.png",
   },
-  other: { "theme-color": "#7CFF6B" },
+  other: { "theme-color": "#ccff00" },
   manifest: "/manifest.json",
   robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${jetbrains.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col bg-[#070a08] font-sans text-zinc-100">
+    <html lang="en" className={`${poppins.variable} ${jetbrains.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-black font-sans text-white">
+        <a
+          href="#main-content"
+          className="fixed left-4 top-3 z-100 -translate-y-20 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition-transform focus:translate-y-0"
+        >
+          Skip to content
+        </a>
         <ClientProviders>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main id="main-content" className="site-main flex-1">{children}</main>
+          <SiteFooter />
         </ClientProviders>
         <Toaster />
       </body>

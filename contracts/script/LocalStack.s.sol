@@ -10,6 +10,7 @@ import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
 import {CardMarketplace} from "../src/CardMarketplace.sol";
 import {MockERC20} from "../src/mocks/MockERC20.sol";
+import {StockTokenRegistry} from "../src/StockTokenRegistry.sol";
 import {MockVRFCoordinator} from "../src/mocks/MockVRFCoordinator.sol";
 import {MockSwapRouter} from "../src/mocks/MockSwapRouter.sol";
 
@@ -34,13 +35,18 @@ contract LocalStackScript is Script {
         PotFactory factory = new PotFactory(deployer, address(usdg), address(card));
         RevealEngine reveal = new RevealEngine(deployer, address(card), address(vrf));
         AssetManager assets = new AssetManager(deployer, address(usdg), address(router));
+        StockTokenRegistry registry = new StockTokenRegistry(deployer);
 
         card.setMinter(address(factory));
         card.setRevealer(address(reveal));
+        card.setBaseURI("http://localhost:3000/api/cards/");
         factory.setAssetManager(address(assets));
         factory.setRevealEngine(address(reveal));
         factory.setTreasury(address(treasury));
-        factory.setCreationFee(10e18);
+        factory.setStockRegistry(address(registry));
+        assets.setStockRegistry(address(registry));
+        registry.setToken(address(nvda), true, "NVDA", 500);
+        factory.setCreationFee(5e18);
         reveal.setVRFConfig(bytes32("dev"), 1, 2_500_000);
         vrf.setConsumer(address(reveal));
 

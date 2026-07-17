@@ -39,7 +39,7 @@ contract SimulateBusinessFlowScript is Script {
 
         // 1) Platform pot
         vm.startBroadcast(pk);
-        address pot = factory.createPot(nvda, 3000, 300e18, 7 days, 50e18, 2e18, 100);
+        address pot = factory.createPot(300e18, 7 days, 50e18, 2e18, 100);
         vm.stopBroadcast();
         console.log("POT", pot);
 
@@ -51,7 +51,7 @@ contract SimulateBusinessFlowScript is Script {
 
         // 3) Purchase + sweep fees
         vm.startBroadcast(pk);
-        assets.purchase(pot, 0);
+        assets.purchaseWithSeed(pot, 0xDEAD, 1, 0);
         Pot(pot).sweepFees();
         uint256 req = reveal.requestReveal(pot);
         vm.stopBroadcast();
@@ -75,7 +75,7 @@ contract SimulateBusinessFlowScript is Script {
         console.log("alice nvda", MockERC20(nvda).balanceOf(alice));
         console.log("bob nvda", MockERC20(nvda).balanceOf(bob));
         console.log("carol nvda", MockERC20(nvda).balanceOf(carol));
-        console.log("assetsClaimed", Pot(pot).assetsClaimed());
+        console.log("claimCount", Pot(pot).claimCount());
         console.log("SIMULATION_OK");
     }
 

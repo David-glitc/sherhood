@@ -1,7 +1,7 @@
 import { defineChain } from "viem"
 
 /** Robinhood Chain mainnet — https://docs.robinhood.com/chain/ */
-export const robinhoodChain = defineChain({
+export const robinhood = defineChain({
   id: Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 4663,
   name: "Robinhood Chain",
   nativeCurrency: {
@@ -19,7 +19,14 @@ export const robinhoodChain = defineChain({
   blockExplorers: {
     default: {
       name: "Blockscout",
-      url: process.env.NEXT_PUBLIC_EXPLORER_URL || "https://robinhoodchain.blockscout.com",
+      url:
+        process.env.NEXT_PUBLIC_EXPLORER_URL ||
+        "https://robinhoodchain.blockscout.com",
     },
   },
 })
+
+/** @deprecated use `robinhood` */
+export const robinhoodChain = robinhood
+
+export const ROBINHOOD_CHAIN_ID = robinhood.id

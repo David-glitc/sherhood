@@ -1,12 +1,19 @@
 "use client"
 
+import { BASKET_STOCKS, stockByAddress } from "@/lib/basket-stocks"
+
 export const POT_STATUSES = ["Funding", "Closed", "Purchased", "Revealed"] as const
 
 export const RARITIES = ["Unrevealed", "Common", "Rare", "Epic", "Legendary"] as const
 
+export type PotHolding = {
+  token: `0x${string}`
+  amount: bigint
+  symbol: string
+}
+
 export interface PotView {
   address: `0x${string}`
-  targetToken: `0x${string}`
   fundingGoal: bigint
   deadline: bigint
   minDeposit: bigint
@@ -14,8 +21,8 @@ export interface PotView {
   status: number
   totalDeposited: bigint
   participantCount: bigint
-  assetAmount: bigint
   progressBps: bigint
+  holdings: PotHolding[]
 }
 
 export interface CardView {
@@ -37,6 +44,12 @@ export function fmtUsdg(value: bigint): string {
   })
 }
 
+export function fmtTokenAmount(value: bigint): string {
+  return (Number(value) / 1e18).toLocaleString(undefined, {
+    maximumFractionDigits: 4,
+  })
+}
+
 export function deadlineLabel(deadline: bigint): string {
   const end = Number(deadline) * 1000
   const diff = end - Date.now()
@@ -48,12 +61,29 @@ export function deadlineLabel(deadline: bigint): string {
   return `${h}h ${m}m left`
 }
 
-const TOKEN_NAMES: Record<string, string> = {
-  "0x309fc0dd9cf7fc77dc9c8ee3b68bfd06a7c226bc": "NVDA",
-  "0x95b73c5780437ce92258f8074878287dfc8ed314": "AAPL",
-  "0x62cbf96ce2edbc9218135385b009bf596f51325c": "GOOG",
-}
+const TOKEN_NAMES: Record<string, string> = Object.fromEntries(
+  BASKET_STOCKS.map((s) => [s.address.toLowerCase(), s.symbol])
+)
 
 export function tokenLabel(address: string): string {
   return TOKEN_NAMES[address.toLowerCase()] || `${address.slice(0, 6)}…${address.slice(-4)}`
+}
+
+export function holdingsLabel(holdings: PotHolding[]): string {
+  if (holdings.length === 0) return "Multi-stock basket"
+  const syms = holdings.map((h) => h.symbol)
+  if (syms.length <= 2) return syms.join(" + ")
+  return `${syms.slice(0, 2).join(", ")} +${syms.length - 2}`
+}
+
+export function parseHoldings(
+  tokens: `0x${string}`[] | undefined,
+  amounts: bigint[] | undefined
+): PotHolding[] {
+  if (!tokens || !amounts || tokens.length !== amounts.length) return []
+  return tokens.map((token, i) => ({
+    token,
+    amount: amounts[i],
+    symbol: stockByAddress(token)?.symbol ?? tokenLabel(token),
+  }))
 }

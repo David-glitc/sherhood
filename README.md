@@ -1,6 +1,6 @@
 # Sherhood
 
-**Fractional Asset Loot Protocol** on Robinhood Chain — [sherhood.online](https://sherhood.online)
+**Fractional Asset Loot Protocol** on Robinhood Chain — [sherhood.xyz](https://sherhood.xyz)
 
 Join investment pots → mint mystery cards → reveal fractional ownership of RH Stock Tokens. Pay with **ETH**, **WETH**, or **USDG**.
 

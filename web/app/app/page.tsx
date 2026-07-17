@@ -2,29 +2,73 @@
 
 import Link from "next/link"
 import { PotDiscovery } from "@/components/pots/pot-discovery"
+import { StockMarketBoard } from "@/components/stocks/stock-market-board"
+import { PageHeader, PageShell } from "@/components/layout/page-shell"
+import { ProtocolStats } from "@/components/protocol/protocol-stats"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export default function AppPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Investment Pots</h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Deposit USDG. Mint a mystery card. Reveal your fractional ownership of the pool.
-        </p>
-        <div className="mt-4 flex justify-center gap-4 text-sm">
-          <Link href="/create" className="text-robinhood hover:underline">
-            Create community pot
+    <PageShell wide>
+      <PageHeader
+        eyebrow="Robinhood Chain · 4663"
+        title="Stock baskets"
+        description="Fund an open basket with USDG, ETH, or WETH. Every deposit mints a card that reveals your share when the basket closes."
+        actions={
+          <>
+          <Link
+            href="/create"
+            className={cn(buttonVariants({ size: "lg" }), "min-w-32")}
+          >
+            Create basket
           </Link>
-          <Link href="/docs/allocation" className="text-zinc-500 hover:text-zinc-300 hover:underline">
-            Allocation EV
+          <Link
+            href="/inventory"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            View cards
           </Link>
-          <Link href="/marketplace" className="text-zinc-500 hover:text-zinc-300 hover:underline">
-            Marketplace
+          <Link
+            href="/docs/getting-started"
+            className={buttonVariants({ variant: "ghost", size: "lg" })}
+          >
+            Read guide
+          </Link>
+          </>
+        }
+      />
+
+      <ProtocolStats />
+
+      <section className="product-section" aria-labelledby="open-baskets-heading">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="open-baskets-heading" className="text-2xl font-semibold sm:text-3xl">
+              Open baskets
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Choose a funding window and review its goal before depositing.
+            </p>
+          </div>
+          <Link href="/create" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            Create basket
           </Link>
         </div>
-      </div>
+        <PotDiscovery />
+      </section>
 
-      <PotDiscovery />
-    </div>
+      <section className="product-section border-t border-border pt-8 sm:pt-10" aria-labelledby="market-heading">
+        <div className="mb-5">
+          <h2 id="market-heading" className="text-2xl font-semibold sm:text-3xl">
+            Market reference
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Current stock pricing for basket constituents.
+          </p>
+        </div>
+        <StockMarketBoard />
+      </section>
+    </PageShell>
   )
 }

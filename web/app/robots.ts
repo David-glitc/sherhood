@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: [],
     },
-    sitemap: "https://sherwood.packs/sitemap.xml",
+    sitemap: "https://sherhood.xyz/sitemap.xml",
   }
 }

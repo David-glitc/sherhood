@@ -1,63 +1,70 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
+import { StockLogoStack } from "@/components/stocks/stock-logo"
 
 const steps = [
   {
     num: "01",
-    title: "Join a Pot",
-    desc: "Deposit USDG into an NVIDIA, BTC, or community basket. You mint a mystery ownership card.",
+    title: "Fund a basket",
+    desc: "Join an open basket with ETH, WETH, or USDG. Your deposit mints a mystery card.",
+    symbols: ["NVDA", "AAPL"],
   },
   {
     num: "02",
-    title: "Pot Fills & Buys",
-    desc: "When the goal or deadline hits, the treasury swaps into the target asset. Cards stay sealed.",
+    title: "The basket buys stocks",
+    desc: "When the goal is hit, the protocol picks 2–5 Robinhood stock tokens and buys them with the pool. Nobody knows the picks in advance.",
+    symbols: ["MSFT", "GOOGL", "SPY"],
   },
   {
     num: "03",
-    title: "Reveal Your Claim",
-    desc: "VRF assigns ownership weights that always sum to 100%. Rarity follows your allocation — never zero.",
+    title: "Reveal your share",
+    desc: "Each card gets a random share of the basket. Hold $SHRH for better reveal luck. No card ever goes to zero.",
+    symbols: ["SHRH"],
   },
 ]
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-32">
+    <section id="how" className="page-container py-16 sm:py-28">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mb-20 text-center"
+        className="mb-16 text-center"
       >
-        <h2 className="text-4xl font-black tracking-tight text-zinc-100 sm:text-5xl">
-          How It Works
-        </h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-500">
-          Deposit → mint → reveal → own a fractional claim.
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">How it works</h2>
+        <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
+          Three steps. Fund, wait for the buy, reveal your card.
         </p>
       </motion.div>
 
-      <div className="relative grid gap-12 md:grid-cols-3">
-        <div className="absolute left-1/2 top-16 hidden h-0.5 w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-zinc-700 to-transparent md:block" />
-
+      <div className="grid gap-8 sm:gap-10 md:grid-cols-3">
         {steps.map((s, i) => (
           <motion.div
             key={s.num}
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: i * 0.2, duration: 0.5 }}
-            className="relative text-center"
+            transition={{ delay: i * 0.1 }}
+            className="text-center"
           >
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-900 text-xl font-black text-robinhood shadow-lg shadow-robinhood/10">
-              {s.num}
-            </div>
-            <h3 className="mb-3 text-xl font-bold text-zinc-200">{s.title}</h3>
-            <p className="mx-auto max-w-xs text-sm leading-relaxed text-zinc-500">{s.desc}</p>
+            <StockLogoStack symbols={s.symbols} size={32} max={3} className="mb-4 justify-center" />
+            <p className="text-xs font-semibold tracking-[0.25em] text-sherhood">{s.num}</p>
+            <h3 className="mt-3 text-lg font-semibold text-white">{s.title}</h3>
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
           </motion.div>
         ))}
       </div>
+
+      <p className="mt-12 text-center text-sm text-white/35">
+        Full walkthrough in the{" "}
+        <Link href="/docs/getting-started" className="font-medium text-sherhood hover:underline">
+          docs
+        </Link>
+        .
+      </p>
     </section>
   )
 }

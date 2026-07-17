@@ -1,40 +1,39 @@
-import Link from "next/link"
-import { HeroSection } from "@/components/landing/hero-section"
-import { TiersSection } from "@/components/landing/tiers-section"
+import { CinematicHero } from "@/components/landing/cinematic-hero"
 import { HowItWorksSection } from "@/components/landing/how-it-works"
-import { WhySection } from "@/components/landing/why-section"
 import { CtaSection } from "@/components/landing/cta-section"
+import { ActivityStripe } from "@/components/landing/activity-stripe"
+import { LiveBasketsSection } from "@/components/landing/live-baskets"
+import { ValuePropsSection } from "@/components/landing/value-props"
+import { StocksMarqueeSection } from "@/components/landing/stocks-marquee"
+import { FaqSection } from "@/components/landing/faq-section"
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "Sherhood",
-  url: "https://sherhood.online",
+  url: "https://sherhood.xyz",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Web",
   description:
-    "Fractional Asset Loot on Robinhood Chain. Join pots, mint mystery cards, reveal ownership of Stock Tokens.",
+    "Fractional stock baskets on Robinhood Chain. Fund, mint a mystery card, reveal ownership.",
   author: { "@type": "Organization", name: "Sherhood" },
 }
 
 export default function LandingPage() {
   return (
-    <>
+    <div data-landing>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HeroSection />
-      <TiersSection />
+      <CinematicHero />
+      <ActivityStripe />
+      <LiveBasketsSection />
       <HowItWorksSection />
-      <WhySection />
+      <ValuePropsSection />
+      <StocksMarqueeSection />
+      <FaqSection />
       <CtaSection />
-      <footer className="border-t border-white/5 py-8 text-center text-xs text-zinc-600">
-        <span className="font-heading text-zinc-400">Sherhood</span> · Robinhood Chain ·{" "}
-        <Link href="/docs/allocation" className="hover:text-zinc-300">
-          Allocation docs
-        </Link>
-      </footer>
-    </>
+    </div>
   )
 }

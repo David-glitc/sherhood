@@ -42,6 +42,15 @@ alwaysApply: true
 - [x] Local anvil deploy + end-to-end simulate (`scripts/devnet-sim.sh`)
 - [x] Fuzz + invariant + attack tests; audit checklist
 
+## Phase 6 — Direction v2: OpenSea, exits, derived pricing (2026-07-16)
+- [x] 6.1 Fixed-price listings + derived-value display on Trade page (exists: CardMarketplace escrow-by-approval; add derived value + state badges in UI)
+- [ ] 6.2 Early exit: pre-close (live, 5% flat) + post-reveal (needs NAV; deferred until oracle path) — post-close/pre-reveal window HELD per rollout
+- [x] 6.3 EIP-2981 (2.5%) + contractURI + dynamic metadata v2 → OpenSea collection submission (contracts+API ready; submit after RH redeploy)
+- [x] 6.4 On-chain `derivedShare(tokenId)` view (pre-reveal deposit share / post-reveal weight); NAV multiplication stays off-chain
+- [x] 6.5 Marketplace shell-card guard: `buy()`/`list()` reject claimed cards; document listing-lock rule
+- [x] 6.6 Docs: new early-exit / secondary-market / pricing / opensea pages; amend allocation + fees
+- [ ] 6.7 Security: reentrancy audit pass on exit/claim/list/buy; VRF migration path documented; external audit before scaling TVL
+
 ## Done Log
 
 ### Phase 0 (partial) — Done (2026-07-13)
@@ -69,6 +78,36 @@ Allocation EV + jurisdiction notes in cursor_project_rules; `/docs/allocation` p
 EntryRouter ETH/WETH→USDG + fee; StockTokenRegistry allowlist; Sherhood UI; RhDeploy.s.sol.
 Pushed to https://github.com/David-glitc/sherhood
 
+### RH gap close (VRF + Router02) — Done (2026-07-13)
+Chainlink VRF not on RH (4663): RhDeploy auto-deploys PrevRandaoCoordinator when VRF_COORDINATOR unset.
+Switched EntryRouter/AssetManager to SwapRouter02 ABI; RH router `0xcaf681a66d020601342297493863e78c959e5cb2`.
 
+### Responsive product surfaces — Done (2026-07-17)
+Added shared responsive containers, product surfaces, focus and reduced-motion rules; rebuilt app, create, inventory, Trade, leaderboard, profile, docs, and Telegram layouts.
+Completed explicit loading, empty, error, connected/disconnected, pending, and success states; lint, TypeScript, and production build pass.
 
+### Domain sherhood.xyz + Vercel — Done (2026-07-13)
+Canonical domain sherhood.xyz; Vercel project web production deploy + RH env vars.
+CF A records script `scripts/cf-dns-sherhood.mjs` — pending refreshed API token (VPS IP allowlist).
 
+### Docs MDX site — Done (2026-07-15)
+Shipped `/docs` with getting-started + protocol + allocation + fees via next-mdx-remote RSC (deterministic SSG).
+Aligned docs with multi-stock-at-close + $SHRH luck; cleaned docs/create layouts.
+
+### Basket detail + early exit — Done (2026-07-15)
+Added Pot earlyExit (5% fee → treasury, burn card) + `/basket/[address]` UI with withdraw.
+Existing live pots need new Pot bytecode (new factory creates) for on-chain early exit.
+
+### Phase-two landing chrome — Done (2026-07-16)
+Custom glass wallet chip (RainbowKit Custom) + cinematic full-viewport hero with parallax stock logos.
+Landing nav fades under hero; glass-panel / glass-ray system for premium surfaces.
+
+### Direction v2 tranche 1 — Done (2026-07-16)
+PotCard: EIP-2981 2.5% + contractURI. Pot: derivedShare view. Market: reject claimed shells.
+Metadata API v2 + /api/collection; docs early-exit/secondary/pricing/opensea; Trade/Inventory state badges + fair share.
+OpenSea collection submit + RH redeploy still required for on-chain royalty/URI to go live.
+
+### Fresh stack + dual luck + XP — Done (2026-07-16)
+Branch `contracts/sherhood-v2-fresh`. SherhoodDeploy.s.sol clean slate (no $SHRH mint). Dual luck check (deposit lock + reveal).
+Docs stripped of internals; XP API + leaderboard + /docs/xp. Threshold target ~0.055 ETH of $SHRH set later via setLuckToken.
+Await deployer funding (~0.004 ETH) then `scripts/sherhood-deploy.sh` with Blockscout verify.

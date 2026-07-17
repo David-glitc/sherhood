@@ -24,13 +24,14 @@ contract CardMarketplaceTest is Test {
         card = new PotCard(deployer);
         market = new CardMarketplace(deployer, address(card), address(usdg), address(treasury));
         card.setMinter(deployer);
+        card.setCardMarketplace(address(market));
         vm.stopPrank();
 
         usdg.mint(alice, 100_000e18);
         usdg.mint(bob, 100_000e18);
 
         vm.prank(deployer);
-        card.mintUnrevealed(alice, address(0x711), 100e18);
+        card.mintUnrevealed(alice, address(0x711), 100e18, false);
     }
 
     function test_listBuy_royaltyToTreasury() public {
@@ -67,7 +68,44 @@ contract CardMarketplaceTest is Test {
 
     function test_cannotBuyUnlisted() public {
         vm.prank(bob);
-        vm.expectRevert(bytes("Market: not listed"));
+        vm.expectRevert(bytes("Market: listed"));
         market.buy(1);
+    }
+
+    function test_claimedCardIsBurned_cannotList() public {
+        // Claim burns the card, so a redeemed shell can never be listed or traded anywhere.
+        address pot = address(0x711);
+        vm.startPrank(deployer);
+        card.setRevealer(deployer);
+        card.revealCard(1, 1e18, PotCard.Rarity.Common);
+        vm.stopPrank();
+
+        vm.prank(pot);
+        card.burnForClaim(1);
+
+        vm.expectRevert(abi.encodeWithSignature("ERC721NonexistentToken(uint256)", 1));
+        card.ownerOf(1);
+
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSignature("ERC721NonexistentToken(uint256)", 1));
+        market.list(1, 100e18);
+    }
+
+    function test_listedBlocksTransferAndExit() public {
+        vm.startPrank(alice);
+        card.approve(address(market), 1);
+        market.list(1, 100e18);
+        vm.expectRevert(bytes("Card: listed"));
+        card.transferFrom(alice, bob, 1);
+        market.cancel(1);
+        card.transferFrom(alice, bob, 1);
+        vm.stopPrank();
+        assertEq(card.ownerOf(1), bob);
+    }
+
+    function test_eip2981_defaultRoyalty() public {
+        (address receiver, uint256 amount) = card.royaltyInfo(1, 10_000);
+        assertEq(receiver, deployer);
+        assertEq(amount, 250); // 2.5% of 10000
     }
 }

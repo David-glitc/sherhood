@@ -1,0 +1,55 @@
+---
+title: Fees
+description: Create fee, protocol take, trade royalty
+---
+
+# Fees
+
+Sherhood earns from a few explicit take rates. Creators do **not** configure protocol fees in the create form.
+
+## Create fee
+
+When you deploy a **community basket**, you pay a flat **create fee** in USDG once.
+
+- Charged on [Create](/create)
+- Sent to the protocol treasury
+- Shown in the UI before you confirm
+
+Platform baskets created by Sherhood may skip this fee.
+
+## On deposits
+
+| Fee | Who sets it | Typical default |
+|-----|-------------|-----------------|
+| Protocol fee | Protocol (bps of deposits, taken before the stock buy) | ~1% |
+| Entry fee | Protocol / pot config (flat per deposit) | often 0 |
+| EntryRouter fee | Protocol (bps when entering with ETH / WETH) | ~0.5% |
+
+ETH / WETH entries swap to USDG on Uniswap; the router fee is skimmed from swap output, then the net USDG is deposited into the basket.
+
+## Early exit
+
+While a basket is still funding, `earlyExit` burns the mystery card and refunds **95%** of the deposit in USDG. The remaining **5%** is an exit fee to the treasury. Entry fees already paid stay with the pot.
+
+Later windows (post-close haircut, post-reveal inventory spread) are specified in [Early exit](/docs/early-exit) and not all live yet.
+
+## On secondary trades
+
+[Trade](/marketplace) charges a **royalty** on sale price (default **2.5%**) paid to the treasury. The card contract also exposes the same **2.5% via EIP-2981** for OpenSea and aggregators. Cards themselves are minted by funding baskets — Trade is optional secondary only.
+
+Derived value (deposit share or ownership weight × basket NAV) is documented in [Pricing](/docs/pricing) — use it next to ask price when judging a trade.
+
+## Example on $100k primary volume
+
+| Stream | Rough take |
+|--------|------------|
+| Protocol 1% | ~$1,000 |
+| EntryRouter 0.5% (if all enter via ETH/WETH) | $0–$500 |
+| Early exit 5% on $10k exited deposits | ~$500 |
+| Marketplace 2.5% on $20k secondary | ~$500 |
+
+Exact numbers depend on live fee params after deploy.
+
+## What you keep
+
+Your card’s claim is on the **net** portfolio after protocol fees are pulled at purchase. Reveal still divides 100% of that remaining pool among card holders — claim pays out a slice of each holding.

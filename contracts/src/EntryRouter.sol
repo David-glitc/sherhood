@@ -6,7 +6,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ISwapRouter} from "./interfaces/ISwapRouter.sol";
+import {ISwapRouter02} from "./interfaces/ISwapRouter02.sol";
 import {IWETH} from "./interfaces/IWETH.sol";
 import {Pot} from "./Pot.sol";
 
@@ -69,7 +69,15 @@ contract EntryRouter is Ownable, Pausable, ReentrancyGuard {
         factory = factory_;
     }
 
-    receive() external payable {}
+    receive() external payable {
+        require(msg.sender == weth, "Entry: eth");
+    }
+
+    function withdrawETH(address to, uint256 amount) external onlyOwner {
+        require(to != address(0), "Entry: zero");
+        (bool ok,) = to.call{value: amount}("");
+        require(ok, "Entry: eth send");
+    }
 
     function setSwapRouter(address router_) external onlyOwner {
         swapRouter = router_;
@@ -143,13 +151,12 @@ contract EntryRouter is Ownable, Pausable, ReentrancyGuard {
         IERC20(weth).forceApprove(swapRouter, 0);
         IERC20(weth).forceApprove(swapRouter, amountIn);
 
-        uint256 usdgOut = ISwapRouter(swapRouter).exactInputSingle(
-            ISwapRouter.ExactInputSingleParams({
+        uint256 usdgOut = ISwapRouter02(swapRouter).exactInputSingle(
+            ISwapRouter02.ExactInputSingleParams({
                 tokenIn: weth,
                 tokenOut: usdg,
                 fee: wethUsdgPoolFee,
                 recipient: address(this),
-                deadline: block.timestamp + 300,
                 amountIn: amountIn,
                 amountOutMinimum: minUsdgOut,
                 sqrtPriceLimitX96: 0

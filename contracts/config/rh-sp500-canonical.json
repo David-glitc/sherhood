@@ -1,0 +1,124 @@
+{
+  "source": "blockscout",
+  "chainId": 4663,
+  "tokens": [
+    {
+      "symbol": "AAPL",
+      "address": "0xaF3D76f1834A1d425780943C99Ea8A608f8a93f9",
+      "name": "Apple \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "AMD",
+      "address": "0x86923f96303D656E4aa86D9d42D1e57ad2023fdC",
+      "name": "AMD \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "AMZN",
+      "address": "0x12f190a9F9d7D37a250758b26824B97CE941bF54",
+      "name": "Amazon \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "AVGO",
+      "address": "0x156E175DD063a8cE274C50654eF40e0032b3fbcF",
+      "name": "Broadcom \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "COIN",
+      "address": "0x6330D8C3178a418788dF01a47479c0ce7CCF450b",
+      "name": "Coinbase \u2022 Robinhood Token"
+    },
+    {
+      "symbol": "COST",
+      "address": "0x4EA005168D7F09a7A0Ba9D1DEf21a479950E44C2",
+      "name": "Costco \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "GOOGL",
+      "address": "0x2e0847E8910a9732eB3fb1bb4b70a580ADAD4FE3",
+      "name": "Alphabet Class A \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "INTU",
+      "address": "0x56d23beE5f41A7120170b0c603Dae30128e460e9",
+      "name": "Intuit \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "LLY",
+      "address": "0x8005d266423c7ea827372c9c864491e5786600ea",
+      "name": "Eli Lilly \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "META",
+      "address": "0xc0D6457C16Cc70d6790Dd43521C899C87ce02f35",
+      "name": "Meta Platforms \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "MSFT",
+      "address": "0xe93237C50D904957Cf27E7B1133b510C669c2e74",
+      "name": "Microsoft \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "NFLX",
+      "address": "0xE0444EF8BF4eD74f74FD73686e2ddF4C1c5591E8",
+      "name": "Netflix \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "NVDA",
+      "address": "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC",
+      "name": "NVIDIA \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "ORCL",
+      "address": "0xb0992820E760d836549ba69BC7598b4af75dEE03",
+      "name": "Oracle \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "PLTR",
+      "address": "0x894E1EC2D74FFE5AEF8Dc8A9e84686acCB964F2A",
+      "name": "Palantir Technologies \u2022 Robinhood Token"
+    },
+    {
+      "symbol": "QCOM",
+      "address": "0x0f17206447090e464C277571124dD2688E48AEA9",
+      "name": "Qualcomm \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "QQQ",
+      "address": "0xD5f3879160bc7c32ebb4dC785F8a4F505888de68",
+      "name": "Invesco QQQ \u2022 Robinhood Token"
+    },
+    {
+      "symbol": "SPY",
+      "address": "0x117cc2133c37B721F49dE2A7a74833232B3B4C0C",
+      "name": "SPDR S&P 500 ETF Trust \u2022 Robinhood Token"
+    },
+    {
+      "symbol": "TSLA",
+      "address": "0x322F0929c4625eD5bAd873c95208D54E1c003b2d",
+      "name": "Tesla \u2022 Robinhood Token",
+      "holders": 0
+    },
+    {
+      "symbol": "XOM",
+      "address": "0xf9B46d3D1B22199D4D1025a9cEDB540A33F1a2d5",
+      "name": "ExxonMobil Holdings Corporation \u2022 Robinhood Token",
+      "holders": 0
+    }
+  ],
+  "note": "Canonical = name contains \"Robinhood Token\" per docs.robinhood.com/chain/contracts/",
+  "sp500_overlap_count": 20
+}

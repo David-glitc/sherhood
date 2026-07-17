@@ -1,0 +1,33 @@
+---
+title: Pricing
+description: Derived card value from fair share or ownership × basket NAV
+---
+
+# Pricing
+
+Every card has a **derived value** — what the card is worth relative to the basket right now. Inventory and Trade show this next to every card.
+
+## Formula
+
+```
+if Unrevealed:  (your deposit / basket total) × basket NAV
+if Revealed:    your ownership % × basket NAV
+if Claimed:     0
+```
+
+Basket NAV is the sum of spot price × holdings for each stock in the basket.
+
+## Fixed-price listings
+
+On [Trade](/marketplace):
+
+1. **List** — set any ask in USDG.
+2. **Display** — ask + derived value + Unrevealed/Revealed state.
+3. **Buy** — pay ask; royalty skimmed; card transfers.
+4. **Cancel** — delist any time before a buy.
+
+No floor/ceiling. No partial fills.
+
+## Why show derived value
+
+Ask alone is noise. Ask next to derived value tells buyers whether they are paying a premium or a discount to fair share — especially for sealed cards.

@@ -43,7 +43,7 @@ contract PotDeployScript is Script {
         factory.setAssetManager(address(assets));
         factory.setRevealEngine(address(reveal));
         factory.setTreasury(address(treasury));
-        factory.setCreationFee(vm.envOr("CREATION_FEE", uint256(10e18)));
+        factory.setCreationFee(vm.envOr("CREATION_FEE", uint256(5e18)));
 
         CardMarketplace market = new CardMarketplace(deployer, address(card), usdg, address(treasury));
 

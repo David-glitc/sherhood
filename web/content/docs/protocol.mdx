@@ -1,0 +1,51 @@
+---
+title: Protocol
+description: Baskets, cards, reveal, and claims
+---
+
+# Protocol
+
+Sherhood turns pooled money into a multi-stock portfolio. Each joiner gets an NFT card that represents their claim.
+
+## Mental model
+
+> Everyone keeps a claim. Luck decides **how large** that claim is — not whether you exist.
+>
+> A second luck path picks **which stocks** the closed basket buys. Creators do not set the ticker list when they open a basket.
+
+Cards mint when you deposit. Reveal only assigns weight and rarity.
+
+## Lifecycle
+
+| Stage | What happens |
+|-------|----------------|
+| **Create** | Platform or community opens a basket (goal, min, duration) |
+| **Funding** | Users deposit ETH / WETH / USDG; each deposit mints a mystery card |
+| **Close** | Goal met or duration expires (with deposits) |
+| **Purchase** | The basket luck-picks 2–5 stock tokens and buys them |
+| **Reveal** | Luck assigns ownership weights that sum to 100% |
+| **Claim / Trade** | Redeem a share of every holding, or sell the card |
+
+## Basket rules
+
+- One basket buys a **portfolio** of 2–5 registered stock tokens when it fills.
+- Creators pick goal, min deposit, and duration — not tickers or fee rates.
+- Concurrent baskets can run in parallel.
+- Claiming redeems a proportional slice of **all** holdings in that basket.
+
+## What Sherhood is not
+
+- Not a winner-take-all raffle as the core product.
+- Not a bet where chance can wipe your deposit to zero.
+- Not off-chain custodial ownership without an on-chain claim NFT.
+
+## Flow
+
+```
+Connect wallet
+    → Fund basket (ETH / WETH / USDG)
+    → Mystery card minted
+    → Basket closes & luck-buys 2–5 stocks
+    → Reveal ownership %
+    → Claim portfolio share  or  Trade card
+```

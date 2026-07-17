@@ -5,37 +5,90 @@ alwaysApply: false
 
 # Audit Checklist — Pot Stack
 
+> Last audit-prep pass: **2026-07-17** against Aggressive Test Surfaces checklist.
+> Full findings: open [sherhood-contract-audit](/home/david/.cursor/projects/home-david/canvases/sherhood-contract-audit.canvas.tsx) canvas.
+
+## Ship blockers (must fix or explicitly accept before marketing trustless claims)
+
+- [ ] **C-01** Operator-chosen `purchaseWithSeed` seed — grindable stock picks (`AssetManager`)
+- [ ] **H-01** Permissionless `PrevRandaoCoordinator.fulfill` — outcome shopping / producer bias
+- [ ] **H-02** Multi-leg swap `amountOutMinimum = 0` for legs 1..n-1
+- [ ] **H-03** Listing lock docs-only — `transferFrom` / `claim` / `earlyExit` bypass soft flag
+- [ ] **H-04** `$SHRH` dual check flash-loanable at deposit + reveal snapshots
+- [ ] **H-05** No full-principal cancel when funding goal unmet after deadline
+- [ ] **H-06** Direction v2 post-close / post-reveal exit windows not implemented (docs mismatch)
+- [ ] **H-07** Last earlyExit → `participantCount == 0` bricks `close()` (`Pot: empty`)
+- [ ] **H-08** API `immutable` Cache-Control after reveal freezes pre-claim metadata
+
 ## Invariants (must always hold)
-- [ ] Σ card.ownershipWeight for a pot == 1e18 after reveal
-- [ ] Every revealed card has ownershipWeight > 0
-- [ ] pot.totalDeposited + entryFees == USDG held until purchase pull
+
+- [x] Σ card.ownershipWeight for a pot == 1e18 after reveal (enforced in `RevealEngine._allocate`; fuzz exists; **not** in invariant suite)
+- [x] Every revealed card has ownershipWeight > 0 (floor repair to 1; dust DoS edge untested)
+- [ ] pot.totalDeposited + entryFees == USDG held until purchase pull (**breaks under FoT** — nominal accounting)
 - [ ] After purchase: feesOwed == protocolFee + entryFees; sweep once only
 - [ ] After all claims: assetsClaimed + dust on pot == assetAmount
-- [ ] Card can be claimed at most once; only by NFT owner; only when Revealed
+- [x] Card can be claimed at most once; only by NFT owner; only when Revealed
+- [ ] Σ deposits == totalDeposited across earlyExit (invariant suite deposit-only today)
 
 ## Access control
-- [ ] Only factory pots can mint cards
-- [ ] Only revealer can reveal; only pot can markClaimed
-- [ ] Only assetManager can pullForPurchase / markPurchased
-- [ ] purchasePulled prevents double pull
-- [ ] pause on factory blocks deposits/claims
+
+- [x] Only factory pots can mint cards
+- [x] Only revealer can reveal; only pot can markClaimed
+- [x] Only assetManager can pullForPurchase / markPurchased
+- [x] purchasePulled prevents double pull
+- [ ] pause on factory blocks deposits/claims — **also freezes earlyExit**; matrix untested
 
 ## Fee paths
-- [ ] Creation fee → Treasury.depositFeeUSDG
-- [ ] Entry + protocol fees → Pot.sweepFees → Treasury
-- [ ] protocolFeeBps capped (factory max + pot constructor)
+
+- [x] Creation fee → Treasury.depositFeeUSDG
+- [x] Entry + protocol fees → Pot.sweepFees → Treasury
+- [x] protocolFeeBps capped (factory max + pot constructor)
+- [x] earlyExit 5% fee while Funding
 
 ## Economic / game integrity
-- [ ] Expected ownership ≈ deposit / totalDeposited (multiplier mean ~1.25 — document EV)
-- [ ] No path zeroes a participant's claim
-- [ ] Cannot reveal before purchase; cannot claim before reveal
+
+- [ ] Expected ownership ≈ deposit / totalDeposited (multiplier mean — document EV)
+- [x] No path zeroes a participant's claim (floor repair; extreme N untested)
+- [x] Cannot reveal before purchase; cannot claim before reveal
+- [ ] Stock selection entropy must not be operator-grindable (currently **FAIL**)
+- [ ] Reveal entropy must resist fulfill-block shopping (currently **FAIL** on PrevRandao)
+
+## Marketplace / OpenSea
+
+- [x] list/buy reject claimed shells
+- [ ] Listing lock enforced on-chain (escrow or `_update`) — **FAIL**
+- [ ] claim / earlyExit blocked while listed — **FAIL**
+- [ ] Metadata not immutable until claimed — **FAIL** (API)
+- [ ] Explicit test: `transferFrom` + off-chain payment does not credit protocol royalties
+
+## $SHRH boost
+
+- [ ] Dual check not flash-loanable (currently snapshots only) — **FAIL**
+- [ ] Boundary tests: threshold-1 vs threshold (`>=`)
+- [ ] Transfer-before-fulfill ownership semantics documented + tested
 
 ## Ops / VRF
-- [ ] VRF consumer set; keyHash + subId configured
-- [ ] amountOutMinimum enforced on real router (never 0 on mainnet)
+
+- [ ] VRF consumer set; keyHash + subId configured (PrevRandao stub in production path)
+- [ ] amountOutMinimum enforced on **every** swap leg (never 0 on mainnet)
 - [ ] Operators scoped; owner key in cold storage
+- [ ] Cap participantCount vs reveal callback gas
+
+## Adversarial test files to add
+
+```
+test/adversarial/FundingClose.t.sol
+test/adversarial/PrevRandaoBias.t.sol
+test/adversarial/StockSeedGrind.t.sol
+test/adversarial/EarlyExitRaces.t.sol
+test/adversarial/ListingLockBypass.t.sol
+test/adversarial/ShrhFlashBoost.t.sol
+test/adversarial/ReentrancyMatrix.t.sol
+test/adversarial/RevealGasDoS.t.sol
+```
 
 ## Test commands
+
 ```bash
 cd contracts
 forge test --match-path 'test/Pot*.t.sol' -vv

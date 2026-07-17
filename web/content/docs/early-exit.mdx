@@ -1,0 +1,27 @@
+---
+title: Early exit
+description: Exit windows, fees, and cancel refunds
+---
+
+# Early exit
+
+You can leave a basket before claiming — payout depends on **when** you exit.
+
+| Window | Payout | Adjustment | Notes |
+|---|---|---|---|
+| **Pre-close** (funding open) | Deposit refund | Flat **5%** exit fee | Burn mystery card; refund 95% USDG |
+| **Unmet goal after deadline** | Full deposit | **0%** fee | Call `cancel`, then `refund` per card |
+| **Post-close / post-reveal** | — | — | Not live — claim or Trade instead |
+
+## Live today
+
+- **Early exit** while funding: burn card, 5% fee, 95% USDG refund.
+- **Cancel + refund** if the deadline passes without hitting the funding goal (full principal).
+- **Listing lock:** a card listed on Trade cannot be transferred, claimed, or exited until you cancel the listing.
+
+## Not live
+
+- Post-close / pre-reveal haircut exit
+- Post-reveal instant NAV exit
+
+See also [Fees](/docs/fees) and [Pricing](/docs/pricing).

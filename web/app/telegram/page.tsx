@@ -1,39 +1,34 @@
-"use client"
+import Link from "next/link"
+import { TELEGRAM_HANDLE, TELEGRAM_URL } from "@/lib/protocol"
+import { PageHeader, PageShell } from "@/components/layout/page-shell"
+import { buttonVariants } from "@/components/ui/button"
 
-import { useEffect } from "react"
-import { RaffleApp } from "@/components/raffle/raffle-app"
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        ready: () => void
-        expand: () => void
-        close: () => void
-        MainButton: { setText: (text: string) => void; show: () => void; hide: () => void }
-        initDataUnsafe: { user?: { id: number; first_name: string; last_name?: string; username?: string } }
-        colorScheme: string
-      }
-    }
-  }
+export const metadata = {
+  title: "Sherhood Telegram",
+  description: "Join the Sherhood community on Telegram.",
 }
 
-export default function TelegramPage() {
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready()
-      window.Telegram.WebApp.expand()
-      document.documentElement.className = "h-full antialiased bg-black"
-    }
-  }, [])
-
+export default function TelegramHubPage() {
   return (
-    <div className="mx-auto max-w-md px-3 py-4">
-      <div className="mb-6 text-center">
-        <h1 className="text-xl font-bold text-robinhood">SHERWOOD</h1>
-        <p className="text-xs text-zinc-500">Enter pools → VRF picks winners → Claim tokens</p>
+    <PageShell narrow className="flex min-h-[70dvh] flex-col justify-center">
+      <PageHeader
+        eyebrow="Community"
+        title={`@${TELEGRAM_HANDLE}`}
+        description="Follow basket reveals, contract updates, and launch notices on Telegram."
+      />
+      <div className="flex flex-wrap gap-3">
+      <a
+        href={TELEGRAM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonVariants({ size: "lg" })}
+      >
+        Open Telegram
+      </a>
+      <Link href="/app" className={buttonVariants({ variant: "outline", size: "lg" })}>
+        Browse baskets
+      </Link>
       </div>
-      <RaffleApp />
-    </div>
+    </PageShell>
   )
 }

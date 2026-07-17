@@ -12,13 +12,27 @@ interface ITreasuryFeeSink {
     function depositFeeUSDG(uint256 amount) external;
 }
 
-/// @title CardMarketplace — trade PotCards for USDG with protocol royalty
+interface ICardState {
+    function cards(uint256 tokenId)
+        external
+        view
+        returns (
+            address pot,
+            uint256 depositAmount,
+            uint256 ownershipWeight,
+            uint8 rarity,
+            bool revealed,
+            bool claimed,
+            bool luckLocked
+        );
+}
+
 contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     struct Listing {
         address seller;
-        uint256 price; // USDG
+        uint256 price;
         bool active;
     }
 
@@ -26,14 +40,13 @@ contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
     address public immutable usdg;
     address public treasury;
 
-    /// @notice Royalty in bps of sale price paid to treasury (max 1000 = 10%).
-    uint256 public royaltyBps = 250; // 2.5%
+    uint256 public royaltyBps = 250;
     uint256 public constant MAX_ROYALTY_BPS = 1000;
 
     mapping(uint256 => Listing) public listings;
     uint256 public listingCount;
     uint256[] private _activeTokenIds;
-    mapping(uint256 => uint256) private _activeIndex; // tokenId => index+1 in _activeTokenIds
+    mapping(uint256 => uint256) private _activeIndex;
 
     event Listed(uint256 indexed tokenId, address indexed seller, uint256 price);
     event Cancelled(uint256 indexed tokenId, address indexed seller);
@@ -54,7 +67,7 @@ contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
     }
 
     function setRoyaltyBps(uint256 bps) external onlyOwner {
-        require(bps <= MAX_ROYALTY_BPS, "Market: royalty high");
+        require(bps <= MAX_ROYALTY_BPS, "Market: royalty");
         royaltyBps = bps;
         emit RoyaltyUpdated(bps);
     }
@@ -68,13 +81,14 @@ contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
     }
 
     function list(uint256 tokenId, uint256 price) external nonReentrant whenNotPaused {
-        require(price > 0, "Market: zero price");
-        require(card.ownerOf(tokenId) == msg.sender, "Market: not owner");
+        require(price > 0, "Market: price");
+        require(card.ownerOf(tokenId) == msg.sender, "Market: owner");
         require(
             card.getApproved(tokenId) == address(this) || card.isApprovedForAll(msg.sender, address(this)),
-            "Market: not approved"
+            "Market: approve"
         );
-        require(!listings[tokenId].active, "Market: already listed");
+        require(!listings[tokenId].active, "Market: listed");
+        require(!_isClaimed(tokenId), "Market: claimed");
 
         listings[tokenId] = Listing({seller: msg.sender, price: price, active: true});
         _activeIndex[tokenId] = _activeTokenIds.length + 1;
@@ -86,39 +100,44 @@ contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
 
     function cancel(uint256 tokenId) external nonReentrant {
         Listing storage L = listings[tokenId];
-        require(L.active, "Market: not listed");
-        require(L.seller == msg.sender || msg.sender == owner(), "Market: not seller");
+        require(L.active, "Market: listed");
+        require(L.seller == msg.sender || msg.sender == owner(), "Market: seller");
         _delist(tokenId);
         emit Cancelled(tokenId, L.seller);
     }
 
     function buy(uint256 tokenId) external nonReentrant whenNotPaused {
         Listing memory L = listings[tokenId];
-        require(L.active, "Market: not listed");
-        require(card.ownerOf(tokenId) == L.seller, "Market: seller moved");
-        require(msg.sender != L.seller, "Market: self buy");
+        require(L.active, "Market: listed");
+        require(card.ownerOf(tokenId) == L.seller, "Market: moved");
+        require(msg.sender != L.seller, "Market: self");
+        require(!_isClaimed(tokenId), "Market: claimed");
 
         uint256 royalty = (L.price * royaltyBps) / 10_000;
         uint256 proceeds = L.price - royalty;
 
         IERC20(usdg).safeTransferFrom(msg.sender, L.seller, proceeds);
         if (royalty > 0) {
-            require(treasury != address(0), "Market: no treasury");
+            require(treasury != address(0), "Market: treasury");
             IERC20(usdg).safeTransferFrom(msg.sender, address(this), royalty);
             IERC20(usdg).forceApprove(treasury, 0);
             IERC20(usdg).forceApprove(treasury, royalty);
             ITreasuryFeeSink(treasury).depositFeeUSDG(royalty);
         }
 
-        _delist(tokenId);
         card.safeTransferFrom(L.seller, msg.sender, tokenId);
+        _delist(tokenId);
 
         emit Sold(tokenId, L.seller, msg.sender, L.price, royalty);
     }
 
+    function _isClaimed(uint256 tokenId) private view returns (bool claimed) {
+        (,,,,, claimed,) = ICardState(address(card)).cards(tokenId);
+    }
+
     function _delist(uint256 tokenId) private {
         Listing storage L = listings[tokenId];
-        require(L.active, "Market: not listed");
+        require(L.active, "Market: listed");
         L.active = false;
         listingCount -= 1;
 
@@ -149,5 +168,9 @@ contract CardMarketplace is Ownable, Pausable, ReentrancyGuard {
 
     function activeListingCount() external view returns (uint256) {
         return _activeTokenIds.length;
+    }
+
+    function isListedActive(uint256 tokenId) external view returns (bool) {
+        return listings[tokenId].active;
     }
 }

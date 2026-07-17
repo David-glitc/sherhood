@@ -12,10 +12,13 @@ import {Treasury} from "../src/Treasury.sol";
 import {MockERC20} from "../src/mocks/MockERC20.sol";
 import {MockVRFCoordinator} from "../src/mocks/MockVRFCoordinator.sol";
 import {MockSwapRouter} from "../src/mocks/MockSwapRouter.sol";
+import {StockTokenRegistry} from "../src/StockTokenRegistry.sol";
+import {SherhoodToken} from "../src/SherhoodToken.sol";
 
 contract PotHarness is Test {
     MockERC20 internal usdg;
     MockERC20 internal nvda;
+    MockERC20 internal aapl;
     MockVRFCoordinator internal vrf;
     MockSwapRouter internal router;
     Treasury internal treasury;
@@ -23,6 +26,8 @@ contract PotHarness is Test {
     PotFactory internal factory;
     RevealEngine internal reveal;
     AssetManager internal assets;
+    StockTokenRegistry internal registry;
+    SherhoodToken internal shrh;
 
     address internal deployer = address(0xA11CE);
     address internal alice = address(0xB0B);
@@ -33,6 +38,7 @@ contract PotHarness is Test {
         vm.startPrank(deployer);
         usdg = new MockERC20("USDG", "USDG", 18);
         nvda = new MockERC20("NVDA", "NVDA", 18);
+        aapl = new MockERC20("AAPL", "AAPL", 18);
         vrf = new MockVRFCoordinator();
         router = new MockSwapRouter();
         treasury = new Treasury(address(usdg), deployer);
@@ -40,15 +46,21 @@ contract PotHarness is Test {
         factory = new PotFactory(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(vrf));
         assets = new AssetManager(deployer, address(usdg), address(router));
+        registry = new StockTokenRegistry(deployer);
+        shrh = new SherhoodToken(deployer, deployer);
 
         card.setMinter(address(factory));
         card.setRevealer(address(reveal));
         factory.setAssetManager(address(assets));
         factory.setRevealEngine(address(reveal));
         factory.setTreasury(address(treasury));
-        factory.setCreationFee(10e18);
-        factory.setRequireRegisteredStock(false);
+        factory.setStockRegistry(address(registry));
+        assets.setStockRegistry(address(registry));
+        registry.setToken(address(nvda), true, "NVDA", 3000);
+        registry.setToken(address(aapl), true, "AAPL", 3000);
+        factory.setCreationFee(5e18);
         reveal.setVRFConfig(bytes32("key"), 1, 2_500_000);
+        reveal.setLuckToken(address(shrh), 1000e18, 2500);
         vrf.setConsumer(address(reveal));
         vm.stopPrank();
 
@@ -63,7 +75,15 @@ contract PotHarness is Test {
         returns (address pot)
     {
         vm.prank(deployer);
-        pot = factory.createPot(address(nvda), 3000, goal, duration, minDeposit, entryFee, 100);
+        pot = factory.createPot(goal, duration, minDeposit, entryFee, 100);
+    }
+
+    function _holdingTotal(address pot) internal view returns (uint256 total) {
+        uint256 n = Pot(pot).holdingsCount();
+        for (uint256 i = 0; i < n; i++) {
+            (, uint256 amt) = Pot(pot).holdingAt(i);
+            total += amt;
+        }
     }
 
     function _deposit(address user, address pot, uint256 amount) internal {
@@ -76,7 +96,7 @@ contract PotHarness is Test {
 
     function _runToRevealed(address pot, uint256 seed) internal {
         vm.prank(deployer);
-        assets.purchase(pot, 0);
+        assets.purchaseWithSeed(pot, seed, 1, 0);
         vm.prank(deployer);
         reveal.allocateWithSeed(pot, seed);
     }
@@ -132,7 +152,7 @@ contract BusinessFlowTest is PotHarness {
         assertEq(Pot(pot).protocolFeeOwed(), 3e18);
 
         vm.prank(deployer);
-        assets.purchase(pot, 0);
+        assets.purchaseWithSeed(pot, 999, 1, 0);
         Pot(pot).sweepFees();
         assertEq(treasury.feesCollectedUSDG(), 18e18);
 
@@ -142,9 +162,9 @@ contract BusinessFlowTest is PotHarness {
         uint256[] memory ids = card.potTokenIds(pot);
         uint256 beforeA = nvda.balanceOf(alice);
         vm.prank(alice);
-        uint256 payout = Pot(pot).claim(ids[0]);
-        assertGt(payout, 0);
-        assertEq(nvda.balanceOf(alice), beforeA + payout);
+        uint256[] memory payoutA = Pot(pot).claim(ids[0]);
+        assertGt(payoutA[0], 0);
+        assertEq(nvda.balanceOf(alice), beforeA + payoutA[0]);
 
         vm.prank(bob);
         Pot(pot).claim(ids[1]);
@@ -152,18 +172,27 @@ contract BusinessFlowTest is PotHarness {
         Pot(pot).claim(ids[2]);
 
         assertEq(Pot(pot).claimCount(), 3);
-        assertEq(Pot(pot).assetsClaimed() + nvda.balanceOf(pot), Pot(pot).assetAmount());
+        assertLe(nvda.balanceOf(pot), 2);
     }
 
     function test_communityPot_pays_creation_fee() public {
         uint256 before = treasury.feesCollectedUSDG();
         vm.startPrank(alice);
-        usdg.approve(address(factory), 10e18);
-        address pot = factory.createCommunityPot(address(nvda), 3000, 100e18, 7 days, 10e18, 0, 100);
+        usdg.approve(address(factory), 5e18);
+        address pot = factory.createCommunityPot(100e18, 7 days, 10e18, 0, 100);
         vm.stopPrank();
         assertTrue(factory.isPot(pot));
         assertEq(factory.potCreator(pot), alice);
-        assertEq(treasury.feesCollectedUSDG(), before + 10e18);
+        assertEq(treasury.feesCollectedUSDG(), before + 5e18);
+    }
+
+    function test_owner_createCommunityPot_no_fee() public {
+        uint256 before = treasury.feesCollectedUSDG();
+        vm.prank(deployer);
+        address pot = factory.createCommunityPot(100e18, 7 days, 10e18, 0, 100);
+        assertTrue(factory.isPot(pot));
+        assertEq(factory.potCreator(pot), deployer);
+        assertEq(treasury.feesCollectedUSDG(), before);
     }
 
     function test_doubleClaim_reverts() public {
@@ -174,8 +203,9 @@ contract BusinessFlowTest is PotHarness {
         uint256 id = card.potTokenIds(pot)[0];
         vm.prank(alice);
         Pot(pot).claim(id);
+        // Card is burned on claim — second claim hits nonexistent token.
         vm.prank(alice);
-        vm.expectRevert(bytes("Pot: claimed"));
+        vm.expectRevert(abi.encodeWithSignature("ERC721NonexistentToken(uint256)", id));
         Pot(pot).claim(id);
     }
 
@@ -186,7 +216,7 @@ contract BusinessFlowTest is PotHarness {
         _runToRevealed(pot, 7);
         uint256 id = card.potTokenIds(pot)[0];
         vm.prank(bob);
-        vm.expectRevert(bytes("Pot: not owner"));
+        vm.expectRevert(bytes("Pot: owner"));
         Pot(pot).claim(id);
     }
 
@@ -196,7 +226,7 @@ contract BusinessFlowTest is PotHarness {
         factory.pause();
         vm.startPrank(alice);
         usdg.approve(pot, 100e18);
-        vm.expectRevert(bytes("Pot: factory paused"));
+        vm.expectRevert(bytes("Pot: paused"));
         Pot(pot).deposit(100e18);
         vm.stopPrank();
     }
@@ -206,9 +236,9 @@ contract BusinessFlowTest is PotHarness {
         _deposit(alice, pot, 50e18);
         _deposit(bob, pot, 50e18);
         vm.prank(deployer);
-        assets.purchase(pot, 0);
+        assets.purchaseWithSeed(pot, 1, 1, 0);
         vm.prank(address(assets));
-        vm.expectRevert(bytes("Pot: not closed"));
+        vm.expectRevert(bytes("Pot: closed"));
         Pot(pot).pullForPurchase();
     }
 }
@@ -223,9 +253,9 @@ contract PotAttackTest is PotHarness {
         _deposit(alice, pot, 50e18);
         _deposit(bob, pot, 50e18);
         vm.prank(deployer);
-        assets.purchase(pot, 0);
+        assets.purchaseWithSeed(pot, 2, 1, 0);
         Pot(pot).sweepFees();
-        vm.expectRevert(bytes("Pot: nothing to sweep"));
+        vm.expectRevert(bytes("Pot: fees"));
         Pot(pot).sweepFees();
     }
 
@@ -236,8 +266,8 @@ contract PotAttackTest is PotHarness {
         _runToRevealed(pot, 1);
         uint256 id = card.potTokenIds(pot)[0];
         vm.prank(alice);
-        vm.expectRevert(bytes("PotCard: only pot"));
-        card.markClaimed(id);
+        vm.expectRevert(bytes("Card: pot"));
+        card.burnForClaim(id);
     }
 
     function test_strangerCannotMint() public {
@@ -246,12 +276,54 @@ contract PotAttackTest is PotHarness {
         factory.mintCard(alice, 1e18);
     }
 
+    function test_protocolStats_counters() public {
+        assertEq(factory.depositCount(), 0);
+        assertEq(factory.uniqueDepositors(), 0);
+        assertEq(card.totalMinted(), 0);
+
+        address potA = _createPlatformPot(100e18, 7 days, 50e18, 0);
+        _deposit(alice, potA, 50e18);
+        _deposit(bob, potA, 50e18);
+
+        address potB = _createPlatformPot(200e18, 7 days, 50e18, 0);
+        _deposit(alice, potB, 100e18);
+
+        (uint256 pools, uint256 volume, uint256 deposits, uint256 users) = factory.protocolStats();
+        assertEq(pools, 2);
+        assertEq(volume, 200e18);
+        assertEq(deposits, 3);
+        assertEq(users, 2); // alice counted once across pots
+
+        assertEq(card.totalMinted(), 3);
+        assertEq(card.totalSupply(), 3);
+        assertEq(card.totalBurned(), 0);
+
+        // Early exit burns and decrements supply, not minted.
+        uint256 aliceCardB = card.potTokenIds(potB)[0];
+        vm.prank(alice);
+        Pot(potB).earlyExit(aliceCardB);
+        assertEq(card.totalBurned(), 1);
+        assertEq(card.totalSupply(), 2);
+
+        // Claim also burns.
+        _runToRevealed(potA, 42);
+        uint256[] memory ids = card.potTokenIds(potA);
+        vm.prank(card.ownerOf(ids[0]));
+        Pot(potA).claim(ids[0]);
+        assertEq(card.totalBurned(), 2);
+        assertEq(card.totalSupply(), 1);
+        assertEq(card.totalMinted(), 3);
+
+        // Volume is cumulative gross — unchanged by exits/claims.
+        assertEq(factory.totalDepositVolume(), 200e18);
+    }
+
     function test_revealBeforePurchase_reverts() public {
         address pot = _createPlatformPot(100e18, 7 days, 50e18, 0);
         _deposit(alice, pot, 50e18);
         _deposit(bob, pot, 50e18);
         vm.prank(deployer);
-        vm.expectRevert(bytes("RevealEngine: not purchased"));
+        vm.expectRevert(bytes("Reveal: purchased"));
         reveal.allocateWithSeed(pot, 1);
     }
 }
@@ -302,10 +374,28 @@ contract PotFuzzTest is PotHarness {
         for (uint256 i = 0; i < ids.length; i++) {
             address owner_ = card.ownerOf(ids[i]);
             vm.prank(owner_);
-            claimed += Pot(pot).claim(ids[i]);
+            uint256[] memory payouts = Pot(pot).claim(ids[i]);
+            for (uint256 j = 0; j < payouts.length; j++) {
+                claimed += payouts[j];
+            }
         }
-        assertEq(claimed, Pot(pot).assetsClaimed());
-        assertLe(claimed, Pot(pot).assetAmount());
-        assertEq(claimed + nvda.balanceOf(pot), Pot(pot).assetAmount());
+        assertLe(claimed, _holdingTotal(pot));
+        assertLe(nvda.balanceOf(pot) + aapl.balanceOf(pot), 10);
+    }
+
+    function test_multiStockPurchase() public {
+        address pot = _createPlatformPot(200e18, 7 days, 50e18, 0);
+        _deposit(alice, pot, 100e18);
+        _deposit(bob, pot, 100e18);
+
+        vm.prank(deployer);
+        assets.purchaseWithSeed(pot, 0xBEEF, 2, 0);
+        assertEq(Pot(pot).holdingsCount(), 2);
+
+        (address t0,) = Pot(pot).holdingAt(0);
+        (address t1,) = Pot(pot).holdingAt(1);
+        assertTrue(t0 == address(nvda) || t0 == address(aapl));
+        assertTrue(t1 == address(nvda) || t1 == address(aapl));
+        assertTrue(t0 != t1);
     }
 }

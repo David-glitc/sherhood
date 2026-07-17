@@ -1,0 +1,31 @@
+---
+title: Secondary market
+description: Mystery vs revealed trading, $SHRH boost, listing locks
+---
+
+# Secondary market
+
+Cards trade on Sherhood Trade (fixed-price USDG) and can also appear on OpenSea. A mystery card and a revealed card are **different products**.
+
+## Mystery vs revealed
+
+| State | What you buy | Risk |
+|---|---|---|
+| **Unrevealed** | A lottery ticket on a basket | Ownership % and rarity unknown until reveal |
+| **Revealed** | A priced claim | Known weight × basket value; can claim stock tokens |
+
+Every listing shows **Unrevealed** or **Revealed**.
+
+## $SHRH boost on trade
+
+Boost requires escrowing enough `$SHRH` via `lockLuck` at **deposit** (sets `luckLocked` on the card) **and** still having that escrow at **reveal** (current holder). You cannot unlock in the same block you lock — that blocks same-tx flash loans. Mystery cards stay tradeable; the reveal-time escrow check follows whoever holds the card.
+
+## Listing lock
+
+While a card is listed on Trade, the NFT **cannot** be transferred, claimed, or early-exited. Cancel the listing first. Claiming **burns** the card — a redeemed card no longer exists, so worthless shells can never be traded here or on OpenSea.
+
+## Royalty
+
+Trade takes **2.5%** to the protocol. OpenSea may display the same rate; enforcement off-app is optional per venue.
+
+See [OpenSea](/docs/opensea) and [Pricing](/docs/pricing).

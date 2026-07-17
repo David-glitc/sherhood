@@ -1,16 +1,16 @@
 {
-  "name": "Sherwood",
-  "short_name": "Sherwood",
-  "description": "Open randomized gacha packs containing fractional Robinhood Chain Stock Tokens.",
+  "name": "Sherhood",
+  "short_name": "Sherhood",
+  "description": "Fractional Asset Loot Protocol on Robinhood Chain",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#00c805",
+  "background_color": "#050806",
+  "theme_color": "#c5f70a",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/brand-lockup-hood.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
     }
   ]
 }

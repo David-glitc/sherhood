@@ -46,7 +46,6 @@ contract MockWethUsdgRouter {
         address tokenOut;
         uint24 fee;
         address recipient;
-        uint256 deadline;
         uint256 amountIn;
         uint256 amountOutMinimum;
         uint160 sqrtPriceLimitX96;
@@ -102,7 +101,7 @@ contract EntryRouterTest is Test {
         factory.setTreasury(address(treasury));
         factory.setEntryRouter(address(entry));
         factory.setStockRegistry(address(registry));
-        factory.setRequireRegisteredStock(true);
+        assets.setStockRegistry(address(registry));
         registry.setToken(address(nvda), true, "NVDA", 3000);
         reveal.setVRFConfig(bytes32("k"), 1, 500_000);
         vrf.setConsumer(address(reveal));
@@ -113,7 +112,7 @@ contract EntryRouterTest is Test {
 
     function test_depositWithETH_skimsFee_and_mintsCard() public {
         vm.prank(deployer);
-        address pot = factory.createPot(address(nvda), 3000, 1_000_000e18, 7 days, 10e18, 0, 100);
+        address pot = factory.createPot(1_000_000e18, 7 days, 10e18, 0, 100);
 
         uint256 treasuryBefore = treasury.feesCollectedUSDG();
         vm.prank(alice);
@@ -128,16 +127,15 @@ contract EntryRouterTest is Test {
         assertEq(c.pot, pot);
     }
 
-    function test_rejectUnregisteredStock() public {
-        address fake = address(new MockERC20("FAKE", "FAKE", 18));
-        vm.prank(deployer);
-        vm.expectRevert(bytes("PotFactory: not RH token"));
-        factory.createPot(fake, 3000, 100e18, 7 days, 10e18, 0, 100);
+    function test_rejectNonPot() public {
+        vm.prank(alice);
+        vm.expectRevert(bytes("Entry: bad pot"));
+        entry.depositWithETH{value: 1 ether}(address(0xBEEF), 0);
     }
 
     function test_depositWithWETH() public {
         vm.prank(deployer);
-        address pot = factory.createPot(address(nvda), 3000, 1_000_000e18, 7 days, 1e18, 1e18, 100);
+        address pot = factory.createPot(1_000_000e18, 7 days, 1e18, 1e18, 100);
 
         vm.startPrank(alice);
         weth.deposit{value: 2 ether}();

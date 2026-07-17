@@ -1,20 +1,28 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import Link from "next/link"
 import { useAccount, useReadContract, useReadContracts } from "wagmi"
 import { potFactoryConfig, potCardConfig, potAbi, marketplaceConfig } from "@/lib/contracts"
 import { useClaimCard } from "@/hooks/use-claim-card"
 import { useMarketplaceTrade } from "@/hooks/use-marketplace"
-import { RARITIES, fmtUsdg, ownershipPct, tokenLabel } from "@/hooks/use-pots"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { RARITIES, fmtUsdg, holdingsLabel, ownershipPct, parseHoldings } from "@/hooks/use-pots"
+import { StockLogoStack } from "@/components/stocks/stock-logo"
+import { ShrhLuckPill } from "@/components/layout/shrh-luck-pill"
+import { PotNftCard } from "@/components/cards/pot-nft-card"
+import { CardStateBadge } from "@/components/cards/card-state-badge"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { computeDerivedShare, shareToPct } from "@/lib/derived-value"
+import { PageHeader, PageShell } from "@/components/layout/page-shell"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 const RARITY_STYLE: Record<string, string> = {
-  Unrevealed: "border-zinc-700 text-zinc-400",
-  Common: "border-zinc-600 text-zinc-300",
-  Rare: "border-sky-500/50 text-sky-300",
-  Epic: "border-violet-500/50 text-violet-300",
-  Legendary: "border-amber-400/60 text-amber-300",
+  Unrevealed: "border-white/10",
+  Common: "border-white/15",
+  Rare: "border-sky-500/40",
+  Epic: "border-violet-500/40",
+  Legendary: "border-amber-400/50",
 }
 
 export default function InventoryPage() {
@@ -23,7 +31,7 @@ export default function InventoryPage() {
   const { list, isPending: listPending } = useMarketplaceTrade()
   const [listPrices, setListPrices] = useState<Record<string, string>>({})
 
-  const { data: potsData } = useReadContract({
+  const { data: potsData, isLoading: potsLoading } = useReadContract({
     ...potFactoryConfig,
     functionName: "getPots",
     args: [],
@@ -31,7 +39,7 @@ export default function InventoryPage() {
   })
   const pots = (potsData as `0x${string}`[] | undefined) ?? []
 
-  const { data: idBatches } = useReadContracts({
+  const { data: idBatches, isLoading: idsLoading } = useReadContracts({
     contracts: pots.map((pot) => ({
       ...potCardConfig,
       functionName: "potTokenIds",
@@ -51,7 +59,7 @@ export default function InventoryPage() {
     return ids
   }, [idBatches])
 
-  const { data: ownership } = useReadContracts({
+  const { data: ownership, isLoading: ownershipLoading } = useReadContracts({
     contracts: allTokenIds.flatMap((tokenId) => [
       { ...potCardConfig, functionName: "ownerOf", args: [tokenId] },
       { ...potCardConfig, functionName: "getCard", args: [tokenId] },
@@ -109,12 +117,13 @@ export default function InventoryPage() {
     }
     return cards
   }, [ownership, address, allTokenIds])
+  const cardsLoading = potsLoading || idsLoading || ownershipLoading
 
-  const { data: targetTokens } = useReadContracts({
+  const { data: potHoldings } = useReadContracts({
     contracts: myCards.map((c) => ({
       address: c.pot,
       abi: potAbi,
-      functionName: "targetToken",
+      functionName: "getHoldings",
     })),
     query: { enabled: myCards.length > 0 },
   })
@@ -128,107 +137,194 @@ export default function InventoryPage() {
     query: { enabled: myCards.length > 0 },
   })
 
+  const { data: potTotals } = useReadContracts({
+    contracts: myCards.map((c) => ({
+      address: c.pot,
+      abi: potAbi,
+      functionName: "totalDeposited",
+    })),
+    query: { enabled: myCards.length > 0 },
+  })
+
   if (!isConnected || !address) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-zinc-300">Inventory</h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Connect your wallet to view mystery and revealed ownership cards.
+      <PageShell narrow>
+        <PageHeader
+          eyebrow="Inventory"
+          title="Your cards"
+          description="Connect a wallet to see the mystery and revealed ownership cards minted from your deposits."
+        />
+        <div className="product-surface p-6 sm:p-8">
+        <h2 className="text-lg font-semibold">Wallet required</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Connect a wallet to see mystery and revealed ownership cards from baskets you funded.
         </p>
-      </div>
+        </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-zinc-100">Your Cards</h1>
-      <p className="mb-6 text-sm text-zinc-500">
-        Claim asset shares after reveal, or list cards on the marketplace.
-      </p>
+    <PageShell wide>
+      <PageHeader
+        eyebrow="Inventory"
+        title="Your cards"
+        description="Cards mint when you fund a basket. Revealed cards show the exact ownership share available to claim."
+        actions={
+          <>
+          <ShrhLuckPill />
+          <Link href="/app" className={buttonVariants({ variant: "outline" })}>
+            Fund a basket
+          </Link>
+          </>
+        }
+      />
 
-      {myCards.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <p className="text-zinc-500">No cards yet. Join a pot to mint your first mystery card.</p>
+      {cardsLoading ? (
+        <div className="responsive-grid" aria-label="Loading cards">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="product-surface flex flex-col gap-4 p-4">
+              <Skeleton className="aspect-[4/5] w-full rounded-xl" />
+              <Skeleton className="h-5 w-2/3" />
+              <Skeleton className="h-11 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : myCards.length === 0 ? (
+        <div className="product-surface p-6 sm:p-10">
+          <h2 className="text-xl font-semibold">No cards yet</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            Fund an open basket to mint your first sealed ownership card.
+          </p>
+          <Link href="/app" className={cn(buttonVariants(), "mt-5")}>
+            Browse baskets
+          </Link>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="responsive-grid">
           {myCards.map((card, idx) => {
             const rarity = RARITIES[card.rarity] ?? "Unrevealed"
-            const target =
-              targetTokens?.[idx]?.status === "success"
-                ? (targetTokens[idx].result as string)
+            const holdingsRaw =
+              potHoldings?.[idx]?.status === "success"
+                ? (potHoldings[idx].result as [string[], bigint[]])
                 : undefined
+            const holdings = parseHoldings(
+              holdingsRaw?.[0] as `0x${string}`[] | undefined,
+              holdingsRaw?.[1]
+            )
+            const basketLabel = holdingsLabel(holdings)
             const potStatus =
               potStatuses?.[idx]?.status === "success" ? Number(potStatuses[idx].result) : -1
             const canClaim = card.revealed && !card.claimed && potStatus === 3
             const idKey = String(card.tokenId)
+            const totalDeposited =
+              potTotals?.[idx]?.status === "success"
+                ? (potTotals[idx].result as bigint)
+                : 0n
+            const share = computeDerivedShare({
+              depositAmount: card.depositAmount,
+              totalDeposited,
+              ownershipWeight: card.ownershipWeight,
+              revealed: card.revealed,
+              claimed: card.claimed,
+            })
 
             return (
               <div
                 key={idKey}
-                className={`rounded-xl border bg-zinc-900/50 p-5 ${RARITY_STYLE[rarity]}`}
+                className={cn("product-surface min-w-0 p-4", RARITY_STYLE[rarity])}
               >
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-wider">{rarity}</span>
-                  <span className="text-xs text-zinc-500">#{idKey}</span>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <CardStateBadge revealed={card.revealed} claimed={card.claimed} />
+                  {holdings.length > 0 && (
+                    <StockLogoStack
+                      symbols={holdings.map((h) => h.symbol)}
+                      size={22}
+                      max={4}
+                    />
+                  )}
                 </div>
-                <h3 className="text-lg font-bold text-zinc-100">
-                  {target ? tokenLabel(target) : "Pot"} Card
-                </h3>
-                <div className="mt-4 space-y-2 text-sm text-zinc-400">
+                <PotNftCard
+                  rarityIndex={card.rarity}
+                  revealed={card.revealed}
+                  tokenId={card.tokenId}
+                  stockLabel={holdings.length > 0 ? `${basketLabel} basket` : "Multi-stock basket"}
+                  ownershipPct={
+                    card.revealed ? `${ownershipPct(card.ownershipWeight)}%` : undefined
+                  }
+                  size="md"
+                />
+
+                <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
                   <div className="flex justify-between">
-                    <span>Deposit</span>
-                    <span className="text-zinc-200">{fmtUsdg(card.depositAmount)} USDG</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Ownership</span>
-                    <span className="font-semibold text-robinhood">
-                      {card.revealed ? `${ownershipPct(card.ownershipWeight)}%` : "???"}
+                    <span className="text-xs uppercase tracking-wider text-white/30">{rarity}</span>
+                    <span className="text-xs text-white/30">
+                      Deposit {fmtUsdg(card.depositAmount)}
                     </span>
                   </div>
-                  {card.claimed && (
-                    <div className="flex justify-between">
-                      <span>Status</span>
-                      <span className="text-amber-300">Claimed</span>
+                  <div className="flex justify-between">
+                    <span>{card.revealed ? "Ownership" : "Fair share"}</span>
+                    <span className="font-medium text-foreground">{shareToPct(share)}%</span>
+                  </div>
+                  {card.revealed && !card.claimed && holdings.length > 0 && (
+                    <div className="flex flex-col gap-1 border-t border-border pt-2">
+                      {holdings.map((h) => {
+                        const payout =
+                          (h.amount * card.ownershipWeight) / 10n ** 18n
+                        const amount = Number(payout) / 1e18
+                        return (
+                          <div key={h.symbol} className="flex justify-between text-xs">
+                            <span className="text-white/35">{h.symbol}</span>
+                            <span className="tabular-nums text-foreground">
+                              {amount.toLocaleString("en-US", { maximumFractionDigits: 4 })}
+                            </span>
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
 
                 {!card.revealed && (
-                  <p className="mt-4 text-center text-xs text-zinc-500">Mystery — awaits pot reveal</p>
+                  <p className="mt-3 text-center text-xs text-white/35">Awaiting basket reveal</p>
                 )}
 
                 {canClaim && (
                   <Button
-                    className="mt-4 w-full bg-robinhood font-semibold text-black hover:opacity-90"
+                    className="mt-4 w-full rounded-[14px] bg-sherhood font-semibold text-black hover:brightness-110"
                     disabled={claimPending}
                     onClick={() => claim(card.pot, card.tokenId)}
                   >
-                    {claimPending ? "Claiming..." : "Claim Asset Share"}
+                    {claimPending ? "Claiming…" : "Claim asset share"}
                   </Button>
                 )}
 
                 {marketplaceConfig.address !==
                   "0x0000000000000000000000000000000000000000" && (
                   <div className="mt-3 space-y-2">
+                    <label htmlFor={`list-price-${idKey}`} className="text-xs font-medium text-muted-foreground">
+                      Listing price (USDG)
+                    </label>
                     <input
+                      id={`list-price-${idKey}`}
                       type="number"
-                      min="0"
+                      min="0.000001"
                       step="any"
-                      placeholder="List price (USDG)"
+                      inputMode="decimal"
+                      placeholder="100"
                       value={listPrices[idKey] ?? ""}
                       onChange={(e) =>
                         setListPrices((p) => ({ ...p, [idKey]: e.target.value }))
                       }
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-robinhood"
+                      className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground transition-colors focus:border-primary"
                     />
                     <Button
                       variant="outline"
-                      className="w-full border-zinc-700 text-zinc-200"
+                      className="w-full rounded-full border-white/15 text-white/80"
                       disabled={listPending || !listPrices[idKey]}
                       onClick={() => list(card.tokenId, listPrices[idKey])}
                     >
-                      {listPending ? "Listing..." : "List on Marketplace"}
+                      {listPending ? "Listing…" : "List on Trade"}
                     </Button>
                   </div>
                 )}
@@ -237,6 +333,6 @@ export default function InventoryPage() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }
