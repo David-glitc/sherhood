@@ -3,8 +3,11 @@ import { parseAbiItem } from "viem"
 import { potFactoryConfig } from "@/lib/contracts"
 import { rhPublicClient } from "@/lib/rh-public-client"
 import { fmtUsdg } from "@/hooks/use-pots"
+import { basketName } from "@/lib/basket-name"
+import { allVisiblePots } from "@/lib/hidden-pots"
 
-export const revalidate = 45
+// On-chain reads must run at request time — prerendering bakes stale chain state.
+export const dynamic = "force-dynamic"
 
 const depositedEvent = parseAbiItem(
   "event Deposited(address indexed user, uint256 amount, uint256 entryFeePaid, uint256 indexed tokenId)"
@@ -15,7 +18,7 @@ function truncAddr(addr: string): string {
 }
 
 function basketLabel(pot: string): string {
-  return `Basket ${truncAddr(pot)}`
+  return basketName(pot)
 }
 
 export async function GET() {
@@ -25,12 +28,14 @@ export async function GET() {
   }
 
   try {
-    const potAddresses = (await rhPublicClient.readContract({
-      address: factory,
-      abi: potFactoryConfig.abi,
-      functionName: "getPots",
-      args: [],
-    })) as `0x${string}`[]
+    const potAddresses = allVisiblePots(
+      (await rhPublicClient.readContract({
+        address: factory,
+        abi: potFactoryConfig.abi,
+        functionName: "getPots",
+        args: [],
+      })) as `0x${string}`[]
+    )
 
     if (potAddresses.length === 0) {
       return NextResponse.json({ items: [] })

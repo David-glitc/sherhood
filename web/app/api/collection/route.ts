@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-
-const SITE = "https://sherhood.xyz"
+import { SITE_URL } from "@/lib/seo"
+import { SHERD_NAME_PLURAL, SHERHOOD_TAGLINE } from "@/lib/protocol"
 
 /**
  * Collection-level metadata for OpenSea / EIP-7572 style `contractURI`.
@@ -8,12 +8,13 @@ const SITE = "https://sherhood.xyz"
  */
 export async function GET() {
   const metadata = {
-    name: "Sherhood Cards",
-    description:
-      "Fractional stock-basket ownership cards on Robinhood Chain. Mystery until reveal — then claim your share of real RH stock tokens. Experimental software; read the terms before you trade.",
-    image: `${SITE}/logo-mark-512.png`,
-    banner_image: `${SITE}/og-image.png`,
-    external_link: SITE,
+    name: `Sherhood ${SHERD_NAME_PLURAL}`,
+    description: `${SHERHOOD_TAGLINE}. Fractional stock-basket ownership ${SHERD_NAME_PLURAL} on Robinhood Chain. Mystery until reveal — rarity tracks your ownership share (Legendary ≥40%, Epic ≥20%, Rare ≥8%). Claim real RH stock tokens. Experimental software; read the terms before you trade.`,
+    image: `${SITE_URL}/logo-mark-512.png`,
+    banner_image: `${SITE_URL}/brand/sherhood-banner.jpg`,
+    featured_image: `${SITE_URL}/brand/sherhood-banner.jpg`,
+    external_link: `${SITE_URL}/inventory`,
+    collaborative: false,
     seller_fee_basis_points: 250,
     fee_recipient:
       process.env.NEXT_PUBLIC_TREASURY_FEE_WALLET ||
@@ -22,7 +23,7 @@ export async function GET() {
 
   return NextResponse.json(metadata, {
     headers: {
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
       "Access-Control-Allow-Origin": "*",
     },
   })

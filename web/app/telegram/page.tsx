@@ -1,33 +1,47 @@
+"use client"
+
 import Link from "next/link"
-import { TELEGRAM_HANDLE, TELEGRAM_URL } from "@/lib/protocol"
+import { TELEGRAM_HANDLE, TELEGRAM_URL, X_URL, X_HANDLE, OPENSEA_COLLECTION_URL } from "@/lib/protocol"
 import { PageHeader, PageShell } from "@/components/layout/page-shell"
 import { buttonVariants } from "@/components/ui/button"
 
-export const metadata = {
-  title: "Sherhood Telegram",
-  description: "Join the Sherhood community on Telegram.",
-}
-
 export default function TelegramHubPage() {
   return (
-    <PageShell narrow className="flex min-h-[70dvh] flex-col justify-center">
+    <PageShell narrow className="pb-16">
       <PageHeader
         eyebrow="Community"
         title={`@${TELEGRAM_HANDLE}`}
-        description="Follow basket reveals, contract updates, and launch notices on Telegram."
+        description="Join the Sherhood hub on Telegram. Pool alerts, drops, and product updates live there."
       />
+
       <div className="flex flex-wrap gap-3">
-      <a
-        href={TELEGRAM_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={buttonVariants({ size: "lg" })}
-      >
-        Open Telegram
-      </a>
-      <Link href="/app" className={buttonVariants({ variant: "outline", size: "lg" })}>
-        Browse baskets
-      </Link>
+        <a
+          href={TELEGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ size: "lg" })}
+        >
+          Open Telegram
+        </a>
+        <a
+          href={X_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ variant: "outline", size: "lg" })}
+        >
+          X @{X_HANDLE}
+        </a>
+        <a
+          href={OPENSEA_COLLECTION_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ variant: "outline", size: "lg" })}
+        >
+          OpenSea
+        </a>
+        <Link href="/app" className={buttonVariants({ variant: "ghost", size: "lg" })}>
+          Browse pools
+        </Link>
       </div>
     </PageShell>
   )

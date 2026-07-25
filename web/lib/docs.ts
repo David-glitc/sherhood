@@ -8,12 +8,12 @@ export const DOCS_NAV: DocNavItem[] = [
   {
     href: "/docs/getting-started",
     title: "Getting started",
-    description: "Fund your first basket",
+    description: "Fund your first Sherd pool",
   },
   {
     href: "/docs/protocol",
     title: "How Sherhood works",
-    description: "The basket and card journey",
+    description: "The pool and card journey",
   },
   {
     href: "/docs/allocation",
@@ -29,6 +29,11 @@ export const DOCS_NAV: DocNavItem[] = [
     href: "/docs/early-exit",
     title: "Exits and refunds",
     description: "Leave funding or recover a refund",
+  },
+  {
+    href: "/docs/positions",
+    title: "Positions and claims",
+    description: "Hold indefinitely, mark growth, claim rules",
   },
   {
     href: "/docs/secondary-market",
@@ -49,6 +54,16 @@ export const DOCS_NAV: DocNavItem[] = [
     href: "/docs/xp",
     title: "XP & streaks",
     description: "Points, daily streaks, leaderboard",
+  },
+  {
+    href: "/docs/shrh",
+    title: "$SHERD",
+    description: "Hold for luck and create perks",
+  },
+  {
+    href: "/docs/v2",
+    title: "Sherhood V2",
+    description: "Product + distribution roadmap",
   },
 ]
 

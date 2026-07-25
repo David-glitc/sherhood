@@ -19,3 +19,4 @@ contracts/.env
 **/.env
 *.pem
 .turbo
+.vercel

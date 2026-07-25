@@ -62,7 +62,8 @@ export function stockBySymbol(symbol: string): BasketStock | undefined {
 
 /** Protocol-owned defaults — creators never set these in the UI */
 export const PROTOCOL_DEFAULTS = {
-  entryFeeUsdg: "0",
+  /** Flat USDG fee per deposit — funds purchase/reveal automation gas (treasury). */
+  entryFeeUsdg: "0.5",
   /** 0 → factory uses defaultProtocolFeeBps (1%) */
   protocolFeeBps: "0",
   /** AssetManager picks 2–5 stocks when basket closes */

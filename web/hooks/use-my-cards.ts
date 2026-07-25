@@ -21,15 +21,16 @@ export type MyPotInfo = {
   holdings: PotHolding[]
 }
 
-/** All cards owned by the connected wallet plus per-pot status/holdings. */
-export function useMyCards() {
-  const { address, isConnected } = useAccount()
+/** Cards owned by any wallet (public profiles, inventory, etc.). */
+export function useOwnerCards(ownerAddress?: string | null) {
+  const owner = ownerAddress?.toLowerCase()
+  const enabled = Boolean(owner && /^0x[a-f0-9]{40}$/.test(owner))
 
   const { data: potsData, isLoading: potsLoading } = useReadContract({
     ...potFactoryConfig,
     functionName: "getPots",
     args: [],
-    query: { enabled: isConnected },
+    query: { enabled },
   })
   const pots = (potsData as `0x${string}`[] | undefined) ?? []
 
@@ -39,7 +40,7 @@ export function useMyCards() {
       functionName: "potTokenIds",
       args: [pot],
     })),
-    query: { enabled: isConnected && pots.length > 0 },
+    query: { enabled: enabled && pots.length > 0 },
   })
 
   const allTokenIds = useMemo(() => {
@@ -58,17 +59,17 @@ export function useMyCards() {
       { ...potCardConfig, functionName: "ownerOf", args: [tokenId] },
       { ...potCardConfig, functionName: "getCard", args: [tokenId] },
     ]),
-    query: { enabled: isConnected && allTokenIds.length > 0 },
+    query: { enabled: enabled && allTokenIds.length > 0 },
   })
 
   const cards = useMemo(() => {
-    if (!ownership || !address) return [] as MyCard[]
+    if (!ownership || !owner) return [] as MyCard[]
     const out: MyCard[] = []
     for (let i = 0; i < allTokenIds.length; i++) {
       const ownerRes = ownership[i * 2]
       const cardRes = ownership[i * 2 + 1]
       if (ownerRes?.status !== "success" || cardRes?.status !== "success") continue
-      if ((ownerRes.result as string).toLowerCase() !== address.toLowerCase()) continue
+      if ((ownerRes.result as string).toLowerCase() !== owner) continue
 
       const raw = cardRes.result as
         | {
@@ -94,7 +95,7 @@ export function useMyCards() {
       })
     }
     return out
-  }, [ownership, address, allTokenIds])
+  }, [ownership, owner, allTokenIds])
 
   const myPots = useMemo(
     () => Array.from(new Set(cards.map((c) => c.pot))),
@@ -135,10 +136,22 @@ export function useMyCards() {
   }, [potReads, myPots])
 
   return {
-    address,
-    isConnected,
+    owner,
     cards,
     potInfo,
-    isLoading: potsLoading || idsLoading || ownershipLoading,
+    isLoading: enabled && (potsLoading || idsLoading || ownershipLoading),
+  }
+}
+
+/** All cards owned by the connected wallet plus per-pot status/holdings. */
+export function useMyCards() {
+  const { address, isConnected } = useAccount()
+  const result = useOwnerCards(isConnected ? address : null)
+  return {
+    address,
+    isConnected,
+    cards: result.cards,
+    potInfo: result.potInfo,
+    isLoading: result.isLoading,
   }
 }

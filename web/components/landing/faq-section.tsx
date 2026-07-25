@@ -5,20 +5,20 @@ import { Plus } from "lucide-react"
 
 const faqs = [
   {
-    question: "What do I need to fund a basket?",
+    question: "What do I need to fund a pool?",
     answer: "Connect a wallet on Robinhood Chain. You need ETH for network fees and USDG, ETH, or WETH for the deposit.",
   },
   {
     question: "What does the sealed card represent?",
-    answer: "It records your deposit and your claim on the basket. After reveal, it shows the exact ownership percentage and stock amounts behind that claim.",
+    answer: "It records your deposit and your claim on the pool. After reveal, it shows the exact ownership percentage and stock amounts behind that claim.",
   },
   {
     question: "Do I choose the stocks?",
-    answer: "No. You choose the basket and deposit amount. When funding closes, the basket buys 2 to 5 stocks from the supported pool.",
+    answer: "No. You choose the pool and deposit amount. When funding closes, the pool buys 2 to 5 stocks from the supported pool.",
   },
   {
-    question: "Can the basket value fall?",
-    answer: "Yes. The value moves with the stock tokens held by the basket. Sherhood is experimental, and you can lose some or all of the value you deposit.",
+    question: "Can the pool value fall?",
+    answer: "Yes. The value moves with the stock tokens held by the pool. Sherhood is experimental, and you can lose some or all of the value you deposit.",
   },
   {
     question: "Can I leave before reveal?",

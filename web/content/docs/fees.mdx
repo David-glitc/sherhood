@@ -9,56 +9,57 @@ Review the amount shown in the app and your wallet before every transaction. Net
 
 ## At a glance
 
-| Action | Fee |
-|--------|-----|
-| Fund with USDG | Basket fees shown before confirmation |
-| Fund with ETH or WETH | Basket fees, conversion fee, and network fee |
-| Create a community basket | One-time USDG creation fee |
-| Exit during funding | 5% of the refundable deposit |
-| Buy or sell on Trade | 2.5% royalty on the sale price |
-| Claim a revealed card | Network fee |
+| Action | Fee | Goes to |
+|--------|-----|---------|
+| Create a community pool | **$5 USDG** (waived for deployer / $SHRH holders when live) | Protocol fee wallet |
+| Fund (card / entry) | **$0.50 USDG** per deposit on new pools | Protocol fee wallet |
+| Fund with ETH / WETH | **0.5%** conversion fee on USDG out, plus entry fee | Protocol fee wallet |
+| Protocol cut at purchase | **1%** of pool deposits (factory default) | Protocol fee wallet |
+| Exit during funding | **5%** of refundable deposit | Protocol fee wallet |
+| Buy / sell on Trade | **2.5%** royalty on sale price | Protocol fee wallet |
+| Claim a revealed Sherd | Network fee only | — |
 
-Live values shown in the app take priority over examples in this guide.
+Live values in the app take priority if a pool was created with different immutable params.
+
+## Where fees go
+
+All protocol USDG fees are forwarded on-chain through the **Treasury** contract straight to the **fee wallet**:
+
+`0xC24F7118f55d0643a82A1594cbCbb7484011a251`
+
+That wallet receives create fees, entry fees, ETH/WETH router fees, early-exit fees, protocol bps at purchase, and Trade royalties.
+
+**Lifetime protocol fees** (all-time USDG forwarded) show on the [Pools](/app) stats row as **Lifetime fees**.
+
+OpenSea and other external markets may apply their own creator-fee rules; on-chain Trade always uses the 2.5% path above.
 
 ## Network fee
 
-Every wallet transaction requires ETH for Robinhood Chain gas. Your wallet shows the estimated network fee before you confirm.
+Every wallet transaction needs ETH for Robinhood Chain gas. Your wallet shows the estimate before you confirm.
 
 ## Funding with USDG
 
-USDG enters the basket directly. The basket page shows any Sherhood fee before you fund.
+USDG enters the pool directly. The pool page shows any Sherhood fee before you fund.
 
 ## Funding with ETH or WETH
 
-ETH and WETH are converted to USDG before the deposit reaches the basket.
+ETH and WETH convert to USDG before the deposit. Your final amount depends on price, slippage, the **0.5%** conversion fee, and any entry fee. If conversion would land below your minimum, the tx reverts.
 
-Your final amount depends on:
+## Creating a pool
 
-- The current ETH or WETH price.
-- Your selected slippage limit.
-- The conversion fee.
-- Any basket fees.
-
-If the conversion would return less than your minimum, the transaction is cancelled instead of depositing at a worse rate.
-
-## Creating a basket
-
-Community basket creators pay the USDG creation fee shown on the [Create](/create) page. You pay it once when the basket is created.
+Community creators pay the **$5 USDG** creation fee shown on [Create](/create). **$SHRH holders** can create fee-free when the waiver is live — see [$SHRH](/docs/shrh).
 
 ## Exiting during funding
 
-An early exit refunds 95% of the eligible deposit in USDG. The other 5% is the exit fee.
+An early exit refunds **95%** of the eligible deposit. The other **5%** is the exit fee. Entry fees paid when you funded are not refunded.
 
-Fees paid when you originally entered are not refunded.
+## Trading a Sherd
 
-## Trading a card
-
-Sherhood Trade charges a 2.5% royalty on the sale price. The buyer pays the listed USDG amount, and the seller receives the amount left after the royalty.
-
-Other marketplaces may apply creator fees differently. Review their checkout before confirming.
+Sherhood Trade takes **2.5%** of the sale price. The buyer pays the ask; the seller receives the rest after royalty.
 
 ## Next steps
 
 - [Review early exits and refunds](/docs/early-exit).
 - [Compare a listing with card value](/docs/pricing).
 - [Learn how Trade works](/docs/secondary-market).
+- [Hold $SHRH](/docs/shrh).

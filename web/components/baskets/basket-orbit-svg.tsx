@@ -1,31 +1,39 @@
 "use client"
 
+import { StockLogo } from "@/components/stocks/stock-logo"
+import { cn } from "@/lib/utils"
+
 /**
- * Basket vault orbit — progress ring + orbiting RH stock nodes.
- * Pure SVG motion; respects prefers-reduced-motion via CSS.
+ * Sherd pool vault orbit — progress ring + orbiting RH stock logos.
+ * HTML logos (not SVG <image>) so /stocks/*.png always render.
  */
 export function BasketOrbitSvg({
   progress = 0,
-  symbols = ["NVDA", "AAPL", "SPY", "MSFT", "GOOG"],
+  symbols = ["NVDA", "AAPL", "SPY", "MSFT", "GOOGL"],
   className = "",
+  /** Hide ticker text — logos / anonymous nodes only (pool shopfront). */
+  anonymous = false,
 }: {
   progress?: number
   symbols?: string[]
   className?: string
+  anonymous?: boolean
 }) {
   const pct = Math.max(0, Math.min(100, progress))
   const circumference = 2 * Math.PI * 118
   const dash = (pct / 100) * circumference
   const uid = "bkt"
-  const nodes = symbols.slice(0, 5)
+  const nodes = (symbols.length > 0 ? symbols : ["NVDA", "AAPL", "SPY", "MSFT", "GOOGL"])
+    .map((s) => s.toUpperCase())
+    .slice(0, 5)
 
   return (
-    <div className={`relative mx-auto aspect-square w-full max-w-[320px] ${className}`}>
+    <div className={cn("relative mx-auto aspect-square w-full max-w-[320px]", className)}>
       <svg
         viewBox="0 0 340 340"
         className="h-full w-full basket-orbit-svg"
         role="img"
-        aria-label={`Basket funding ${pct.toFixed(0)} percent`}
+        aria-label={`Pool funding ${pct.toFixed(0)} percent · ${nodes.join(", ")}`}
       >
         <defs>
           <radialGradient id={`${uid}-core`} cx="50%" cy="50%" r="50%">
@@ -49,7 +57,6 @@ export function BasketOrbitSvg({
 
         <circle cx="170" cy="170" r="150" fill={`url(#${uid}-core)`} className="basket-orbit-breathe" />
 
-        {/* Track */}
         <circle
           cx="170"
           cy="170"
@@ -59,7 +66,6 @@ export function BasketOrbitSvg({
           strokeWidth="6"
           strokeLinecap="round"
         />
-        {/* Progress arc */}
         <circle
           cx="170"
           cy="170"
@@ -74,7 +80,6 @@ export function BasketOrbitSvg({
           className="basket-orbit-progress"
         />
 
-        {/* Outer dashed spin */}
         <g>
           <animateTransform
             attributeName="transform"
@@ -96,7 +101,6 @@ export function BasketOrbitSvg({
           />
         </g>
 
-        {/* Inner counter-spin */}
         <g>
           <animateTransform
             attributeName="transform"
@@ -118,53 +122,6 @@ export function BasketOrbitSvg({
           />
         </g>
 
-        {/* Orbiting stock logos — counter-rotated so they stay upright */}
-        <g>
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="0 170 170"
-            to="360 170 170"
-            dur="36s"
-            repeatCount="indefinite"
-          />
-          {nodes.map((label, i) => {
-            const a = ((i * 360) / nodes.length - 90) * (Math.PI / 180)
-            const x = 170 + Math.cos(a) * 118
-            const y = 170 + Math.sin(a) * 118
-            const clipId = `${uid}-clip-${label}`
-            return (
-              <g key={label} transform={`translate(${x} ${y})`}>
-                <g>
-                  <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    from="0 0 0"
-                    to="-360 0 0"
-                    dur="36s"
-                    repeatCount="indefinite"
-                  />
-                  <circle r="18" fill="#0f0f0f" stroke="#333333" strokeWidth="1" />
-                  <circle r="18" fill="none" stroke="#ccff00" strokeWidth="1" opacity="0.25" />
-                  <clipPath id={clipId}>
-                    <circle r="13" />
-                  </clipPath>
-                  <image
-                    href={`/stocks/${label.toUpperCase()}.png`}
-                    x="-13"
-                    y="-13"
-                    width="26"
-                    height="26"
-                    clipPath={`url(#${clipId})`}
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                </g>
-              </g>
-            )
-          })}
-        </g>
-
-        {/* Center vault */}
         <g filter={`url(#${uid}-glow)`} className="basket-orbit-core">
           <circle cx="170" cy="170" r="42" fill="#0a0a0a" stroke="#ccff00" strokeWidth="1.75" />
           <circle cx="170" cy="170" r="28" fill="#ccff00" className="basket-orbit-pulse" />
@@ -181,6 +138,38 @@ export function BasketOrbitSvg({
           </text>
         </g>
       </svg>
+
+      {/* Orbiting logos — HTML so PNG assets reliably paint */}
+      <div
+        className="pointer-events-none absolute inset-[11%] basket-orbit-logos"
+        aria-hidden
+      >
+        {nodes.map((label, i) => {
+          const angle = (i * 360) / nodes.length - 90
+          return (
+            <div
+              key={`${label}-${i}`}
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: 0,
+                height: 0,
+                transform: `rotate(${angle}deg) translateY(-50%)`,
+              }}
+            >
+              <div
+                className="basket-orbit-logo-node absolute flex items-center justify-center rounded-full border border-[#333333] bg-[#0f0f0f] shadow-[0_0_0_1px_rgba(204,255,0,0.22)]"
+                style={{ width: 44, height: 44, left: -22, top: -22 }}
+              >
+                {anonymous ? (
+                  <span className="size-2.5 rounded-full bg-[#ccff00]/70" />
+                ) : (
+                  <StockLogo symbol={label} size={30} />
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

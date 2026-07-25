@@ -42,14 +42,17 @@ export async function GET(
     }
     if (series.length === 0) throw new Error("empty series")
 
-    const last = series[series.length - 1].c
+    const spot = result.meta?.regularMarketPrice
+    const lastClose = series[series.length - 1].c
+    const price =
+      typeof spot === "number" && Number.isFinite(spot) && spot > 0 ? spot : lastClose
     const prev = result.meta?.previousClose ?? series[0].c
-    const changePct = prev ? ((last - prev) / prev) * 100 : 0
+    const changePct = prev ? ((price - prev) / prev) * 100 : 0
 
     return NextResponse.json(
       {
         symbol,
-        price: last,
+        price,
         changePct,
         series,
         updatedAt: new Date().toISOString(),

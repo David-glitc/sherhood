@@ -30,7 +30,7 @@ export const USDG_ADDRESS = getAddress(
 
 /** On-chain fee sink — TreasuryDirect forwards USDG to fee wallet on deposit. */
 export const TREASURY_ADDRESS = getAddress(
-  process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xdfa1c90107faf1a19e53e6eed9ee4aa6ad414085"
+  process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0x62cbf96cE2eDbc9218135385B009bF596F51325C"
 )
 
 /** Protocol fee wallet — Treasury owner withdraws USDG here. */
@@ -44,7 +44,7 @@ export const RAFFLE_MANAGER_ADDRESS = getAddress(
 )
 
 export const SHRH_ADDRESS = getAddress(
-  process.env.NEXT_PUBLIC_SHRH_ADDRESS || "0xa1c084c4f7387dfeac2a055d745efc0405867777"
+  process.env.NEXT_PUBLIC_SHRH_ADDRESS || "0xe429dbb6b55532685C7eAE41DbF052934449aCc1"
 )
 
 export const CONTRACTS_LIVE =

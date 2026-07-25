@@ -1,32 +1,73 @@
+import dynamic from "next/dynamic"
 import { CinematicHero } from "@/components/landing/cinematic-hero"
-import { HowItWorksSection } from "@/components/landing/how-it-works"
-import { CtaSection } from "@/components/landing/cta-section"
-import { LiveBasketsSection } from "@/components/landing/live-baskets"
-import { ValuePropsSection } from "@/components/landing/value-props"
-import { StocksMarqueeSection } from "@/components/landing/stocks-marquee"
-import { FaqSection } from "@/components/landing/faq-section"
+import { JsonLd } from "@/components/seo/json-ld"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo"
+import { OPENSEA_COLLECTION_URL } from "@/lib/protocol"
 
-const jsonLd = {
+const LiveBasketsSection = dynamic(
+  () =>
+    import("@/components/landing/live-baskets").then((m) => m.LiveBasketsSection),
+  {
+    loading: () => (
+      <div className="page-container-wide py-16 sm:py-20" aria-hidden>
+        <div className="product-surface h-52 animate-pulse" />
+      </div>
+    ),
+  }
+)
+const HowItWorksSection = dynamic(() =>
+  import("@/components/landing/how-it-works").then((m) => m.HowItWorksSection)
+)
+const ValuePropsSection = dynamic(() =>
+  import("@/components/landing/value-props").then((m) => m.ValuePropsSection)
+)
+const OpenSeaCollectionSection = dynamic(() =>
+  import("@/components/landing/opensea-collection").then((m) => m.OpenSeaCollectionSection)
+)
+const StocksMarqueeSection = dynamic(() =>
+  import("@/components/landing/stocks-marquee").then((m) => m.StocksMarqueeSection)
+)
+const FaqSection = dynamic(() =>
+  import("@/components/landing/faq-section").then((m) => m.FaqSection)
+)
+const CtaSection = dynamic(() =>
+  import("@/components/landing/cta-section").then((m) => m.CtaSection)
+)
+
+const appLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Sherhood",
-  url: "https://sherhood.xyz",
+  name: SITE_NAME,
+  url: SITE_URL,
   applicationCategory: "FinanceApplication",
   operatingSystem: "Web",
-  description:
-    "Fractional stock baskets on Robinhood Chain. Fund, mint a mystery card, reveal ownership.",
-  author: { "@type": "Organization", name: "Sherhood" },
+  description: SITE_DESCRIPTION,
+  author: { "@type": "Organization", name: SITE_NAME },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+}
+
+const collectionLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Sherds on OpenSea",
+  url: OPENSEA_COLLECTION_URL,
+  isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+  about: "Fractional stock basket Sherd NFTs on Robinhood Chain",
 }
 
 export default function LandingPage() {
   return (
     <div data-landing>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <link rel="preload" as="image" href="/cards/mystery-hero-lcp.webp" type="image/webp" />
+      <JsonLd data={appLd} />
+      <JsonLd data={collectionLd} />
       <CinematicHero />
       <LiveBasketsSection />
+      <OpenSeaCollectionSection />
       <HowItWorksSection />
       <ValuePropsSection />
       <StocksMarqueeSection />

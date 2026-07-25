@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1a2a10"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+    <radialGradient id="e1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f0ff99"/>
+      <stop offset="100%" stop-color="#ccff00"/>
+    </radialGradient>
+    <filter id="glow1" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g1)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5" opacity=".85"/>
+  <circle cx="64" cy="64" r="52" stroke="#ccff00" stroke-width=".75" opacity=".25"/>
+  <!-- hood -->
+  <path d="M28 92c4-40 18-62 36-62s32 22 36 62c-8 12-20 18-36 18S36 104 28 92z" fill="#0c1409" stroke="#2a3d14" stroke-width="1.5"/>
+  <path d="M36 88c6-32 16-48 28-48s22 16 28 48c-6 8-16 12-28 12s-22-4-28-12z" fill="#121c0c"/>
+  <!-- cowl rim -->
+  <path d="M40 70c8-18 20-26 24-26s16 8 24 26c-6 4-14 6-24 6s-18-2-24-6z" fill="#0a1008" stroke="#ccff00" stroke-width="1.2" opacity=".9"/>
+  <!-- face void -->
+  <ellipse cx="64" cy="78" rx="16" ry="18" fill="#030503"/>
+  <ellipse cx="64" cy="76" rx="13" ry="14" fill="#050806"/>
+  <!-- eyes -->
+  <g filter="url(#glow1)">
+    <ellipse cx="56" cy="74" rx="3.2" ry="4" fill="url(#e1)"/>
+    <ellipse cx="72" cy="74" rx="3.2" ry="4" fill="url(#e1)"/>
+  </g>
+  <circle cx="56.5" cy="73" r="1" fill="#050806" opacity=".55"/>
+  <circle cx="72.5" cy="73" r="1" fill="#050806" opacity=".55"/>
+  <!-- arrow mark -->
+  <path d="M64 48l2.5 7H72l-5 4 2 7-5-3.5-5 3.5 2-7-5-4h5.5z" fill="#ccff00" opacity=".85"/>
+  <path d="M58 98h12l-2 8H60z" fill="#ccff00" opacity=".35"/>
+</svg>

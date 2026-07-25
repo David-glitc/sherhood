@@ -1,5 +1,13 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
+import { MessageCircle, ExternalLink } from "lucide-react"
+import { BrandLockup } from "@/components/layout/brand"
+import {
+  OPENSEA_COLLECTION_URL,
+  TELEGRAM_URL,
+  X_HANDLE,
+  X_URL,
+} from "@/lib/protocol"
 import { cn } from "@/lib/utils"
 
 /** Shared narrow page frame for app surfaces */
@@ -56,51 +64,113 @@ export function PageHeader({
   )
 }
 
+const FOOTER_LINKS = [
+  { href: "/app", label: "Pools" },
+  { href: "/sherds", label: "Sherds" },
+  { href: "/marketplace", label: "Market" },
+  { href: "/inventory", label: "My collection" },
+  { href: "/create", label: "Create" },
+  { href: "/people", label: "People" },
+  { href: "/leaderboard", label: "Board" },
+  { href: "/docs/getting-started", label: "Docs" },
+  { href: "/bridge", label: "Bridge" },
+] as const
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  )
+}
+
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border bg-background">
-      <div className="page-container-wide grid gap-8 py-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          Experimental software — full risk exclusion
-        </p>
-        <p className="mt-3 max-w-3xl text-xs leading-5 text-muted-foreground sm:text-sm">
-          Sherhood is experimental, unfinished software provided <strong className="font-semibold text-foreground">AS IS</strong>,
-          with no warranties of any kind. It is not a bank, broker, exchange, investment adviser, or
-          licensed financial product. You may lose some or all funds. On-chain transactions are
-          irreversible. Nothing on this site is legal, tax, or investment advice. Use is entirely at
-          your own risk. See{" "}
-          <Link href="/legal/terms" className="text-primary underline-offset-4 hover:underline">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link href="/legal/privacy" className="text-primary underline-offset-4 hover:underline">
-            Privacy Policy
-          </Link>
-          .
-        </p>
+    <footer className="mt-auto shrink-0 border-t border-[#ccff00]/20 bg-[#050505]">
+      <div className="page-container-wide py-8 sm:py-10">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+            <Link href="/" className="inline-flex shrink-0">
+              <BrandLockup height={36} />
+            </Link>
+            <p className="max-w-xs text-sm leading-5 text-white/45">
+              Collect stocks like gacha cards on Robinhood Chain.{" "}
+              <Link href="/roadmap" className="text-[#ccff00]/80 hover:text-[#ccff00]">
+                V2 coming soon
+              </Link>
+              .
+            </p>
+          </div>
+
+          <nav
+            aria-label="Footer"
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-white/55"
+          >
+            {FOOTER_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="transition hover:text-[#ccff00]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`X @${X_HANDLE}`}
+              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-[#ccff00]/40 hover:text-[#ccff00]"
+            >
+              <XIcon className="size-4" />
+            </a>
+            <a
+              href={TELEGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Telegram"
+              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-[#ccff00]/40 hover:text-[#ccff00]"
+            >
+              <MessageCircle className="size-4" />
+            </a>
+            <a
+              href={OPENSEA_COLLECTION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="OpenSea"
+              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-[#ccff00]/40 hover:text-[#ccff00]"
+            >
+              <ExternalLink className="size-4" />
+            </a>
+          </div>
         </div>
 
-        <nav aria-label="Footer" className="flex max-w-md flex-wrap gap-x-5 gap-y-3 text-sm text-muted-foreground lg:justify-end">
-          <Link href="/app" className="touch-target inline-flex items-center hover:text-primary">
-            Baskets
-          </Link>
-          <Link href="/docs/getting-started" className="touch-target inline-flex items-center hover:text-primary">
-            Docs
-          </Link>
-          <Link href="/marketplace" className="touch-target inline-flex items-center hover:text-primary">
-            Trade
-          </Link>
-          <Link href="/profile" className="touch-target inline-flex items-center hover:text-primary">
-            Profile
-          </Link>
-          <Link href="/legal/terms" className="touch-target inline-flex items-center hover:text-primary">
-            Terms
-          </Link>
-          <Link href="/legal/privacy" className="touch-target inline-flex items-center hover:text-primary">
-            Privacy
-          </Link>
-        </nav>
+        <div className="mt-8 flex flex-col gap-2 border-t border-white/[0.06] pt-5 text-[11px] text-white/30 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-xl space-y-1">
+            <p>© {new Date().getFullYear()} Sherhood</p>
+            <p className="leading-relaxed text-white/25">
+              Not financial advice. Sherds are on-chain ownership claims on Robinhood Chain stock
+              tokens — markets move, liquidity varies, and you can lose value. Read the Terms.
+            </p>
+          </div>
+          <p className="flex flex-wrap gap-x-3 gap-y-1 sm:justify-end">
+            <Link href="/legal/terms" className="hover:text-[#ccff00]">
+              Terms
+            </Link>
+            <Link href="/legal/privacy" className="hover:text-[#ccff00]">
+              Privacy
+            </Link>
+            <Link href="/profile" className="hover:text-[#ccff00]">
+              Profile
+            </Link>
+            <Link href="/roadmap" className="hover:text-[#ccff00]">
+              Roadmap
+            </Link>
+          </p>
+        </div>
       </div>
     </footer>
   )

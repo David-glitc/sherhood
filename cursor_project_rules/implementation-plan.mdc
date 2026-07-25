@@ -51,6 +51,20 @@ alwaysApply: true
 - [x] 6.6 Docs: new early-exit / secondary-market / pricing / opensea pages; amend allocation + fees
 - [ ] 6.7 Security: reentrancy audit pass on exit/claim/list/buy; VRF migration path documented; external audit before scaling TVL
 
+## Phase 7 — Product surfaces + moat (2026-07-18)
+- [x] 7.1 Relay bridge page (`/bridge`) — all Relay chains, default destination Robinhood Chain
+- [x] 7.2 Roadmap page (`/roadmap`)
+- [x] 7.3 Create fee UX — subtle fee; USDG or ETH; balance detection
+- [x] 7.4 $SHRH hold-to-waive + buy widget (Relay swap when live)
+- [x] 7.5 Mobile nav — Bridge + Deck + Roadmap
+- [x] 7.6 Factory `createFor` + `/api/create-sponsored` (deployer signer; needs factory redeploy with createFor)
+- [x] 7.10 On-site product deck (`/deck`, 9 slides)
+- [x] 7.11 Full profile dashboard (deposits, mark/PnL, cards, XP, listings)
+- [ ] 7.7 Generative Gacha Cards / DMT card layers from asset + rarity + pool share
+- [ ] 7.7b Single-card swaps — stock bundle → instant tradable card
+- [ ] 7.8 Index baskets + instant NAV redeem
+- [ ] 7.9 Elite coins listing ($500 + manual DD)
+
 ## Done Log
 
 ### Phase 0 (partial) — Done (2026-07-13)
@@ -115,3 +129,158 @@ OpenSea collection submit + RH redeploy still required for on-chain royalty/URI 
 Branch `contracts/sherhood-v2-fresh`. SherhoodDeploy.s.sol clean slate (no $SHRH mint). Dual luck check (deposit lock + reveal).
 Docs stripped of internals; XP API + leaderboard + /docs/xp. Threshold target ~0.055 ETH of $SHRH set later via setLuckToken.
 Await deployer funding (~0.004 ETH) then `scripts/sherhood-deploy.sh` with Blockscout verify.
+
+### Phase 7 shipping tranche — Done (2026-07-18)
+Shipped `/bridge` (Relay SwapWidget: all chains → Robinhood), `/roadmap`, `/deck`, subtle create-fee UX with USDG|ETH pay + balances, $SHRH buy-widget shell + waiver gate, mobile nav with Bridge/Roadmap/Deck, profile mark/PnL.
+Sponsored create uses existing owner `createPot` (no factory upgrade). Deferred: generative cards, index redeem, Elite listings.
+
+### Phase 7 — Bridge + roadmap + create fee UX — Done (2026-07-18)
+Shipped `/bridge` with Relay SwapWidget (ETH / Base / Solana presets), RelayKitProvider + mainnet/base in wagmi.
+Create page: subtle fee (no Pay $5 CTA), USDG/ETH fee pay via wrap+swap, balance detect, $SHRH buy widget + $500 waiver gate.
+`/roadmap` lists Gacha Cards, index redeem, Elite coins, deck, profile dashboard; mobile nav reordered with Bridge.
+
+### USDG 6-dec create harden — Done (2026-07-19)
+Web + scripts reject 18-dec pot params; Crimson Talon \$5 pot live; legacy ETH fund disabled in UI.
+Create/fee/balance paths use native 6-decimal USDG units end-to-end.
+
+### Multi-hop stock purchase + Sherds — Done (2026-07-19)
+MultiHopSwapAdapter (USDG→WETH→stock) live; 2-pick liquid registry (TSLA/USO); Crimson Talon purchased+revealed.
+Product units renamed Sherds; OpenSea deep-link for PotCard on Robinhood Chain.
+
+### SEO + share surfaces — Done (2026-07-19)
+Dynamic OG images from brand banner for home/basket/Sherd; generateMetadata + Product/Breadcrumb JSON-LD; open pots in sitemap.
+Share buttons on basket detail + inventory; public `/sherd/[id]` share landing; hero uses full-bleed banner.
+
+### Profile identity + onchain rarity display — Done (2026-07-19)
+OpenSea/metadata reads on-chain rarity at reveal; UI falls back to ownership bands only for legacy cards.
+Users set name + one of 10 SVG hoods on Profile; chips render on leaderboard, basket deposits, and Trade.
+
+### People discovery + allow-receive send — Done (2026-07-19)
+Public `/people` + `/u/[address]`; Allow receive gates address display and send targets.
+Leaderboard/People in header+footer; OpenSea collection API updated for Sherds + brand banner.
+
+### Unique profile names + share — Done (2026-07-19)
+Profiles keyed by unique name slug (`/u/name`); share buttons on profile/people; UI copy moved to tooltips.
+
+### Cards UX + stock NAV + deck + deploy — Done (2026-07-19)
+Inventory animations + claimable amount/price/value; TradingView minis; profile PnL fixed for USDG decimals.
+Deck is full-bleed (back + slides + banner/logos). Production deploy on Vercel project web → sherhood.xyz.
+
+### Leaderboard + profile balances + wallet NFTs — Done (2026-07-19)
+XP leaderboard render + People/Send; profile view mode + wallet/Sherd values; Add Sherds via wallet_watchAsset; hero prism restored; TradingView theme aligned.
+Send typeahead by unique name with pfp + truncated address.
+
+### Sherd pools + Orynth #1 — Done (2026-07-19)
+Renamed UI baskets→Sherd pools; nav icons; created Orynth #1 pool ($100 / $2 min / 5d) at 0x80D6…5910.
+
+### MongoDB profiles + web perf — Done (2026-07-19)
+Profiles persist in Atlas; Relay/landing lazy-load; production redeployed.
+
+### Hero + Mongo account data + legal — Done (2026-07-19)
+Restored reference hero; XP/streaks/profiles in Atlas; Delete my account; deep Terms/Privacy.
+
+### Telegram activity bot — Done (2026-07-19)
+Bootstrapped TG broadcast cron for pool/fund/trade/transfer events; set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID to go live.
+
+### TG webhook + poller (no cron UI) — Done (2026-07-19)
+Webhook + `/whereami` for chat id; `tg:poll` long worker for chain broadcasts (Chessonchain-style).
+Removed public cron-secret UI; cleaned navbar socials as external links (X/TG/OpenSea).
+
+### Dynamic pools + onboarding — Done (2026-07-19)
+Pool discovery motion/hierarchy upgrade; profile hero; first-visit walkthrough + finish-profile popup for connected wallets without a name.
+
+### Public profile cards + buy/offer — Done (2026-07-19)
+`/u/[slug]` inventory sections; send gated on login; marketplace buy + off-chain offers.
+
+### Card CLS + Sherd detail — Done (2026-07-19)
+Compact Sherd tiles (no CLS); dark multi-symbol TV tabs; /sherd owner + asset shares; clean ownership %.
+
+### $SHRH docs + OG Twitter contrast — Done (2026-07-19)
+Added /docs/shrh (hold-only); scrubbed hold amounts from UI copy; high-contrast OgFrame + twitter-image for basket/sherd; Twitter @sherhood_xyz cards.
+
+### Twitter OG build fix + hold-only polish — Done (2026-07-19)
+Fixed Next twitter-image (shared renderers, no config re-export); solid lime-on-black OG plate; docs/roadmap say hold only (no amounts).
+
+### V2 docs + distribution features — Done (2026-07-19)
+Published /docs/v2 with remaining product track and expanded distribution (referrals, seasons, creator share, LP, quests).
+Knowledge mirror: cursor_project_rules/v2.md.
+
+### Form V2 docs — Done (2026-07-19)
+Reformed /docs/v2 into layered tables (product, distribution A–H, ship order); knowledge mirror updated.
+
+### Profile PnL + balances + charts — Done (2026-07-20)
+Profile: dynamic balances, colored live Mark PnL, allocation/mark charts, denser layout, shareable /api/og/pnl cards.
+
+### WebSpeed landing optimisation — Done (2026-07-20)
+Deferred wallet on marketing, smaller LCP card image, SSR hero, CLS/link/cache fixes for Performance.
+
+### WebSpeed CWV pass — Done (2026-07-20)
+Landing LCP image + deferred wallet/orbit JS; header without framer; font-display optional for CLS.
+
+### Lifetime protocol revenue on stats — Done (2026-07-20)
+Exposed TreasuryDirect feesForwardedUSDG as Lifetime fees on /app + /api/stats + TG; fees docs list destinations.
+
+### Profile + OpenSea Sherds showcase — Done (2026-07-20)
+Tight profile/u layouts; inventory OpenSea-style showcase; all Sherds link to OpenSea; collection URL /collection/sherds.
+
+### Inventory cards + profile links + footer — Done (2026-07-20)
+Fitted inventory Sherd cards linking to `/sherd/[id]`; usernames link to `/u/[slug]` via UserChip.
+Rebuilt site footer with brand, nav columns, and socials (risk banner removed from hero line).
+
+### Card 3D + profile hero + footer — Done (2026-07-20)
+3D mouse-tilt Sherd cards; card-first grids without fractional boxes; one profile edit hero.
+Footer compacted to logo/nav/socials with lime accent edge.
+
+### Card motion + sfx + Buy SHRH + account pack — Done (2026-07-20)
+Idle float/shimmer cards; mint/send sounds with mute; Buy $SHRH coming-soon dialog.
+Profile/Collection packaged via AccountSubnav; public profile card stack + mark/day delta.
+
+### $SHERD token live — Done (2026-07-20)
+Wired CA 0xe429…aCc1; ticker SHERD; SHRH_LAUNCHED on; Buy $SHERD dialog goes to Relay swap.
+
+### Swap fix + lean UX + fund $SHERD — Done (2026-07-20)
+Replaced broken Relay buy with Flap/Uniswap; stripped excess fund/app copy.
+Added $SHERD pay tab (mark→ETH settle + Uniswap assist) on pool cards and basket.
+
+### In-app $SHERD swap — Done (2026-07-21)
+Updated Buy CTA to open an in-app `/buy-shrd` swap screen instead of a dialog.
+Ensured Relay provider boots on the new route for the SwapWidget.
+
+### Pool rank + XP soundness + OpenSea SEO — Done (2026-07-21)
+Ranked pools by activity; fixed streak expiry and XP indexing; profiles show rank + created pools.
+OpenSea collection section on landing (not hero); robots/sitemap crawl policy tightened.
+
+### Profile UX mobile pass — Done (2026-07-22)
+Sign out, portfolio tokens, Mark PnL layout, Share PnL modal, ETH ticker, name→profile, dwell mint modal.
+Documented Phase 2 Onboarding pool (env deep-link); no on-chain create this ship.
+
+### XP persistence + Mark PnL text — Done (2026-07-23)
+XP/streak now event-backed (`xp_events` merge + stale/board fallback); no zero-wipe on RPC fail.
+Mark PnL amounts wrap instead of truncating; reveal XP uses owner-at-block.
+
+### Pool lifecycle ops + details — Done (2026-07-24)
+Owner/permissionless seal + ops auto purchase/reveal; pool holdings mark/PnL + pulse history.
+Footer clearance; Mint Sherd copy; Sherd→pool nav; sealed 0.5×–2× share band wording.
+
+### Footer + live vault + create fee — Done (2026-07-24)
+In-flow footer on all pages; vault holdings use live token balances after claims.
+Create fee USDG/ETH toggle fixed; pool reads poll on-chain every ~12s.
+
+## Phase 8 — Live discovery + trade surfaces (2026-07-25)
+- [x] 8.1 Show verified revealed pools across current and earlier factories
+- [x] 8.2 Exclude protocol wallets and empty scores from the public leaderboard
+- [x] 8.3 New-pool notifications, stock-logo pool visuals, and live vault charts
+- [x] 8.4 Signed off-chain offers for listed or unlisted Sherds
+- [x] 8.5 Restore create registry UI (orbit + StockRegistryGrid)
+
+### Phase 8 — Live discovery + trade surfaces — Done (2026-07-25)
+Merged verified legacy revealed pools into live discovery; xp-store excludes ops wallets before limit/rank.
+Create aside restored to orbit + StockLogoStack + StockRegistryGrid; offers require buyer signature, chain/card binding, owner + claimed checks.
+
+### Phase 8.6 — Orbit logos + Stock Gacha + random names — Done (2026-07-25)
+Pool orbit uses HTML StockLogo nodes (SVG image href was unreliable). Leaderboard merges XP + People directory, ranks 0-XP by join time.
+Created Stock Gacha pool on-chain; FEATURED merge shows all revealed pots; create page has randomBasketName().
+
+### Phase 8.7 — Defer factory upgrade; V2 disclosure; UI → master — Done (2026-07-25)
+Factory/pot hardenings stay on `audit/harden-findings-h1-l8` (no RH redeploy). Site discloses V2 coming soon.
+UI/web tree promoted to `master` for production redeploy + perf.

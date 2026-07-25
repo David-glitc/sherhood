@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g9" cx="50%" cy="36%" r="62%">
+      <stop offset="0%" stop-color="#1e2e14"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+    <linearGradient id="crown9" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ff66"/>
+      <stop offset="100%" stop-color="#ccff00"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g9)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- crown spikes -->
+  <path d="M40 40l6-16 8 12 10-18 10 18 8-12 6 16z" fill="url(#crown9)"/>
+  <path d="M46 40h36" stroke="#050806" stroke-width="1.5" opacity=".35"/>
+  <!-- regal hood -->
+  <path d="M28 94c5-40 20-58 36-58s31 18 36 58c-9 12-21 18-36 18S37 106 28 94z" fill="#0e160a" stroke="#3a541a" stroke-width="1.5"/>
+  <path d="M36 90c6-32 16-48 28-48s22 16 28 48c-6 8-16 12-28 12s-22-4-28-12z" fill="#162110"/>
+  <path d="M42 72c7-14 14-20 22-20s15 6 22 20c-5 3-13 5-22 5s-17-2-22-5z" fill="#0a1007" stroke="#ccff00" stroke-width="1.2"/>
+  <ellipse cx="64" cy="84" rx="15" ry="16" fill="#030503"/>
+  <circle cx="56" cy="82" r="3.3" fill="#ccff00"/>
+  <circle cx="72" cy="82" r="3.3" fill="#ccff00"/>
+  <!-- jewel -->
+  <circle cx="64" cy="52" r="4" fill="#ccff00"/>
+  <circle cx="64" cy="51" r="1.5" fill="#f5ffc0"/>
+  <path d="M58 98h12v4H58z" fill="#ccff00" opacity=".3"/>
+</svg>

@@ -25,7 +25,7 @@ export function ValuePropsSection() {
             </h2>
           </div>
           <p className="max-w-md text-base leading-7 text-muted-foreground lg:justify-self-end">
-            The sealed card becomes a clear ownership record. It shows the basket, your percentage, its rarity, and the stock tokens behind it.
+            The sealed card becomes a clear ownership record. It shows the pool, your percentage, its rarity, and the stock tokens behind it.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export function ValuePropsSection() {
                 rarityIndex={3}
                 revealed
                 tokenId="4663"
-                stockLabel="Technology basket"
+                stockLabel="Technology pool"
                 ownershipPct="6.42%"
                 size="lg"
                 interactive={false}
@@ -60,7 +60,7 @@ export function ValuePropsSection() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Known ownership</p>
               <p className="mt-5 text-5xl font-semibold tracking-[-0.05em] text-foreground">6.42%</p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Revealed cards show the exact percentage used when you claim the basket’s holdings.
+                Revealed cards show the exact percentage used when you claim the pool’s holdings.
               </p>
             </motion.article>
 
@@ -74,7 +74,7 @@ export function ValuePropsSection() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Several stocks</p>
               <StockLogoStack symbols={ownershipRows.map((row) => row.symbol)} size={40} max={3} className="mt-5" />
               <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                One claim sends your share of every token held by the basket.
+                One claim sends your share of every token held by the pool.
               </p>
             </motion.article>
 

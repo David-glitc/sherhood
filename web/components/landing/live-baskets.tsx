@@ -37,24 +37,24 @@ export function LiveBasketsSection({ className }: { className?: string }) {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             On chain now
           </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Open baskets</h2>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Open Sherd pools</h2>
         </div>
         <Link
           href="/app"
           className="touch-target inline-flex items-center text-sm font-semibold text-primary hover:underline"
         >
-          View all baskets
+          View all pools
         </Link>
       </div>
 
       {loading ? (
-        <div className="product-surface h-52 animate-pulse" aria-label="Loading live baskets" />
+        <div className="product-surface h-52 animate-pulse" aria-label="Loading live pools" />
       ) : open.length === 0 ? (
         <div className="product-surface grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-8">
           <div>
-            <h3 className="text-xl font-semibold">The next basket is being prepared.</h3>
+            <h3 className="text-xl font-semibold">The next Sherd pool is being prepared.</h3>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-              Open baskets appear here as soon as funding starts. You can still review cards, fees, and the full user flow.
+              Open Sherd pools appear here as soon as funding starts. You can still review cards, fees, and the full user flow.
             </p>
           </div>
           <Link href="/docs/getting-started" className="touch-target inline-flex items-center text-sm font-semibold text-primary hover:underline">
@@ -66,7 +66,7 @@ export function LiveBasketsSection({ className }: { className?: string }) {
         {open.map((pot) => (
           <Link
             key={pot.address}
-            href={`/basket/${pot.address}`}
+            href={`/pools/${pot.address}`}
             className="product-surface group p-5 transition-colors hover:border-primary/40"
           >
             <div className="mb-3 flex items-center justify-between">
@@ -75,7 +75,7 @@ export function LiveBasketsSection({ className }: { className?: string }) {
                 {pot.statusLabel}
               </span>
             </div>
-            <p className="text-lg font-bold text-foreground">Multi-stock basket</p>
+            <p className="text-lg font-bold text-foreground">Multi-stock pool</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {pot.participantCount} funder{Number(pot.participantCount) === 1 ? "" : "s"}
             </p>
@@ -86,7 +86,7 @@ export function LiveBasketsSection({ className }: { className?: string }) {
                 </span>
                 <span>{pot.progressPct.toFixed(0)}%</span>
               </div>
-              <div className="h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Basket funding progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pot.progressPct)}>
+              <div className="h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Pool funding progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pot.progressPct)}>
                 <div
                   className="h-full rounded-full bg-sherhood transition-all"
                   style={{ width: `${pot.progressPct}%` }}

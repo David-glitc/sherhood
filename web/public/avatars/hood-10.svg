@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g10" cx="50%" cy="38%" r="62%">
+      <stop offset="0%" stop-color="#1a2811"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+    <filter id="glow10"><feGaussianBlur stdDeviation="1.5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g10)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- fox ears -->
+  <path d="M38 48L28 22l22 18z" fill="#0e160a" stroke="#ccff00" stroke-width="1.5"/>
+  <path d="M90 48l10-26-22 18z" fill="#0e160a" stroke="#ccff00" stroke-width="1.5"/>
+  <path d="M36 42l-2-10 10 8z" fill="#ccff00" opacity=".7"/>
+  <path d="M92 42l2-10-10 8z" fill="#ccff00" opacity=".7"/>
+  <!-- fox hood -->
+  <path d="M28 92c5-36 20-54 36-54s31 18 36 54c-9 12-21 18-36 18S37 104 28 92z" fill="#0c1409" stroke="#2f4816" stroke-width="1.5"/>
+  <path d="M36 88c6-28 16-44 28-44s22 16 28 44c-6 8-16 12-28 12s-22-4-28-12z" fill="#141f0e"/>
+  <path d="M42 70c7-12 14-18 22-18s15 6 22 18c-5 3-13 5-22 5s-17-2-22-5z" fill="#0a1007" stroke="#ccff00" stroke-width="1.1"/>
+  <!-- snout void -->
+  <path d="M50 74c4 14 10 20 14 20s10-6 14-20c-4-2-8-3-14-3s-10 1-14 3z" fill="#030503"/>
+  <g filter="url(#glow10)">
+    <ellipse cx="54" cy="76" rx="3.5" ry="4" fill="#ccff00"/>
+    <ellipse cx="74" cy="76" rx="3.5" ry="4" fill="#ccff00"/>
+  </g>
+  <!-- nose -->
+  <ellipse cx="64" cy="88" rx="3" ry="2.5" fill="#ccff00" opacity=".8"/>
+  <!-- matrix ticks -->
+  <path d="M48 56h4M56 56h4M76 56h4M84 56h4" stroke="#ccff00" stroke-width="1.5" opacity=".4"/>
+</svg>
