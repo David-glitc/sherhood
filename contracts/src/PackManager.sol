@@ -38,6 +38,7 @@ contract PackManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard {
         bool claimed;
         bool buybackTaken;
         uint256 createdAt;
+        uint256 pricePaid;
     }
 
     address public immutable usdg;
@@ -67,6 +68,7 @@ contract PackManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard {
     event PackClaimed(uint256 indexed packId, address indexed user);
     event PackBuybackTaken(uint256 indexed packId, address indexed user);
     event PackExpired(uint256 indexed packId);
+    event PackRefunded(uint256 indexed packId, address indexed user, uint256 amount);
     event TierCreated(uint256 indexed tierId, string name, uint256 price);
     event TierUpdated(uint256 indexed tierId, uint256 price, bool active);
     event DropTableSet(uint256 indexed tierId);
@@ -173,7 +175,8 @@ contract PackManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard {
             resolved: false,
             claimed: false,
             buybackTaken: false,
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            pricePaid: tier.price
         });
 
         emit PackPurchased(packId, msg.sender, tierId);
@@ -261,6 +264,30 @@ contract PackManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard {
         result.buybackTaken = true;
         IERC20(result.token).safeTransfer(treasury, result.amount);
         emit PackExpired(packId);
+    }
+
+    /// @notice Refund the USDG paid for a pack whose VRF draw never resolved (e.g. the
+    ///         callback reverted because the treasury was under-funded, or randomness never
+    ///         arrived). Without this, a purchaser's funds would be locked forever, since every
+    ///         claim/buyback/expire path requires `resolved`.
+    /// @dev Marks the pack resolved+claimed so a late VRF callback can neither pay out nor
+    ///      double-refund (fulfillRandomWords requires `!resolved`).
+    function refundUnresolvedPack(uint256 packId) external nonReentrant {
+        PackResult storage result = packResults[packId];
+        require(result.user == msg.sender, "PackManager: not your pack");
+        require(!result.resolved, "PackManager: resolved");
+        require(block.timestamp > result.createdAt + packClaimTimeout, "PackManager: not expired");
+
+        uint256 amount = result.pricePaid;
+        require(amount > 0, "PackManager: nothing to refund");
+
+        result.resolved = true;
+        result.claimed = true;
+        result.pricePaid = 0;
+        // tierRevenue is a lifetime stat and is intentionally left untouched here.
+
+        IERC20(usdg).safeTransfer(msg.sender, amount);
+        emit PackRefunded(packId, msg.sender, amount);
     }
 
     function withdrawUSDG(uint256 amount) external onlyOwner {

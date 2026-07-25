@@ -220,7 +220,7 @@ contract PackManagerTest is Test {
 
         vrfCoordinator.fulfill(1, randomWords);
 
-        (address resultUser, address token, uint256 amount, PackManager.Rarity rarity, bool resolved, bool claimed, bool buybackTaken,) = packManager.packResults(packId);
+        (address resultUser, address token, uint256 amount, PackManager.Rarity rarity, bool resolved, bool claimed, bool buybackTaken,,) = packManager.packResults(packId);
         assertTrue(resolved);
         assertEq(resultUser, user);
         assertEq(token, address(nvda));
@@ -254,7 +254,7 @@ contract PackManagerTest is Test {
         uint256 userNvdaAfter = nvda.balanceOf(user);
         assertTrue(userNvdaAfter > userNvdaBefore);
 
-        (,,,,, bool claimed, bool buybackTaken,) = packManager.packResults(packId);
+        (,,,,, bool claimed, bool buybackTaken,,) = packManager.packResults(packId);
         assertTrue(claimed);
         assertFalse(buybackTaken);
     }
@@ -400,5 +400,53 @@ contract PackManagerTest is Test {
         vm.expectRevert();
         packManager.openPack(0);
         vm.stopPrank();
+    }
+
+    function test_refundUnresolvedPack_afterTimeout() public {
+        _setupTier();
+
+        vm.startPrank(user);
+        usdg.approve(address(packManager), 10 ether);
+        uint256 balBefore = usdg.balanceOf(user);
+        uint256 packId = packManager.openPack(0); // VRF never fulfilled
+        vm.stopPrank();
+
+        // Too early to refund.
+        vm.prank(user);
+        vm.expectRevert("PackManager: not expired");
+        packManager.refundUnresolvedPack(packId);
+
+        vm.warp(block.timestamp + packManager.packClaimTimeout() + 1);
+
+        vm.prank(user);
+        packManager.refundUnresolvedPack(packId);
+        assertEq(usdg.balanceOf(user), balBefore, "price refunded in full");
+
+        // Cannot refund twice.
+        vm.prank(user);
+        vm.expectRevert("PackManager: resolved");
+        packManager.refundUnresolvedPack(packId);
+    }
+
+    function test_refundUnresolvedPack_blocksLateVRF() public {
+        _setupTier();
+
+        vm.startPrank(user);
+        usdg.approve(address(packManager), 10 ether);
+        uint256 packId = packManager.openPack(0);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + packManager.packClaimTimeout() + 1);
+        vm.prank(user);
+        packManager.refundUnresolvedPack(packId);
+
+        // A late VRF callback must not also pay out tokens. The mock coordinator re-wraps the
+        // inner "PackManager: already resolved" revert as "fulfill failed".
+        uint256[] memory randomWords = new uint256[](3);
+        randomWords[0] = 1;
+        randomWords[1] = 2;
+        randomWords[2] = 3;
+        vm.expectRevert("fulfill failed");
+        vrfCoordinator.fulfill(1, randomWords);
     }
 }

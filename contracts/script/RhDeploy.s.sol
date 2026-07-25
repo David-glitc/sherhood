@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {ProxyDeploy} from "./ProxyDeploy.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {TreasuryDirect} from "../src/TreasuryDirect.sol";
@@ -43,7 +44,7 @@ contract RhDeployScript is Script {
 
         TreasuryDirect treasury = new TreasuryDirect(usdg, feeWallet, deployer);
         PotCard card = new PotCard(deployer);
-        PotFactory factory = new PotFactory(deployer, usdg, address(card));
+        PotFactory factory = ProxyDeploy.deployFactory(deployer, usdg, address(card));
         RevealEngine reveal = new RevealEngine(deployer, address(card), vrfCoordinator);
         AssetManager assets = new AssetManager(deployer, usdg, swapRouter);
         StockTokenRegistry registry = new StockTokenRegistry(deployer);
@@ -83,9 +84,10 @@ contract RhDeployScript is Script {
         entry.setRouterFeeBps(vm.envOr("ROUTER_FEE_BPS", uint256(50)));
 
         // Seed a funding basket so early-exit UI can be exercised immediately.
-        uint256 seedGoal = vm.envOr("SEED_POT_GOAL", uint256(100e18));
+        // USDG on RH is 6 decimals — never use 1e18 for goal/min.
+        uint256 seedGoal = vm.envOr("SEED_POT_GOAL", uint256(100e6));
         uint256 seedDuration = vm.envOr("SEED_POT_DURATION", uint256(5 days));
-        uint256 seedMin = vm.envOr("SEED_POT_MIN", uint256(1e18));
+        uint256 seedMin = vm.envOr("SEED_POT_MIN", uint256(1e6));
         address seedPot = factory.createPot(seedGoal, seedDuration, seedMin, 0, 100);
         console.log("SEED_POT", seedPot);
 

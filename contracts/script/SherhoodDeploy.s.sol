@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {ProxyDeploy} from "./ProxyDeploy.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {TreasuryDirect} from "../src/TreasuryDirect.sol";
@@ -55,7 +56,7 @@ contract SherhoodDeployScript is Script {
         PrevRandaoCoordinator entropy = new PrevRandaoCoordinator(prevDelay, vm.envOr("PREVRANDAO_MAX_DELAY_BLOCKS", uint256(64)));
         TreasuryDirect treasury = new TreasuryDirect(usdg, feeWallet, deployer);
         PotCard card = new PotCard(deployer);
-        PotFactory factory = new PotFactory(deployer, usdg, address(card));
+        PotFactory factory = ProxyDeploy.deployFactory(deployer, usdg, address(card));
         RevealEngine reveal = new RevealEngine(deployer, address(card), address(entropy));
         AssetManager assets = new AssetManager(deployer, usdg, swapRouter);
         StockTokenRegistry registry = new StockTokenRegistry(deployer);

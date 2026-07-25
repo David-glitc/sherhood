@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Pot} from "../src/Pot.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {DeployFactory} from "./DeployFactory.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
@@ -42,7 +43,7 @@ contract PotEdgeOverflowTest is Test {
         router = new MockSwapRouter();
         treasury = new Treasury(address(usdg), deployer);
         card = new PotCard(deployer);
-        factory = new PotFactory(deployer, address(usdg), address(card));
+        factory = DeployFactory.deploy(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(vrf));
         assets = new AssetManager(deployer, address(usdg), address(router));
         registry = new StockTokenRegistry(deployer);
@@ -118,6 +119,34 @@ contract PotEdgeOverflowTest is Test {
         vm.expectRevert(bytes("Pot: goal"));
         Pot(pot).deposit(50e18);
         vm.stopPrank();
+    }
+
+    function test_revert_maxParticipants_full() public {
+        vm.prank(deployer);
+        factory.setMaxParticipants(2);
+        address pot = _create(100e18, 1e18, 0, 100);
+        _deposit(alice, pot, 1e18);
+        _deposit(bob, pot, 1e18);
+        vm.startPrank(carol);
+        usdg.approve(pot, 1e18);
+        vm.expectRevert(bytes("Pot: full"));
+        Pot(pot).deposit(1e18);
+        vm.stopPrank();
+    }
+
+    function test_earlyExit_frees_participant_slot() public {
+        vm.prank(deployer);
+        factory.setMaxParticipants(2);
+        address pot = _create(100e18, 1e18, 0, 100);
+        _deposit(alice, pot, 1e18);
+        _deposit(bob, pot, 1e18);
+
+        uint256[] memory ids = card.potTokenIds(pot);
+        vm.prank(bob);
+        Pot(pot).earlyExit(ids[1]);
+
+        _deposit(carol, pot, 1e18);
+        assertEq(Pot(pot).participantCount(), 2);
     }
 
     function test_exactGoal_autoCloses() public {

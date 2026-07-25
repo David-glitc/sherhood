@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {ProxyDeploy} from "./ProxyDeploy.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
@@ -32,7 +33,7 @@ contract LocalStackScript is Script {
 
         Treasury treasury = new Treasury(address(usdg), deployer);
         PotCard card = new PotCard(deployer);
-        PotFactory factory = new PotFactory(deployer, address(usdg), address(card));
+        PotFactory factory = ProxyDeploy.deployFactory(deployer, address(usdg), address(card));
         RevealEngine reveal = new RevealEngine(deployer, address(card), address(vrf));
         AssetManager assets = new AssetManager(deployer, address(usdg), address(router));
         StockTokenRegistry registry = new StockTokenRegistry(deployer);

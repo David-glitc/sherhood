@@ -12,6 +12,7 @@ interface IPotFactoryView {
     function mintCard(address to, uint256 depositAmount) external returns (uint256 tokenId);
     function paused() external view returns (bool);
     function treasury() external view returns (address);
+    function maxParticipants() external view returns (uint256);
 }
 
 interface ITreasuryFee {
@@ -47,6 +48,9 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
     uint256 public immutable entryFee;
     uint256 public immutable protocolFeeBps;
     address public immutable creator;
+    /// @notice Creator's share (bps) of this pool's swept protocol + entry fees. Locked at
+    ///         creation so a pool created during a 50% campaign keeps 50% forever.
+    uint256 public immutable creatorFeeShareBps;
 
     PotCard public immutable card;
     address public assetManager;
@@ -58,6 +62,7 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
     uint256 public totalEntryFees;
     uint256 public participantCount;
     uint256 public feesSwept;
+    uint256 public creatorFeesPaid;
     uint256 public claimCount;
     bool public purchasePulled;
 
@@ -74,6 +79,7 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
     event Purchased(address[] tokens, uint256[] amounts);
     event Revealed();
     event FeesSwept(address indexed treasury, uint256 amount);
+    event CreatorFeePaid(address indexed creator, uint256 amount);
     event Claimed(address indexed user, uint256 indexed tokenId, address[] tokens, uint256[] payouts);
     event AssetManagerSet(address assetManager);
     event RevealEngineSet(address revealEngine);
@@ -110,12 +116,14 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
         uint256 duration_,
         uint256 minDeposit_,
         uint256 entryFee_,
-        uint256 protocolFeeBps_
+        uint256 protocolFeeBps_,
+        uint256 creatorFeeShareBps_
     ) Ownable(owner_) {
         require(usdg_ != address(0) && factory_ != address(0) && card_ != address(0), "Pot: zero");
         require(creator_ != address(0), "Pot: creator");
         require(fundingGoal_ > 0 && duration_ > 0, "Pot: params");
         require(protocolFeeBps_ <= 2000, "Pot: fee");
+        require(creatorFeeShareBps_ <= 10_000, "Pot: creatorShare");
 
         usdg = usdg_;
         factory = factory_;
@@ -126,6 +134,7 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
         minDeposit = minDeposit_;
         entryFee = entryFee_;
         protocolFeeBps = protocolFeeBps_;
+        creatorFeeShareBps = creatorFeeShareBps_;
         status = Status.Funding;
     }
 
@@ -198,6 +207,7 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
         require(block.timestamp < deadline, "Pot: deadline");
         require(amount >= minDeposit, "Pot: min");
         require(totalDeposited + amount <= fundingGoal, "Pot: goal");
+        require(participantCount < IPotFactoryView(factory).maxParticipants(), "Pot: full");
 
         uint256 fee = entryFee;
         IERC20(usdg).safeTransferFrom(payer, address(this), amount + fee);
@@ -216,9 +226,19 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
 
     function close() external nonReentrant whenNotPaused {
         require(status == Status.Funding, "Pot: funding");
-        require(totalDeposited >= fundingGoal || block.timestamp >= deadline, "Pot: ready");
         require(participantCount > 0, "Pot: empty");
-        _close();
+        if (totalDeposited >= fundingGoal) {
+            // Goal met: anyone may finalize (this is the auto-close condition too).
+            _close();
+        } else {
+            // Under-funded: only after the deadline, and only the operator or creator may
+            // elect to proceed into a purchase (which forgoes depositor refunds). This stops
+            // a third party from front-running cancel() to force an under-funded pot forward
+            // and strip depositors of the refund path, which stays open to anyone via cancel().
+            require(block.timestamp >= deadline, "Pot: ready");
+            require(msg.sender == owner() || msg.sender == creator, "Pot: auth");
+            _close();
+        }
     }
 
     function cancel() external nonReentrant whenNotPaused whenFactoryNotPaused {
@@ -382,10 +402,23 @@ contract Pot is Ownable, Pausable, ReentrancyGuard {
         require(amount > 0, "Pot: bal");
 
         feesSwept += amount;
-        IERC20(usdg).forceApprove(treasury, 0);
-        IERC20(usdg).forceApprove(treasury, amount);
-        ITreasuryFee(treasury).depositFeeUSDG(amount);
-        emit FeesSwept(treasury, amount);
+
+        // Creator revenue split: creator earns their locked-in share of this pool's protocol +
+        // entry fees; the remainder goes to the protocol treasury.
+        uint256 creatorCut = (amount * creatorFeeShareBps) / 10_000;
+        uint256 treasuryCut = amount - creatorCut;
+
+        if (creatorCut > 0) {
+            creatorFeesPaid += creatorCut;
+            IERC20(usdg).safeTransfer(creator, creatorCut);
+            emit CreatorFeePaid(creator, creatorCut);
+        }
+        if (treasuryCut > 0) {
+            IERC20(usdg).forceApprove(treasury, 0);
+            IERC20(usdg).forceApprove(treasury, treasuryCut);
+            ITreasuryFee(treasury).depositFeeUSDG(treasuryCut);
+            emit FeesSwept(treasury, treasuryCut);
+        }
     }
 
     function claim(uint256 tokenId)

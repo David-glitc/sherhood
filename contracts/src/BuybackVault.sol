@@ -12,6 +12,7 @@ contract BuybackVault is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address public immutable usdg;
+    uint8 public immutable usdgDecimals;
     address public treasury;
     uint256 public buybackPercentage = 85;
 
@@ -23,7 +24,9 @@ contract BuybackVault is Ownable, ReentrancyGuard {
     event TreasuryUpdated(address treasury);
 
     constructor(address _usdg, address _treasury, address _owner) Ownable(_owner) {
+        require(_usdg != address(0), "BuybackVault: zero usdg");
         usdg = _usdg;
+        usdgDecimals = IERC20Metadata(_usdg).decimals();
         treasury = _treasury;
     }
 
@@ -55,15 +58,16 @@ contract BuybackVault is Ownable, ReentrancyGuard {
         decimals = priceFeed.decimals();
     }
 
+    /// @notice USD value of `tokenAmount`, at `buybackPercentage`, expressed in USDG base units.
+    /// @dev Scales to the USDG token's own decimals (6 on RH), NOT a hardcoded 18. Paying an
+    ///      18-decimal figure into a 6-decimal token would overpay by ~1e12 and drain the vault.
     function calculateBuyback(address token, uint256 tokenAmount) public view returns (uint256 usdgAmount) {
         (uint256 price, uint8 priceDecimals) = getTokenPrice(token);
         uint8 tokenDecimals = IERC20Metadata(token).decimals();
-        usdgAmount = tokenAmount * price * buybackPercentage / (10 ** tokenDecimals) / 100;
-        if (priceDecimals < 18) {
-            usdgAmount = usdgAmount * (10 ** (18 - priceDecimals));
-        } else if (priceDecimals > 18) {
-            usdgAmount = usdgAmount / (10 ** (priceDecimals - 18));
-        }
+        // value = (tokenAmount / 10^tokenDecimals) * (price / 10^priceDecimals) * (pct/100)
+        // in USDG units => multiply by 10^usdgDecimals. Multiply before dividing to keep precision.
+        usdgAmount = tokenAmount * price * buybackPercentage * (10 ** usdgDecimals)
+            / (10 ** tokenDecimals) / (10 ** priceDecimals) / 100;
     }
 
     function acceptBuyback(address token, uint256 tokenAmount) external nonReentrant {

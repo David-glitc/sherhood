@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Pot} from "./Pot.sol";
 import {PotCard} from "./PotCard.sol";
 
@@ -12,11 +15,23 @@ interface ITreasuryFeeSink {
     function depositFeeUSDG(uint256 amount) external;
 }
 
-contract PotFactory is Ownable, Pausable, ReentrancyGuard {
+/// @title PotFactory — UUPS-upgradeable. Its proxy address is baked into every Pot (`factory`)
+///        and into `PotCard.minter`, so upgrading the logic here changes pot-creation / fee /
+///        creator-split behaviour WITHOUT redeploying the factory or the NFT collection.
+/// @dev Storage is append-only across upgrades. New vars must be added at the end.
+contract PotFactory is
+    Initializable,
+    OwnableUpgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardTransient,
+    UUPSUpgradeable
+{
     using SafeERC20 for IERC20;
 
-    PotCard public immutable card;
-    address public immutable usdg;
+    uint256 public constant MAX_CREATOR_FEE_SHARE_BPS = 5000;
+
+    PotCard public card;
+    address public usdg;
 
     address public assetManager;
     address public revealEngine;
@@ -25,11 +40,17 @@ contract PotFactory is Ownable, Pausable, ReentrancyGuard {
     address public stockRegistry;
 
     uint256 public creationFee;
-    uint256 public defaultProtocolFeeBps = 100;
-    uint256 public maxProtocolFeeBps = 2000;
-    uint256 public minFundingGoal = 1e18;
-    uint256 public maxDuration = 365 days;
-    uint256 public minDuration = 1 hours;
+    uint256 public defaultProtocolFeeBps;
+    uint256 public maxProtocolFeeBps;
+    /// @notice Creator's share (bps) of a pool's swept protocol + entry fees, locked into each
+    ///         pool at creation. Default 30%; set to 50% (5000) for the launch campaign.
+    uint256 public creatorFeeShareBps;
+    uint256 public minFundingGoal;
+    uint256 public maxDuration;
+    uint256 public minDuration;
+    /// @notice Cap on live cards per pot, enforced in Pot._deposit, so the
+    /// RevealEngine single-tx allocation loop can never exceed block gas.
+    uint256 public maxParticipants;
 
     address[] public pots;
     mapping(address => bool) public isPot;
@@ -57,12 +78,32 @@ contract PotFactory is Ownable, Pausable, ReentrancyGuard {
     event StockRegistryUpdated(address registry);
     event CreationFeeUpdated(uint256 fee);
     event FeeParamsUpdated(uint256 defaultProtocolFeeBps, uint256 maxProtocolFeeBps);
+    event CreatorFeeShareUpdated(uint256 creatorFeeShareBps);
 
-    constructor(address owner_, address usdg_, address card_) Ownable(owner_) {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address owner_, address usdg_, address card_) external initializer {
         require(usdg_ != address(0) && card_ != address(0), "PotFactory: zero");
+        __Ownable_init(owner_);
+        __Pausable_init();
+
         usdg = usdg_;
         card = PotCard(card_);
+
+        // Defaults (must be set here, not as inline field initializers, for proxy storage).
+        defaultProtocolFeeBps = 100;
+        maxProtocolFeeBps = 2000;
+        creatorFeeShareBps = 3000;
+        minFundingGoal = 1e18;
+        maxDuration = 30 days;
+        minDuration = 1 hours;
+        maxParticipants = 250;
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function setAssetManager(address assetManager_) external onlyOwner {
         assetManager = assetManager_;
@@ -113,6 +154,19 @@ contract PotFactory is Ownable, Pausable, ReentrancyGuard {
         minFundingGoal = goal_;
     }
 
+    /// @notice Set the creator revenue share applied to pools created from now on (existing pools
+    ///         keep the rate locked at their creation). Campaign: set to 5000 (50%), later 3000.
+    function setCreatorFeeShareBps(uint256 bps_) external onlyOwner {
+        require(bps_ <= MAX_CREATOR_FEE_SHARE_BPS, "PotFactory: creator share high");
+        creatorFeeShareBps = bps_;
+        emit CreatorFeeShareUpdated(bps_);
+    }
+
+    function setMaxParticipants(uint256 max_) external onlyOwner {
+        require(max_ > 0, "PotFactory: zero");
+        maxParticipants = max_;
+    }
+
     function pause() external onlyOwner {
         _pause();
     }
@@ -129,6 +183,19 @@ contract PotFactory is Ownable, Pausable, ReentrancyGuard {
         uint256 protocolFeeBps
     ) external onlyOwner whenNotPaused returns (address) {
         return _create(msg.sender, fundingGoal, duration, minDeposit, entryFee, protocolFeeBps, false);
+    }
+
+    /// @notice Owner-sponsored create (e.g. $SHRH holders via server signer). Creator attribution is `creator`, not msg.sender.
+    function createFor(
+        address creator,
+        uint256 fundingGoal,
+        uint256 duration,
+        uint256 minDeposit,
+        uint256 entryFee,
+        uint256 protocolFeeBps
+    ) external onlyOwner whenNotPaused returns (address) {
+        require(creator != address(0), "PotFactory: zero creator");
+        return _create(creator, fundingGoal, duration, minDeposit, entryFee, protocolFeeBps, true);
     }
 
     function createCommunityPot(
@@ -174,7 +241,8 @@ contract PotFactory is Ownable, Pausable, ReentrancyGuard {
             duration,
             minDeposit,
             entryFee,
-            protocolFeeBps
+            protocolFeeBps,
+            creatorFeeShareBps
         );
         potAddr = address(pot);
         pot.setAssetManager(assetManager);

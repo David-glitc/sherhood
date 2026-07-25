@@ -55,6 +55,11 @@ contract RaffleManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard 
     Round[] public rounds;
     mapping(uint256 => Entry[]) public entries;
     mapping(uint256 => uint256[]) public winnerIndices;
+    /// @notice One-shot guard so the protocol fee can be pulled once per round, not repeatedly
+    ///         (which would drain entrants' staked USDG beyond the intended fee).
+    mapping(uint256 => bool) public protocolFeeWithdrawn;
+    /// @notice VRF requestId => roundId + 1 (0 = unknown), for O(1) callback routing.
+    mapping(uint256 => uint256) private _requestToRound;
 
     bytes32 public keyHash;
     uint64 public subscriptionId;
@@ -140,17 +145,15 @@ contract RaffleManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard 
             uint32(round.maxWinners)
         );
         round.requestId = requestId;
+        _requestToRound[requestId] = roundId + 1;
 
         emit RoundClosed(roundId, requestId);
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
-        for (uint256 i = 0; i < rounds.length; i++) {
-            if (rounds[i].requestId == requestId) {
-                _resolveRound(i, randomWords);
-                return;
-            }
-        }
+        uint256 encoded = _requestToRound[requestId];
+        require(encoded != 0, "Raffle: unknown request");
+        _resolveRound(encoded - 1, randomWords);
     }
 
     function _resolveRound(uint256 roundId, uint256[] memory randomWords) private {
@@ -236,6 +239,8 @@ contract RaffleManager is VRFConsumerBaseV2, Ownable, Pausable, ReentrancyGuard 
     function withdrawProtocolUSDG(uint256 roundId) external onlyOwner {
         Round storage round = rounds[roundId];
         require(round.state == RoundState.Bought || round.state == RoundState.Resolved, "Raffle: wrong state");
+        require(!protocolFeeWithdrawn[roundId], "Raffle: fee withdrawn");
+        protocolFeeWithdrawn[roundId] = true;
         uint256 protocolFee = round.totalUSDG * round.feePercent / 10000;
         uint256 balance = IERC20(usdg).balanceOf(address(this));
         uint256 available = protocolFee < balance ? protocolFee : balance;

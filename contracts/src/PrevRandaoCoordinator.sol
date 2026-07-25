@@ -61,18 +61,27 @@ contract PrevRandaoCoordinator {
         require(consumers[requestId] != address(0), "PrevRandao: unknown");
         require(!fulfilled[requestId], "PrevRandao: done");
         uint256 rb = requestBlock[requestId];
-        require(block.number >= rb + minDelayBlocks, "PrevRandao: too early");
+
+        // Entropy comes from the hash of a FIXED target block (rb + minDelay), chosen at
+        // request time and unknown to anyone then. Crucially it does NOT depend on the
+        // fulfill block: the seed is identical no matter when (or by whom) fulfill is
+        // called within the window, so a fulfiller cannot grind the outcome by previewing
+        // the result and re-submitting on a more favourable block.
+        uint256 targetBlock = rb + minDelayBlocks;
+        require(block.number > targetBlock, "PrevRandao: too early");
         require(block.number <= rb + maxDelayBlocks, "PrevRandao: too late");
+        // maxDelay <= 256 and minDelay >= 1 keep (block.number - targetBlock) within the
+        // 256-block blockhash window, so this is retrievable for any valid fulfill block.
+        require(block.number - targetBlock <= 256, "PrevRandao: expired");
+
+        bytes32 bh = blockhash(targetBlock);
+        require(bh != bytes32(0), "PrevRandao: no entropy");
 
         fulfilled[requestId] = true;
         uint32 n = numWordsOf[requestId];
         uint256[] memory words = new uint256[](n);
 
-        bytes32 bh;
-        if (block.number > rb && block.number - rb <= 256) {
-            bh = blockhash(rb);
-        }
-        uint256 seed = uint256(keccak256(abi.encode(block.prevrandao, requestId, rb, bh, consumers[requestId])));
+        uint256 seed = uint256(keccak256(abi.encode(bh, requestId, rb, consumers[requestId])));
         for (uint32 i = 0; i < n; i++) {
             words[i] = uint256(keccak256(abi.encode(seed, i)));
         }

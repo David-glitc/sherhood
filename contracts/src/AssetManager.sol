@@ -138,12 +138,26 @@ contract AssetManager is Ownable, ReentrancyGuard {
         uint256 listLen = list.length;
         require(listLen > 0, "AM: empty");
 
+        // Only allowed tokens — avoids picking delisted / illiquid registry entries.
+        uint256 allowedLen;
+        for (uint256 i = 0; i < listLen; i++) {
+            if (IStockRegistry(stockRegistry).getToken(list[i]).allowed) allowedLen++;
+        }
+        require(allowedLen > 0, "AM: empty");
+        address[] memory allowed = new address[](allowedLen);
+        uint256 w;
+        for (uint256 i = 0; i < listLen; i++) {
+            if (IStockRegistry(stockRegistry).getToken(list[i]).allowed) {
+                allowed[w++] = list[i];
+            }
+        }
+
         if (pickCount == 0) pickCount = defaultPickCount;
         if (pickCount < minPickCount) pickCount = minPickCount;
         if (pickCount > maxPickCount) pickCount = maxPickCount;
-        if (pickCount > listLen) pickCount = listLen;
+        if (pickCount > allowedLen) pickCount = allowedLen;
 
-        picked = _pickTokens(list, seed, pickCount);
+        picked = _pickTokens(allowed, seed, pickCount);
         require(picked.length > 0, "AM: picks");
     }
 

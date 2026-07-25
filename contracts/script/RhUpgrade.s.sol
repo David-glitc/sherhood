@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {ProxyDeploy} from "./ProxyDeploy.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {CardMarketplace} from "../src/CardMarketplace.sol";
 import {EntryRouter} from "../src/EntryRouter.sol";
@@ -51,7 +52,7 @@ contract RhUpgradeScript is Script {
         vm.startBroadcast(pk);
 
         PotCard card = new PotCard(deployer);
-        PotFactory factory = new PotFactory(deployer, usdg, address(card));
+        PotFactory factory = ProxyDeploy.deployFactory(deployer, usdg, address(card));
         RevealEngine reveal = new RevealEngine(deployer, address(card), vrfCoordinator);
         CardMarketplace market = new CardMarketplace(deployer, address(card), usdg, treasury);
 
@@ -76,10 +77,11 @@ contract RhUpgradeScript is Script {
 
         // Optional seed basket (skipped by default to save gas)
         if (vm.envOr("SEED_POT", false)) {
+            // USDG on RH is 6 decimals — never use 1e18 for goal/min.
             address seedPot = factory.createPot(
-                vm.envOr("SEED_POT_GOAL", uint256(100e18)),
+                vm.envOr("SEED_POT_GOAL", uint256(100e6)),
                 vm.envOr("SEED_POT_DURATION", uint256(5 days)),
-                vm.envOr("SEED_POT_MIN", uint256(1e18)),
+                vm.envOr("SEED_POT_MIN", uint256(1e6)),
                 0,
                 100
             );

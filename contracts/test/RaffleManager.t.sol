@@ -171,6 +171,34 @@ contract RaffleManagerTest is Test {
         assertTrue(r.tokenAmount > 0);
     }
 
+    function test_withdrawProtocolUSDG_onlyOnce() public {
+        for (uint256 i = 1; i <= 5; i++) {
+            address u = address(uint160(i + 1));
+            usdg.mint(u, 100 ether);
+            vm.startPrank(u);
+            usdg.approve(address(raffle), 10 ether);
+            raffle.enter(0);
+            vm.stopPrank();
+        }
+        vm.prank(deployer);
+        raffle.closeRound(0);
+        uint256[] memory randomWords = new uint256[](2);
+        randomWords[0] = 12345;
+        randomWords[1] = 67890;
+        vrfCoordinator.fulfill(1, randomWords);
+
+        // 50 USDG staked, 5% fee => 2.5 USDG is the max the owner can pull.
+        uint256 before = usdg.balanceOf(deployer);
+        vm.prank(deployer);
+        raffle.withdrawProtocolUSDG(0);
+        assertEq(usdg.balanceOf(deployer) - before, 2.5 ether, "fee once");
+
+        // A second pull (draining winners' stakes) must revert.
+        vm.prank(deployer);
+        vm.expectRevert("Raffle: fee withdrawn");
+        raffle.withdrawProtocolUSDG(0);
+    }
+
     function test_RevertEnterWhenRoundExpired() public {
         vm.warp(block.timestamp + 2 hours);
 

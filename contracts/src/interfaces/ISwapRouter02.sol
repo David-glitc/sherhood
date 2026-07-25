@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @notice Uniswap V3 SwapRouter02-style exactInputSingle (no deadline field).
+/// @notice Uniswap V3 SwapRouter02-style swaps (no deadline field).
 interface ISwapRouter02 {
     struct ExactInputSingleParams {
         address tokenIn;
@@ -13,5 +13,14 @@ interface ISwapRouter02 {
         uint160 sqrtPriceLimitX96;
     }
 
+    struct ExactInputParams {
+        bytes path;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+    }
+
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+
+    function exactInput(ExactInputParams calldata params) external payable returns (uint256 amountOut);
 }

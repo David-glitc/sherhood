@@ -6,6 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Pot} from "../src/Pot.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {DeployFactory} from "./DeployFactory.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
@@ -88,7 +89,7 @@ contract EntryRouterTest is Test {
 
         treasury = new Treasury(address(usdg), deployer);
         card = new PotCard(deployer);
-        factory = new PotFactory(deployer, address(usdg), address(card));
+        factory = DeployFactory.deploy(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(vrf));
         assets = new AssetManager(deployer, address(usdg), address(router));
         registry = new StockTokenRegistry(deployer);

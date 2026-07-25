@@ -6,6 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Pot} from "../src/Pot.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {DeployFactory} from "./DeployFactory.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
@@ -43,7 +44,7 @@ contract PotHarness is Test {
         router = new MockSwapRouter();
         treasury = new Treasury(address(usdg), deployer);
         card = new PotCard(deployer);
-        factory = new PotFactory(deployer, address(usdg), address(card));
+        factory = DeployFactory.deploy(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(vrf));
         assets = new AssetManager(deployer, address(usdg), address(router));
         registry = new StockTokenRegistry(deployer);
@@ -131,8 +132,24 @@ contract PotProtocolTest is PotHarness {
         address pot = _createPlatformPot(1_000_000e18, 1 days, 10e18, 1e18);
         _deposit(alice, pot, 50e18);
         vm.warp(block.timestamp + 1 days + 1);
+        // Under-funded close is an operator/creator decision (deployer created this pot).
+        vm.prank(deployer);
         Pot(pot).close();
         assertEq(uint256(Pot(pot).status()), uint256(Pot.Status.Closed));
+    }
+
+    function test_revert_underfundedClose_thirdParty() public {
+        address pot = _createPlatformPot(1_000_000e18, 1 days, 10e18, 1e18);
+        _deposit(alice, pot, 50e18);
+        vm.warp(block.timestamp + 1 days + 1);
+        // A third party cannot force an under-funded pot forward and strip refunds.
+        vm.prank(bob);
+        vm.expectRevert(bytes("Pot: auth"));
+        Pot(pot).close();
+        // But cancel() (refund path) remains open to anyone.
+        vm.prank(bob);
+        Pot(pot).cancel();
+        assertEq(uint256(Pot(pot).status()), uint256(Pot.Status.Cancelled));
     }
 }
 
@@ -153,8 +170,13 @@ contract BusinessFlowTest is PotHarness {
 
         vm.prank(deployer);
         assets.purchaseWithSeed(pot, 999, 1, 0);
+        // Default creator share is 30%: treasury gets 70% of the 18 in fees, creator gets 30%.
+        uint256 treasuryBefore = treasury.feesCollectedUSDG();
+        uint256 creatorBefore = usdg.balanceOf(Pot(pot).creator());
         Pot(pot).sweepFees();
-        assertEq(treasury.feesCollectedUSDG(), 18e18);
+        assertEq(treasury.feesCollectedUSDG() - treasuryBefore, 12_600e15); // 70% of 18e18
+        assertEq(Pot(pot).creatorFeesPaid(), 5_400e15); // 30% of 18e18
+        assertEq(usdg.balanceOf(Pot(pot).creator()) - creatorBefore, 5_400e15);
 
         vm.prank(deployer);
         reveal.allocateWithSeed(pot, 123);
@@ -173,6 +195,38 @@ contract BusinessFlowTest is PotHarness {
 
         assertEq(Pot(pot).claimCount(), 3);
         assertLe(nvda.balanceOf(pot), 2);
+    }
+
+    function test_creatorSplit_campaignRate_lockedAtCreation() public {
+        // Launch campaign: creators get 50%.
+        vm.prank(deployer);
+        factory.setCreatorFeeShareBps(5000);
+
+        address pot = _createPlatformPot(300e18, 7 days, 50e18, 5e18);
+        assertEq(Pot(pot).creatorFeeShareBps(), 5000);
+
+        // Campaign ends and the rate drops — the already-created pool keeps its 50%.
+        vm.prank(deployer);
+        factory.setCreatorFeeShareBps(3000);
+        assertEq(Pot(pot).creatorFeeShareBps(), 5000);
+
+        _deposit(alice, pot, 100e18);
+        _deposit(bob, pot, 100e18);
+        _deposit(carol, pot, 100e18);
+
+        // fees = 15 entry + 3 protocol = 18; 50/50 split.
+        vm.prank(deployer);
+        assets.purchaseWithSeed(pot, 1, 1, 0);
+        uint256 tBefore = treasury.feesCollectedUSDG();
+        Pot(pot).sweepFees();
+        assertEq(Pot(pot).creatorFeesPaid(), 9e18);
+        assertEq(treasury.feesCollectedUSDG() - tBefore, 9e18);
+    }
+
+    function test_setCreatorFeeShareBps_capEnforced() public {
+        vm.prank(deployer);
+        vm.expectRevert("PotFactory: creator share high");
+        factory.setCreatorFeeShareBps(5001);
     }
 
     function test_communityPot_pays_creation_fee() public {

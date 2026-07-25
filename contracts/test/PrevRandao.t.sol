@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Pot} from "../src/Pot.sol";
 import {PotCard} from "../src/PotCard.sol";
 import {PotFactory} from "../src/PotFactory.sol";
+import {DeployFactory} from "./DeployFactory.sol";
 import {RevealEngine} from "../src/RevealEngine.sol";
 import {AssetManager} from "../src/AssetManager.sol";
 import {Treasury} from "../src/Treasury.sol";
@@ -39,7 +40,7 @@ contract PrevRandaoTest is Test {
         vm.startPrank(deployer);
         treasury = new Treasury(address(usdg), deployer);
         card = new PotCard(deployer);
-        factory = new PotFactory(deployer, address(usdg), address(card));
+        factory = DeployFactory.deploy(deployer, address(usdg), address(card));
         reveal = new RevealEngine(deployer, address(card), address(entropy));
         assets = new AssetManager(deployer, address(usdg), address(router));
         registry = new StockTokenRegistry(deployer);
@@ -84,7 +85,8 @@ contract PrevRandaoTest is Test {
         vm.expectRevert("PrevRandao: too early");
         entropy.fulfill(requestId);
 
-        vm.roll(block.number + 2);
+        // Target block is rb + minDelay (=2); fulfill must land strictly after it.
+        vm.roll(block.number + 3);
         entropy.fulfill(requestId);
 
         assertEq(uint256(Pot(pot).status()), uint256(Pot.Status.Revealed));
@@ -95,5 +97,38 @@ contract PrevRandaoTest is Test {
             assertGt(card.getCard(ids[i]).ownershipWeight, 0);
         }
         assertEq(sum, 1e18);
+    }
+
+    /// A fulfiller must not be able to grind the outcome by choosing WHICH block it submits
+    /// fulfill() in. The seed is bound to blockhash(rb + minDelay), so the resulting random
+    /// word is identical regardless of the fulfill block within the window.
+    function test_prevRandao_seedIndependentOfFulfillBlock() public {
+        // Direct coordinator request via a lightweight consumer that just records the words.
+        RecordingConsumer consumer = new RecordingConsumer();
+        vm.prank(address(consumer));
+        uint256 reqId = entropy.requestRandomWords(bytes32(0), 0, 0, 0, 1);
+        uint256 rb = block.number;
+
+        // Fulfill early in the window (rb + minDelay + 1).
+        uint256 snap = vm.snapshotState();
+        vm.roll(rb + 3);
+        entropy.fulfill(reqId);
+        uint256 wordEarly = consumer.lastWord();
+
+        // Rewind and fulfill much later in the window (rb + maxDelay).
+        vm.revertToState(snap);
+        vm.roll(rb + 64);
+        entropy.fulfill(reqId);
+        uint256 wordLate = consumer.lastWord();
+
+        assertEq(wordEarly, wordLate, "seed must not depend on the fulfill block");
+    }
+}
+
+contract RecordingConsumer {
+    uint256 public lastWord;
+
+    function rawFulfillRandomWords(uint256, uint256[] memory words) external {
+        lastWord = words[0];
     }
 }

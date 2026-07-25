@@ -36,6 +36,12 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
     mapping(address => uint256) public luckEscrow;
     mapping(address => uint256) public luckLockBlock;
 
+    /// @notice Break-glass toggle for the operator-supplied-seed reveal path. Enabled for
+    ///         local/testing flows; production MUST disable it after wiring a coordinator so
+    ///         no operator can hand-pick a reveal seed (which would let them assign rarity /
+    ///         ownership at will). See allocateWithSeed.
+    bool public seededRevealEnabled = true;
+
     event VRFConfigSet(bytes32 keyHash, uint64 subId, uint32 gasLimit);
     event LuckTokenSet(address token, uint256 threshold, uint256 boostBps);
     event LuckLocked(address indexed account, uint256 amount, uint256 total);
@@ -43,6 +49,7 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
     event RevealRequested(address indexed pot, uint256 requestId);
     event RevealFulfilled(address indexed pot, uint256 totalOwnership);
     event OperatorUpdated(address indexed operator, bool allowed);
+    event SeededRevealSet(bool enabled);
 
     modifier onlyOwnerOrOperator() {
         require(msg.sender == owner() || operators[msg.sender], "Reveal: auth");
@@ -68,6 +75,11 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
     function setOperator(address operator, bool allowed) external onlyOwner {
         operators[operator] = allowed;
         emit OperatorUpdated(operator, allowed);
+    }
+
+    function setSeededRevealEnabled(bool enabled) external onlyOwner {
+        seededRevealEnabled = enabled;
+        emit SeededRevealSet(enabled);
     }
 
     function setLuckToken(address token, uint256 threshold, uint256 boostBps) external onlyOwner {
@@ -124,6 +136,7 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
     }
 
     function allocateWithSeed(address pot, uint256 seed) external onlyOwnerOrOperator {
+        require(seededRevealEnabled, "Reveal: seeded off");
         Pot p = Pot(pot);
         require(p.status() == Pot.Status.Purchased, "Reveal: purchased");
         require(!revealRequested[pot], "Reveal: requested");
@@ -185,7 +198,7 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
         uint256 total;
         for (uint256 i = 0; i < n; i++) {
             require(weights[i] > 0, "Reveal: weight");
-            PotCard.Rarity rarity = _rarityFromMultiplier(multipliers[i]);
+            PotCard.Rarity rarity = _rarityFromOwnership(weights[i]);
             card.revealCard(tokenIds[i], weights[i], rarity);
             total += weights[i];
         }
@@ -195,10 +208,12 @@ contract RevealEngine is VRFConsumerBaseV2, Ownable {
         emit RevealFulfilled(pot, total);
     }
 
-    function _rarityFromMultiplier(uint256 multBps) private pure returns (PotCard.Rarity) {
-        if (multBps >= 16_000) return PotCard.Rarity.Legendary;
-        if (multBps >= 12_000) return PotCard.Rarity.Epic;
-        if (multBps >= 9_000) return PotCard.Rarity.Rare;
+    /// @notice Rarity tracks final ownership share (not the luck multiplier alone).
+    /// Legendary ≥40% · Epic ≥20% · Rare ≥8% · else Common.
+    function _rarityFromOwnership(uint256 weight) private pure returns (PotCard.Rarity) {
+        if (weight >= 4e17) return PotCard.Rarity.Legendary;
+        if (weight >= 2e17) return PotCard.Rarity.Epic;
+        if (weight >= 8e16) return PotCard.Rarity.Rare;
         return PotCard.Rarity.Common;
     }
 }
