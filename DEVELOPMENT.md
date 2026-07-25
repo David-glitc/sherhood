@@ -888,3 +888,4 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - **No RH factory redeploy.** Pot / PrevRandao / Reveal hardenings remain on `audit/harden-findings-h1-l8` for V2.
 - Disclosure: roadmap banner + `/docs/v2` + footer “V2 coming soon”.
 - Web UI tree copied to `master` for production; contract changes stay on audit only.
+- Production redeploy from master (`b02b5c4`). Cold download timings: `/` 235ms, `/roadmap` 174ms, `/create` 48ms, `/app` 839ms, `/docs/v2` 453ms. Local Lighthouse blocked (Chrome missing `libatk`); PSI API quota exhausted.
