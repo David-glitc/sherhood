@@ -3,8 +3,14 @@
 import { StockLogo } from "@/components/stocks/stock-logo"
 import { cn } from "@/lib/utils"
 
+/** Outer dashed ring radius in the 340×340 viewBox — logos sit on this path. */
+const ORBIT_R = 142
+const VIEW = 340
+/** Distance from center as a fraction of the square's min side. */
+const ORBIT_FRAC = ORBIT_R / VIEW
+
 /**
- * Sherd pool vault orbit — progress ring + orbiting RH stock logos.
+ * Sherd pool vault orbit — progress ring + stock logos riding the dashed circle.
  * HTML logos (not SVG <image>) so /stocks/*.png always render.
  */
 export function BasketOrbitSvg({
@@ -28,9 +34,11 @@ export function BasketOrbitSvg({
     .slice(0, 5)
 
   return (
-    <div className={cn("relative mx-auto aspect-square w-full max-w-[320px]", className)}>
+    <div
+      className={cn("basket-orbit-root relative mx-auto aspect-square w-full max-w-[320px]", className)}
+    >
       <svg
-        viewBox="0 0 340 340"
+        viewBox={`0 0 ${VIEW} ${VIEW}`}
         className="h-full w-full basket-orbit-svg"
         role="img"
         aria-label={`Pool funding ${pct.toFixed(0)} percent · ${nodes.join(", ")}`}
@@ -80,6 +88,7 @@ export function BasketOrbitSvg({
           className="basket-orbit-progress"
         />
 
+        {/* Outer dashed path — logos ride this ring (72s spin, matched in CSS) */}
         <g>
           <animateTransform
             attributeName="transform"
@@ -92,7 +101,7 @@ export function BasketOrbitSvg({
           <circle
             cx="170"
             cy="170"
-            r="142"
+            r={ORBIT_R}
             fill="none"
             stroke="#333333"
             strokeWidth="1"
@@ -139,11 +148,8 @@ export function BasketOrbitSvg({
         </g>
       </svg>
 
-      {/* Orbiting logos — HTML so PNG assets reliably paint */}
-      <div
-        className="pointer-events-none absolute inset-[11%] basket-orbit-logos"
-        aria-hidden
-      >
+      {/* Logos on the dashed ring — cqmin places them at ORBIT_R/VIEW from center */}
+      <div className="pointer-events-none absolute inset-0 basket-orbit-logos" aria-hidden>
         {nodes.map((label, i) => {
           const angle = (i * 360) / nodes.length - 90
           return (
@@ -151,19 +157,18 @@ export function BasketOrbitSvg({
               key={`${label}-${i}`}
               className="absolute left-1/2 top-1/2"
               style={{
-                width: 0,
-                height: 0,
-                transform: `rotate(${angle}deg) translateY(-50%)`,
+                transform: `rotate(${angle}deg) translateY(calc(-100cqmin * ${ORBIT_FRAC}))`,
               }}
             >
-              <div
-                className="basket-orbit-logo-node absolute flex items-center justify-center rounded-full border border-[#333333] bg-[#0f0f0f] shadow-[0_0_0_1px_rgba(204,255,0,0.22)]"
-                style={{ width: 44, height: 44, left: -22, top: -22 }}
-              >
+              <div className="basket-orbit-logo-node absolute left-0 top-0 flex size-[clamp(2rem,13cqmin,2.75rem)] items-center justify-center rounded-full border border-[#333] bg-[#0f0f0f] shadow-[0_0_0_1px_rgba(204,255,0,0.22)]">
                 {anonymous ? (
                   <span className="size-2.5 rounded-full bg-[#ccff00]/70" />
                 ) : (
-                  <StockLogo symbol={label} size={30} />
+                  <StockLogo
+                    symbol={label}
+                    size={28}
+                    className="[&>div]:border-0 [&>div]:bg-transparent"
+                  />
                 )}
               </div>
             </div>

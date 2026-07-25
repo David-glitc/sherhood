@@ -459,7 +459,12 @@
   }
 }
 
-/* Basket orbit */
+/* Basket orbit — logos ride the dashed ring (r=142/340) */
+.basket-orbit-root {
+  container-type: size;
+  container-name: basket-orbit;
+}
+
 @keyframes basket-orbit-breathe {
   0%, 100% { opacity: 0.14; transform: scale(1); }
   50% { opacity: 0.28; transform: scale(1.05); }
@@ -488,14 +493,17 @@
   to { transform: rotate(360deg); }
 }
 @keyframes basket-orbit-counter {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
 }
+/* Match SVG dashed-ring dur="72s" so logos stay on the path visually */
 .basket-orbit-logos {
-  animation: basket-orbit-spin 36s linear infinite;
+  animation: basket-orbit-spin 72s linear infinite;
+  transform-origin: center center;
 }
 .basket-orbit-logo-node {
-  animation: basket-orbit-counter 36s linear infinite;
+  /* translate keeps the node centered on the orbit point while counter-spinning */
+  animation: basket-orbit-counter 72s linear infinite;
 }
 
 /* Token chart draw-in */

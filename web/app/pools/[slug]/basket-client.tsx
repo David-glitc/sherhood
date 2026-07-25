@@ -281,10 +281,15 @@ function BasketView({ address }: { address: `0x${string}` }) {
         <div className="mt-6 grid gap-8 sm:mt-8 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] lg:items-start lg:gap-12">
           <aside className="order-1 min-w-0 space-y-4 lg:order-2 lg:sticky lg:top-20">
             {acceptingDeposits ? (
-              <div className="rounded-[22px] border border-[#333333] bg-[#0a0a0a] p-5 shadow-[0_0_60px_rgba(204,255,0,0.04)] sm:p-7">
-                <p className="text-[12px] tracking-[0.14em] text-[#666666]">MINT</p>
+              <div className="rounded-[22px] border border-[#ccff00]/25 bg-[#0a0a0a] p-5 shadow-[0_0_60px_rgba(204,255,0,0.06)] sm:p-7">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#ccff00]">
+                  Mint a Sherd
+                </p>
+                <p className="mt-1.5 text-[13px] leading-5 text-[#777]">
+                  Drop USDG · sealed card until reveal
+                </p>
                 <FundAmountPanel
-                  className="mt-3"
+                  className="mt-4"
                   potAddress={address}
                   minDeposit={pot.minDeposit}
                   entryFee={pot.entryFee}
@@ -398,52 +403,61 @@ function BasketView({ address }: { address: `0x${string}` }) {
           </aside>
 
           <div className="order-2 min-w-0 lg:order-1">
-            {/* Hero: text + orbit */}
-            <div className="flex flex-col items-stretch gap-6 sm:grid sm:grid-cols-[1fr_minmax(180px,260px)] sm:items-center sm:gap-8">
-              <div className="min-w-0">
+            {/* Hero: orbit as the visual, title as the signal */}
+            <div className="flex flex-col items-center gap-8 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(200px,300px)] sm:items-center sm:gap-10">
+              <div className="order-2 min-w-0 w-full text-center sm:order-1 sm:text-left">
                 <p
                   className={cn(
-                    "inline-flex max-w-full flex-wrap items-center gap-x-2 rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.14em]",
-                    isFunding
-                      ? "bg-[#ccff00]/12 text-[#ccff00]"
-                      : "bg-[#191919] text-[#999999]"
+                    "inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 text-[12px] font-medium tracking-wide sm:justify-start",
+                    isFunding ? "text-[#ccff00]" : "text-[#999999]"
                   )}
                 >
-                  <span>{status.toUpperCase()}</span>
-                  <span className="opacity-40">·</span>
-                  <span className="font-medium tracking-normal text-[#999999]">
-                    {deadlineLabel(pot.deadline)}
-                  </span>
+                  <span className="font-semibold uppercase tracking-[0.14em]">{status}</span>
+                  <span className="text-[#444]">·</span>
+                  <span className="tracking-normal text-[#888]">{deadlineLabel(pot.deadline)}</span>
                 </p>
-                <h1 className="mt-4 break-words text-[34px] font-normal leading-[1.05] tracking-[-0.6px] text-[#e5e7eb] sm:text-[48px]">
+                <h1 className="mt-3 break-words text-[36px] font-normal leading-[1.02] tracking-[-0.8px] text-[#e5e7eb] sm:mt-4 sm:text-[48px]">
                   {title}
                 </h1>
-                <p className="mt-3 max-w-md text-[14px] leading-6 tracking-[-0.2px] text-[#999999] sm:text-[15px]">
+                <p className="mx-auto mt-3 max-w-md text-[15px] leading-6 tracking-[-0.2px] text-[#999999] sm:mx-0">
                   {acceptingDeposits
-                    ? "Mint a sealed Sherd. Reveal lands ~0.5×–2× deposit share."
+                    ? "Mint a sealed Sherd. Reveal lands ~0.5×–2× your deposit share."
                     : pot.holdings.length > 0
-                      ? `${pot.holdings.length}-asset vault · claim your cut.`
+                      ? `${pot.holdings.length}-asset vault — claim your cut when ready.`
                       : readyToEnd
-                        ? "Window closed — End pool to buy + reveal."
-                        : "Buy + reveal run automatically."}
+                        ? "Window closed — end the pool to buy stocks and reveal."
+                        : "Buy + reveal run automatically after funding."}
+                </p>
+                <p className="mt-4 text-[13px] tabular-nums text-[#666]">
+                  <span className="text-[#e5e7eb]">${fmtUsdg(pot.totalDeposited)}</span>
+                  <span className="text-[#444]"> / </span>
+                  ${fmtUsdg(pot.fundingGoal)}
+                  <span className="mx-2 text-[#333]">·</span>
+                  {Number(pot.participantCount)} joined
+                  {pot.minDeposit > 0n ? (
+                    <>
+                      <span className="mx-2 text-[#333]">·</span>
+                      min ${fmtUsdg(pot.minDeposit)}
+                    </>
+                  ) : null}
                 </p>
                 <ShareButton
-                  className="mt-5"
+                  className="mt-5 sm:mt-6"
                   path={`/pools/${address}`}
                   title={`${title} on Sherhood`}
                   text={`${title} · ${status}. ${SHERHOOD_TAGLINE}.`}
-                  label="Share pool"
+                  label="Share"
                 />
               </div>
               <BasketOrbitSvg
                 progress={progress}
                 symbols={orbitSymbols}
                 anonymous={false}
-                className="w-[220px] sm:w-full sm:max-w-[260px] lg:max-w-[300px] sm:justify-self-end"
+                className="order-1 w-[280px] sm:order-2 sm:w-full sm:max-w-[300px] lg:max-w-[320px] sm:justify-self-end"
               />
             </div>
 
-            <div className="mt-6 sm:mt-8">
+            <div className="mt-8 sm:mt-10">
               <PoolDetailTabs
                 tab={tab}
                 onTabChange={setTab}
@@ -460,19 +474,28 @@ function BasketView({ address }: { address: `0x${string}` }) {
                 }}
                 overview={
                   <>
-                    <div className="rounded-[22px] border border-[#333333] bg-[#0a0a0a]/80 p-5 sm:p-8">
-                      <p className="text-[12px] tracking-[0.12em] text-[#666666]">RAISED</p>
-                      <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <span className="text-[40px] font-normal leading-none tracking-[-1.5px] text-[#e5e7eb] sm:text-[56px]">
-                          ${fmtUsdg(pot.totalDeposited)}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-[16px] text-[#666666] sm:text-[18px]">
-                          / ${fmtUsdg(pot.fundingGoal)}
-                          <UsdgLogo size={16} />
-                        </span>
-                      </p>
+                    <div className="border-b border-[#1f1f1f] pb-6 sm:pb-8">
+                      <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#666]">
+                            Raised
+                          </p>
+                          <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <span className="text-[40px] font-normal leading-none tracking-[-1.5px] text-[#e5e7eb] sm:text-[52px]">
+                              ${fmtUsdg(pot.totalDeposited)}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 text-[15px] text-[#666]">
+                              of ${fmtUsdg(pot.fundingGoal)}
+                              <UsdgLogo size={15} />
+                            </span>
+                          </p>
+                        </div>
+                        <p className="text-[13px] tabular-nums text-[#888]">
+                          {progress.toFixed(0)}% filled
+                        </p>
+                      </div>
                       <div
-                        className="mt-5 h-2.5 overflow-hidden rounded-full bg-[#1a1a1a] sm:mt-6"
+                        className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#1a1a1a]"
                         role="progressbar"
                         aria-label="Pool funding progress"
                         aria-valuemin={0}
@@ -484,52 +507,40 @@ function BasketView({ address }: { address: `0x${string}` }) {
                           style={{ width: `${progress}%` }}
                         />
                       </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
+                      <p className="mt-3 text-[12px] leading-relaxed text-[#555]">
                         {[
-                          `${progress.toFixed(0)}% filled`,
-                          `${Number(pot.participantCount)} joined`,
-                          `min $${fmtUsdg(pot.minDeposit)}`,
-                          pot.entryFee > 0n ? `entry $${fmtUsdg(pot.entryFee)}` : null,
-                          `protocol ${Number(pot.protocolFeeBps) / 100}%`,
+                          pot.entryFee > 0n ? `Entry $${fmtUsdg(pot.entryFee)}` : null,
+                          `Protocol ${Number(pot.protocolFeeBps) / 100}%`,
                           pot.holdings.length > 0
-                            ? `${pot.holdings.length} stocks`
-                            : null,
+                            ? `${pot.holdings.length} stocks in vault`
+                            : acceptingDeposits
+                              ? "Stocks picked at close"
+                              : null,
                         ]
                           .filter(Boolean)
-                          .map((t) => (
-                            <span
-                              key={String(t)}
-                              className="rounded-full border border-[#333333] px-3 py-1 text-[12px] text-[#999999]"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                      </div>
-                      <p className="mt-4 text-[11px] leading-relaxed text-white/30">
-                        Dividends coming soon — vault stock dividends will route to Sherd holders
-                        in a later release. Marks above are spot marks only.
+                          .join(" · ")}
                       </p>
                     </div>
 
-                    <div className="mt-5 rounded-[22px] border border-[#333333] bg-gradient-to-b from-[#0c0c0c] to-[#080808] p-4 sm:mt-6 sm:p-5">
+                    <div className="mt-6 sm:mt-8">
                       <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-[12px] tracking-[0.12em] text-[#666666]">
-                          {title} · holders
+                        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#666]">
+                          Holders
                         </p>
                         <button
                           type="button"
                           onClick={() => setTab("sherds")}
                           className="text-[12px] text-[#ccff00] hover:underline"
                         >
-                          View Sherds →
+                          All Sherds →
                         </button>
                       </div>
                       {deposits.length === 0 ? (
-                        <p className="mt-4 rounded-[14px] border border-dashed border-[#2a2a2a] px-4 py-6 text-center text-[14px] text-[#666666]">
-                          Empty table — drop in to mint the first Sherd.
+                        <p className="mt-4 border border-dashed border-[#2a2a2a] px-4 py-8 text-center text-[14px] text-[#666]">
+                          No Sherds yet — mint to open the table.
                         </p>
                       ) : (
-                        <ul className="scroll-mask-y mt-3 max-h-56 space-y-2 pr-1">
+                        <ul className="scroll-mask-y mt-3 max-h-56 space-y-1.5 pr-1">
                           {deposits.slice(0, 8).map(({ tokenId, owner, card: c }) => {
                             const p = owner ? getProfile(owner) : null
                             const shareLabel = c
@@ -540,7 +551,7 @@ function BasketView({ address }: { address: `0x${string}` }) {
                             return (
                               <li
                                 key={tokenId.toString()}
-                                className="flex items-center gap-3 rounded-[14px] border border-[#1f1f1f] bg-black/50 px-3 py-2.5"
+                                className="flex items-center gap-3 border-b border-[#141414] px-1 py-2.5 last:border-0"
                               >
                                 <Link
                                   href={`/sherds/${tokenId.toString()}`}
@@ -557,7 +568,7 @@ function BasketView({ address }: { address: `0x${string}` }) {
                                       size={24}
                                     />
                                   ) : (
-                                    <span className="text-[13px] text-[#666666]">—</span>
+                                    <span className="text-[13px] text-[#666]">—</span>
                                   )}
                                 </div>
                                 <div className="shrink-0 text-right">
@@ -577,21 +588,20 @@ function BasketView({ address }: { address: `0x${string}` }) {
                       )}
                     </div>
 
-                    <div className="mt-5 sm:mt-6">
+                    <div className="mt-6 sm:mt-8">
                       <PoolActivityFeed potAddress={address} />
                     </div>
 
-                    <p className="mt-4 px-1 text-[11px] leading-relaxed text-white/28">
-                      Footnotes · Dividends coming soon. Protocol fee and entry fees are separate
-                      from vault mark. Claiming burns your Sherd and sends stock tokens to your
-                      wallet.
+                    <p className="mt-5 text-[11px] leading-relaxed text-[#444]">
+                      Claiming burns your Sherd and sends vault stocks to your wallet. Dividends
+                      route later — marks are spot only.
                     </p>
 
                     {myDeposits.length > 0 && (
-                      <div className="mt-6 sm:mt-8">
+                      <div className="mt-8 border-t border-[#1f1f1f] pt-6 sm:mt-10 sm:pt-8">
                         <div className="flex items-baseline justify-between gap-3">
-                          <p className="text-[12px] tracking-[0.12em] text-[#666666]">
-                            YOUR SHERDS
+                          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#666]">
+                            Your Sherds
                           </p>
                           {pot.status === 3 ? (
                             <button
@@ -614,7 +624,7 @@ function BasketView({ address }: { address: `0x${string}` }) {
                             return (
                               <li
                                 key={tokenId.toString()}
-                                className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#333333] bg-[#0a0a0a] p-4"
+                                className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#2a2a2a] bg-[#0a0a0a] p-4"
                               >
                                 <div className="min-w-0">
                                   <p className="text-[15px] text-[#e5e7eb]">
@@ -624,11 +634,11 @@ function BasketView({ address }: { address: `0x${string}` }) {
                                     >
                                       #{tokenId.toString()}
                                     </Link>
-                                    <span className="ml-2 rounded-full bg-[#191919] px-2 py-0.5 text-[11px] text-[#999999]">
+                                    <span className="ml-2 text-[11px] text-[#777]">
                                       {c.revealed ? RARITIES[rarityIdx] : "Sealed"}
                                     </span>
                                   </p>
-                                  <p className="mt-1 text-[13px] text-[#999999]">
+                                  <p className="mt-1 text-[13px] text-[#888]">
                                     ${fmtUsdg(c.depositAmount)}
                                     {c.revealed
                                       ? ` · ${ownershipPct(c.ownershipWeight)}%`

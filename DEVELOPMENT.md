@@ -889,3 +889,8 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - Disclosure: roadmap banner + `/docs/v2` + footer “V2 coming soon”.
 - Web UI tree copied to `master` for production; contract changes stay on audit only.
 - Production redeploy from master (`b02b5c4`). Cold download timings: `/` 235ms, `/roadmap` 174ms, `/create` 48ms, `/app` 839ms, `/docs/v2` 453ms. Local Lighthouse blocked (Chrome missing `libatk`); PSI API quota exhausted.
+
+## 2026-07-25 21:30 UTC — Orbit logos on dashed ring + pool UX
+
+- BasketOrbitSvg: logos placed at dashed-ring radius (142/340 via cqmin) and spin with the ring (72s); counter-spin keeps marks upright.
+- Pool page UX: orbit-first hero on mobile, cleaner raised/holders (no pill cluster), clearer Mint CTA, less card chrome.
