@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g5" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1a2810"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g5)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- horns -->
+  <path d="M42 36c-6-14-4-22 2-26 2 8 4 16 0 26z" fill="#ccff00" opacity=".9"/>
+  <path d="M86 36c6-14 4-22-2-26-2 8-4 16 0 26z" fill="#ccff00" opacity=".9"/>
+  <path d="M42 36c-3-8-2-14 0-18" stroke="#050806" stroke-width="1.5" opacity=".4"/>
+  <path d="M86 36c3-8 2-14 0-18" stroke="#050806" stroke-width="1.5" opacity=".4"/>
+  <!-- hood body -->
+  <path d="M28 92c5-38 20-58 36-58s31 20 36 58c-9 12-21 18-36 18S37 104 28 92z" fill="#0d150a" stroke="#2e4416" stroke-width="1.5"/>
+  <path d="M36 88c6-30 16-46 28-46s22 16 28 46c-6 8-16 12-28 12s-22-4-28-12z" fill="#152010"/>
+  <path d="M42 70c7-14 14-20 22-20s15 6 22 20c-5 4-13 6-22 6s-17-2-22-6z" fill="#0a1007" stroke="#ccff00" stroke-width="1.1"/>
+  <ellipse cx="64" cy="82" rx="15" ry="17" fill="#030503"/>
+  <ellipse cx="57" cy="80" rx="3.5" ry="4.5" fill="#ccff00"/>
+  <ellipse cx="71" cy="80" rx="3.5" ry="4.5" fill="#ccff00"/>
+  <circle cx="57.8" cy="78.5" r="1.2" fill="#050806" opacity=".45"/>
+  <circle cx="71.8" cy="78.5" r="1.2" fill="#050806" opacity=".45"/>
+  <!-- brow ridge -->
+  <path d="M50 72h8M70 72h8" stroke="#ccff00" stroke-width="1.5" stroke-linecap="round" opacity=".55"/>
+</svg>

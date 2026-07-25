@@ -20,9 +20,9 @@ export function CtaSection() {
         <div aria-hidden className="hero-grid absolute inset-0 opacity-20" />
         <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em]">Your first card starts with one basket.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em]">Your first card starts with one pool.</p>
             <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-[0.95] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
-              Choose the basket. Set the amount. See what your card reveals.
+              Choose the pool. Set the amount. See what your card reveals.
             </h2>
           </div>
           <div className="flex flex-col gap-3 min-[420px]:flex-row lg:flex-col">
@@ -33,7 +33,7 @@ export function CtaSection() {
                 "group h-12 min-w-44 justify-between bg-background px-5 text-foreground hover:bg-background/90"
               )}
             >
-              Explore baskets
+              Explore pools
               <ArrowRight data-icon="inline-end" className="transition-transform group-hover:translate-x-1" />
             </Link>
             <Link

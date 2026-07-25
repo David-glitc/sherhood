@@ -34,14 +34,16 @@ w_i = raw_i × 1e18 / Σ raw_j
 
 3. Floor repair: if any `w_i == 0` after integer division, set to `1` and steal overflow from the largest weight so the sum remains `1e18`.
 
-4. Rarity from multiplier band:
+4. Rarity from **final ownership share** (not the luck multiplier alone):
 
-| Multiplier | Rarity |
-|------------|--------|
-| [0.50, 0.90) | Common |
-| [0.90, 1.20) | Rare |
-| [1.20, 1.60) | Epic |
-| [1.60, 2.00] | Legendary |
+| Ownership share | Rarity |
+|-----------------|--------|
+| ≥ 40% | Legendary |
+| ≥ 20% | Epic |
+| ≥ 8% | Rare |
+| else | Common |
+
+Luck multipliers still reshape weights; rarity labels the resulting claim size.
 
 ## Expected value (transparent)
 
@@ -98,4 +100,4 @@ Rounding dust remains on the pot until all cards claim; owner may sweep dust.
 
 ## Implementation reference
 
-`contracts/src/RevealEngine.sol` — `_allocate`, `_rarityFromMultiplier`
+`contracts/src/RevealEngine.sol` — `_allocate`, `_rarityFromOwnership`

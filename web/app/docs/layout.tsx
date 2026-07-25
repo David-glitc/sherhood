@@ -12,7 +12,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             Docs
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Learn how baskets, cards, trading, and claims work.
+            Learn how pools, cards, trading, and claims work.
           </p>
         </div>
         <Link href="/app" className={buttonVariants()}>

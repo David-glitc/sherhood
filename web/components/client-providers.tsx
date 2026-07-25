@@ -1,45 +1,76 @@
 "use client"
 
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
+import dynamic from "next/dynamic"
+import { usePathname } from "next/navigation"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import {
-  RainbowKitProvider,
-  darkTheme,
-  getDefaultConfig,
-} from "@rainbow-me/rainbowkit"
-import { WagmiProvider } from "wagmi"
-import { MotionConfig } from "framer-motion"
-import { robinhood } from "@/lib/chain"
-import "@rainbow-me/rainbowkit/styles.css"
+import { WalletBootProvider, useWalletBoot } from "@/components/providers/wallet-boot"
+import { isMarketingPath } from "@/lib/marketing-path"
+import { usePoolNamesHydration } from "@/hooks/use-pool-names"
+import { ProtocolActivityToasts } from "@/hooks/use-protocol-activity-toasts"
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "demo"
+const WalletShell = dynamic(
+  () => import("@/components/providers/wallet-shell").then((m) => m.WalletShell),
+  { ssr: false }
+)
 
-const wagmiConfig = getDefaultConfig({
-  appName: "Sherhood",
-  projectId,
-  chains: [robinhood],
-  ssr: true,
-})
+const RelayBoot = dynamic(
+  () => import("@/components/providers/relay-boot").then((m) => m.RelayBoot),
+  { ssr: false }
+)
+
+function needsRelay(pathname: string): boolean {
+  return (
+    pathname.startsWith("/bridge") ||
+    pathname.startsWith("/create") ||
+    pathname.startsWith("/deck") ||
+    pathname.startsWith("/buy-shrd")
+  )
+}
+
+function ProvidersInner({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || "/"
+  const { ready } = useWalletBoot()
+  const withRelay = needsRelay(pathname)
+  usePoolNamesHydration()
+
+  useEffect(() => {
+    if (isMarketingPath(pathname)) {
+      void import("@/components/providers/wallet-shell")
+    }
+  }, [pathname])
+
+  if (!ready) return <>{children}</>
+
+  const shell = (
+    <WalletShell>
+      <ProtocolActivityToasts />
+      {children}
+    </WalletShell>
+  )
+  return withRelay ? <RelayBoot>{shell}</RelayBoot> : shell
+}
 
 export function ClientProviders({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            gcTime: 5 * 60_000,
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  )
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          initialChain={robinhood}
-          theme={darkTheme({
-            accentColor: "#ccff00",
-            accentColorForeground: "#050806",
-            borderRadius: "large",
-            fontStack: "system",
-            overlayBlur: "small",
-          })}
-        >
-          <MotionConfig reducedMotion="user">{children}</MotionConfig>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <QueryClientProvider client={queryClient}>
+      <WalletBootProvider>
+        <ProvidersInner>{children}</ProvidersInner>
+      </WalletBootProvider>
+    </QueryClientProvider>
   )
 }

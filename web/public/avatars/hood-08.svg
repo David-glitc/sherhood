@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g8" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#1b2912"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g8)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- asymmetric rogue hood -->
+  <path d="M30 90c4-40 16-60 32-62 18-2 34 16 38 58-6 14-18 22-36 22S36 104 30 90z" fill="#0d150a" stroke="#355018" stroke-width="1.5"/>
+  <path d="M38 88c5-32 14-50 26-50 14 0 26 16 30 48-6 10-16 14-28 14S42 96 38 88z" fill="#152010"/>
+  <!-- diagonal sash -->
+  <path d="M28 48l72 52" stroke="#ccff00" stroke-width="8" opacity=".2" stroke-linecap="round"/>
+  <path d="M30 50l68 48" stroke="#ccff00" stroke-width="3" opacity=".75" stroke-linecap="round"/>
+  <path d="M42 68c6-12 12-18 20-18 10 0 18 8 22 20-5 3-12 5-20 5s-16-2-22-7z" fill="#0a1007" stroke="#ccff00" stroke-width="1"/>
+  <ellipse cx="62" cy="80" rx="14" ry="16" fill="#030503"/>
+  <circle cx="55" cy="78" r="3.4" fill="#ccff00"/>
+  <circle cx="69" cy="78" r="3.4" fill="#ccff00"/>
+  <!-- scar -->
+  <path d="M74 70l8 12" stroke="#ccff00" stroke-width="1.5" opacity=".55" stroke-linecap="round"/>
+  <circle cx="96" cy="40" r="4" fill="none" stroke="#ccff00" stroke-width="1.5" opacity=".5"/>
+</svg>

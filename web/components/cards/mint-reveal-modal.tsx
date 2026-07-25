@@ -45,10 +45,10 @@ export function MintRevealModal({
         <div className="mb-6 text-center">
           <p className="font-heading text-xs uppercase tracking-[0.35em] text-sherhood">Minted</p>
           <h2 id="mint-modal-title" className="mt-2 text-2xl font-bold text-white">
-            Mystery Card Secured
+            Sherd secured
           </h2>
           <p className="mt-2 text-sm text-white/45">
-            {stockLabel ? `${stockLabel} basket` : "Your basket"} — ownership reveals after allocation.
+            Sealed until the pool reveals ownership.
           </p>
         </div>
 

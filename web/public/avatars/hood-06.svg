@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g6" cx="48%" cy="36%" r="64%">
+      <stop offset="0%" stop-color="#1d2c14"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g6)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- scout hood with side flaps -->
+  <path d="M24 86c8-40 22-58 40-58s32 18 40 58c-10 16-24 24-40 24S34 102 24 86z" fill="#0c1409" stroke="#314a16" stroke-width="1.5"/>
+  <path d="M34 84c7-32 18-48 30-48s23 16 30 48c-7 10-17 16-30 16s-23-6-30-16z" fill="#141f0e"/>
+  <path d="M22 78c2-8 6-12 10-14" stroke="#ccff00" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+  <path d="M106 78c-2-8-6-12-10-14" stroke="#ccff00" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+  <!-- quiver chevrons -->
+  <path d="M54 44l10 6 10-6" stroke="#ccff00" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M56 50l8 5 8-5" stroke="#ccff00" stroke-width="1.5" fill="none" opacity=".55"/>
+  <ellipse cx="64" cy="78" rx="16" ry="18" fill="#030503"/>
+  <ellipse cx="64" cy="76" rx="12" ry="13" fill="#080c06"/>
+  <circle cx="56" cy="74" r="3.2" fill="#ccff00"/>
+  <circle cx="72" cy="74" r="3.2" fill="#ccff00"/>
+  <path d="M58 86c2 3 4 4 6 4s4-1 6-4" stroke="#ccff00" stroke-width="1.2" fill="none" opacity=".4"/>
+  <!-- strap -->
+  <path d="M40 58l48 28" stroke="#ccff00" stroke-width="2.5" opacity=".35" stroke-linecap="round"/>
+</svg>

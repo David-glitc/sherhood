@@ -15,8 +15,12 @@ export function computeDerivedShare(params: {
   return (params.depositAmount * 10n ** 18n) / params.totalDeposited
 }
 
-/** Human percent string, e.g. "3.80". */
+/** Human percent string, e.g. "100" or "3.8". */
 export function shareToPct(share: bigint, digits = 2): string {
   const pct = Number(share) / 1e16
-  return pct.toFixed(digits)
+  if (!Number.isFinite(pct)) return "0"
+  const nearest = Math.round(pct)
+  if (Math.abs(pct - nearest) < 0.005) return String(nearest)
+  const fixed = pct.toFixed(digits)
+  return fixed.replace(/\.?0+$/, "")
 }

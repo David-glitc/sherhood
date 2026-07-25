@@ -63,7 +63,7 @@ export function HeroAcreSvg({ className = "" }: { className?: string }) {
         viewBox="0 0 420 420"
         className="h-full w-full hero-acre-svg"
         role="img"
-        aria-label="Stock tokens orbiting a Sherhood basket"
+        aria-label="Stock tokens orbiting a Sherhood Sherd pool"
       >
         <defs>
           <radialGradient id="acre-core" cx="50%" cy="50%" r="50%">

@@ -1,0 +1,47 @@
+---
+title: Positions and claims
+description: Hold after reveal, claim when you want, and track position mark
+---
+
+# Positions and claims
+
+After reveal, your Sherd is a **position** in the pool’s stock tokens. Claiming is optional — you can hold indefinitely, trade the card, or claim when you want the underlying tokens in your wallet.
+
+## Interaction rules
+
+| Stage | Allowed | Not allowed |
+|-------|---------|-------------|
+| **Funding** | Fund, early exit (−5%), trade sealed card | Claim stock tokens |
+| **Closed / Purchased** | Hold, trade | Early exit, claim |
+| **Revealed** | Hold, trade, claim anytime | Early exit, refund |
+| **Cancelled** | Full deposit refund | Claim, trade as a live position |
+
+## Position growth
+
+While your Sherd is revealed and **unclaimed**:
+
+- You own a fixed **ownership %** of the pool’s stock holdings.
+- The **mark** of that position moves with live stock prices (same quotes used on profile / inventory).
+- Claiming converts that share into ERC-20 stock tokens in your wallet and burns the Sherd.
+- Holding does not earn extra ownership — growth is price mark, not dilution.
+
+## Tight rules (product)
+
+1. **No forced claim** — dust sweeps wait until every participant has claimed.
+2. **One claim per Sherd** — claim burns the card; it cannot be listed again.
+3. **Trade before claim** — listed cards must be delisted (or sold) before claim.
+4. **Early exit only while Funding** — after close, wait for reveal (or cancel/refund if the pool never filled).
+5. **Cancel path** — if the deadline passes under goal and the pool is cancelled, refund recovers your deposit (entry fee stays with the protocol).
+
+## Why hold unclaimed?
+
+- Keep a tradable Sherd on OpenSea or Sherhood Trade.
+- Track mark / day move on your profile without claiming.
+- Claim later when you want the tokens in-wallet.
+
+## Next steps
+
+- [How Sherhood works](/docs/protocol)
+- [Exits and refunds](/docs/early-exit)
+- [Card value](/docs/pricing)
+- [OpenSea](/docs/opensea)

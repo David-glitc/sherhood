@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
+import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts"
 import { cn } from "@/lib/utils"
 
 type SeriesPoint = { t: number; c: number }
@@ -17,24 +18,6 @@ type StockPriceChartProps = {
   className?: string
   height?: number
   showPrice?: boolean
-}
-
-const VIEW_W = 88
-
-function sparkPath(series: SeriesPoint[], width: number, height: number): string {
-  if (series.length < 2) return ""
-  const prices = series.map((p) => p.c)
-  const min = Math.min(...prices)
-  const max = Math.max(...prices)
-  const span = max - min || 1
-  const step = width / (series.length - 1)
-  return series
-    .map((p, i) => {
-      const x = i * step
-      const y = height - ((p.c - min) / span) * (height - 4) - 2
-      return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`
-    })
-    .join(" ")
 }
 
 export function StockPriceChart({
@@ -66,10 +49,6 @@ export function StockPriceChart({
 
   const up = (data?.changePct ?? 0) >= 0
   const stroke = up ? "#ccff00" : "#f87171"
-  const path = useMemo(
-    () => (data?.series ? sparkPath(data.series, VIEW_W, height) : ""),
-    [data, height]
-  )
 
   // Reserve identical space for loading / failed / loaded — no layout shift.
   const totalHeight = height + (showPrice ? 16 : 0)
@@ -98,23 +77,29 @@ export function StockPriceChart({
           )}
         </div>
       )}
-      {data ? (
-        <svg
-          viewBox={`0 0 ${VIEW_W} ${height}`}
-          className="block h-auto w-full"
-          preserveAspectRatio="xMidYMid meet"
-          aria-label={`${symbol} 5-day price chart`}
-        >
-          <path
-            d={path}
-            fill="none"
-            stroke={stroke}
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+      {data && data.series.length > 1 ? (
+        <div style={{ height }} aria-label={`${symbol} 5-day price chart`} role="img">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data.series} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
+              <defs>
+                <linearGradient id={`spark-${symbol}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={stroke} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={stroke} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <YAxis domain={["dataMin", "dataMax"]} hide />
+              <Area
+                type="monotone"
+                dataKey="c"
+                stroke={stroke}
+                strokeWidth={1.75}
+                fill={`url(#spark-${symbol})`}
+                dot={false}
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       ) : (
         <div
           className={cn("w-full rounded-md bg-white/[0.04]", !failed && "animate-pulse")}

@@ -8,16 +8,16 @@ import { StockLogoStack } from "@/components/stocks/stock-logo"
 const steps = [
   {
     number: "01",
-    label: "Fund",
-    title: "Choose a live basket.",
+    label: "Drop in",
+    title: "Choose a live pool.",
     copy: "Pay with USDG, ETH, or WETH. Your deposit mints a sealed card immediately.",
     symbols: ["AAPL", "NVDA"],
   },
   {
     number: "02",
     label: "Close",
-    title: "The basket buys its stocks.",
-    copy: "When funding closes, the basket buys 2 to 5 stock tokens from the live pool.",
+    title: "The pool buys its stocks.",
+    copy: "When funding closes, the pool buys 2 to 5 stock tokens from the live pool.",
     symbols: ["MSFT", "GOOGL", "SPY"],
   },
   {
@@ -39,10 +39,10 @@ export function HowItWorksSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">The flow</p>
           <h2 className="mt-4 max-w-md text-4xl font-semibold leading-[0.98] tracking-[-0.045em] sm:text-5xl">
             One deposit.
-            <span className="block text-muted-foreground">A basket of stocks.</span>
+            <span className="block text-muted-foreground">A pool of stocks.</span>
           </h2>
           <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
-            You don’t pick individual tickers or calculate allocations. Choose the basket and the amount. Your card carries the ownership claim.
+            You don’t pick individual tickers or calculate allocations. Choose the pool and the amount. Your card carries the ownership claim.
           </p>
           <Link
             href="/docs/getting-started"

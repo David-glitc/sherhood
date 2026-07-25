@@ -49,7 +49,7 @@ export function HeroSection() {
             transition={{ delay: 0.16, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             className="mt-4 text-[34px] font-normal leading-[1.1] tracking-[-0.6px] text-[#e5e7eb] sm:text-[48px] sm:leading-[1.05] lg:text-[58px] lg:leading-[1]"
           >
-            Fund a basket.
+            Drop into a pool.
             <br />
             <span className="text-[#999999]">Reveal your share.</span>
           </motion.h1>
@@ -60,7 +60,7 @@ export function HeroSection() {
             transition={{ delay: 0.24, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="mt-5 max-w-md text-base font-normal leading-[24px] tracking-[-0.4px] text-[#999999]"
           >
-            Put money into a shared basket. When it fills, the basket buys real
+            Put money into a shared Sherd pool. When it fills, the pool buys real
             Robinhood stock tokens. You get a mystery card. At reveal, the card
             shows your share.
           </motion.p>
@@ -75,7 +75,7 @@ export function HeroSection() {
               href="/app"
               className="inline-flex min-h-11 items-center rounded-[14px] bg-[#ccff00] px-8 py-4 text-base font-semibold text-black transition hover:brightness-110"
             >
-              Open baskets
+              Open Sherd pools
             </Link>
             <Link
               href="/#how"

@@ -397,3 +397,494 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - Rebuilt `/profile` as a dashboard: stat tiles (deposited, cards, XP, streak), portfolio-over-time SVG area chart, aggregated claimable asset holdings, active pool list, horizontal card rail, active Trade listings with cancel, XP-tagged activity feed, and the existing wallet/legal/clear-data sections.
 - Deployed prior landing/docs work to production before starting (commit e8ad05f, sherhood.xyz verified).
 - Verification: ESLint clean, TypeScript clean, production build clean (31 routes).
+
+## 2026-07-17 14:15 (UTC+1) — Max funding window 30 days
+
+- `PotFactory.maxDuration` default: 365 days → **30 days** (owner can still retune via `setDurationBounds`).
+- Create UI + `useCreateCommunityPot`: reject windows over 720 hours; custom input clamped to 30 days; copy updated.
+
+## 2026-07-17 15:05 (UTC+1) — Participant cap + pre-deploy contract review
+
+- Pre-deploy review: confirmed only intended contract diffs (30d max window). Found and closed one gap: no cap on cards per basket while RevealEngine allocates all cards in one tx — spam dust deposits could brick reveal via block gas.
+- `PotFactory.maxParticipants = 250` (owner-tunable via `setMaxParticipants`); `Pot._deposit` reverts `Pot: full` at the cap; early exits free slots.
+- Tests: 72/72 (added `test_revert_maxParticipants_full`, `test_earlyExit_frees_participant_slot`). ABIs regenerated (PotFactory, CardMarketplace). Web TS clean.
+
+## 2026-07-17 15:35 (UTC+1) — Fresh RH mainnet deploy + verify + web sync
+
+- Deployed fresh Sherhood stack to Robinhood Chain 4663 via `sherhood-deploy.sh` (gas ~0.0032 ETH), 25-stock whitelist registered, **all 9 contracts Blockscout-verified**.
+- Addresses: FACTORY `0x6a03aE2e1A5E5521d044Ed2cdFe24947E0CD92a1`, CARD `0x646F4Dcb5f863bC9650C743556C478d8eD640773`, ENTRY `0xd9150AD48bB7199e0BcE1949f1F9E07962971469`, MARKET `0x92D31fcE7b6365Ec27cF75Bc4A0CFCF458F5f343`, TREASURY `0x62cbf96cE2eDbc9218135385B009bF596F51325C`, REGISTRY `0xDB8e527E47228CDbfbC45ee70ec460E21F41383f`, REVEAL `0xDeb6E3536DEA5D628C0d7540e8EF979eaB8925EE`, ASSETS `0x9313589D663A48D018360C2A62083B6e30194E80`, PREVRANDAO `0x95B73c5780437Ce92258f8074878287dFC8ed314`.
+- On-chain limits confirmed: minDuration 1h, maxDuration 30d, maxParticipants 250, minFundingGoal 1 USDG, creationFee 5 USDG.
+- Web: `.env.local` + Vercel prod env synced to new addresses; fixed `use-pots.ts` ("use client" removed — pure helpers now server-safe, `/api/stats` had 500ed); prod deploy verified on sherhood.xyz (stats API + /app render fresh stack).
+- Post-launch TODO: `RevealEngine.setLuckToken` once $SHRH launches.
+
+## 2026-07-17 15:55 (UTC+1) — 3 launch baskets + API cache fix
+
+- Created 3 owner baskets on new factory (no USDG fee via `createPot`): $500 goal / $5 min / 3d (`0xe9936388BE59E5a48CFba62a6238f442E1CDEBdD`), $750 / $10 / 7d (`0x24298D352bCB704249ADF97D79fE8f9D93d3c427`), $1,000 / $10 / 14d (`0x6108B46315a43DeA37493524A0C5f0cA66A87962`).
+- Fixed stale on-chain APIs: `revalidate` prerendered `/api/pots`, `/api/stats`, `/api/activity` with build-time chain state and Vercel kept serving STALE. Switched all three to `force-dynamic` (CDN caching stays via Cache-Control headers).
+- Added multicall3 address to the viem chain config (`lib/chain.ts`) — `/api/pots` multicall was failing without it on the fresh stack.
+- Verified live: /app renders 3 Funding baskets, stats show 3 live pools.
+
+## 2026-07-17 16:20 (UTC+1) — UX pass: basket names, recharts, entry fee, layout fixes
+
+- **Basket naming**: new `web/lib/basket-name.ts` — deterministic Sherwood-themed names derived from the pot address (adjective + noun, e.g. "Ember Vault", "Amber Longbow", "Golden Fletcher"). Applied on /app cards, basket/[slug] hero, profile pools, inventory card labels, `/api/pots` (`name` field), `/api/activity` labels, and OpenSea card metadata (`Basket` trait now the name, address moved to `Basket Address`).
+- **Admin fee from users**: `PROTOCOL_DEFAULTS.entryFeeUsdg` set to `0.5` — new baskets created via the UI charge a $0.50 USDG card fee per deposit (flows to treasury, funds purchase/reveal automation gas). Create page shows a "Card fee per deposit" row; deposit panels show the fee note (USDG: added on top; ETH/WETH: taken from swap output). The 3 live baskets predate this and keep fee = 0 (immutable per pot).
+- **Recharts**: replaced hand-rolled SVG paths with recharts AreaCharts in `stock-price-chart.tsx` (sparklines), `token-chart-card.tsx` (basket 5-day tiles, now with hover tooltip), and `profile/portfolio-chart.tsx` (tooltip + gradient).
+- **Create layout**: wider column split, roomier form padding, 3-col duration tiles with min-height and larger labels, registry grid forced to 2 columns in the aside so prices/sparklines aren't cramped.
+- **basket/[slug] fixes**: orbit ring now renders initials under each node as fallback so missing logos degrade gracefully; downloaded 12 missing logos to `public/stocks/` (BABA, BE, CRWV, INTC, MU, SGOV, SLV, SNDK, SPCX, USAR, USO — CRCL falls back to initials); hero title is the basket name, holdings label moved to subtitle; orbit sizing/alignment tightened.
+- Typecheck + lint + build clean; deployed to production and verified names, charts, and layout live on sherhood.xyz.
+
+## 2026-07-18 09:28 (UTC+1) — Ory site verification file
+
+- Added `web/public/.well-known/ory-verify.txt` with `ory-verify=orynth-f821cfaad0ad495b98db4713a02d20df` so Orynth can verify domain ownership via `https://sherhood.xyz/.well-known/ory-verify.txt`.
+- Redeployed web to production; confirmed the URL returns the expected token.
+
+## 2026-07-18 22:20 (UTC+1) — Bridge + roadmap + create fee UX
+
+- **Bridge (`/bridge`)**: Relay Kit UI (`@relayprotocol/relay-kit-ui` SwapWidget) wrapped in `RelayKitProvider`. Presets for ETH↔Base and SOL→Base. Copy notes RH is not a Relay destination yet — bridge first, then fund on Robinhood Chain. Nav + mobile sheet include Bridge.
+- **Roadmap (`/roadmap`)**: Now / Next / Later — Pokémon generative cards, index redeem, Elite coins ($500 DD), product deck, full profile, sponsored createFor, $SHRH live swap.
+- **Create fee UX**: CTA is just "Create basket" (no Pay $5 on the button). Subtle protocol fee row with USDG|ETH toggle, live balance chips, ETH→WETH→USDG swap then create. $SHRH $500 waiver gate + `ShrhBuyWidget` shell (Orynth until token live).
+- **Mobile nav**: Primary order Baskets → Create → Bridge → Cards → Trade → Profile → Roadmap → Docs.
+
+## 2026-07-18 22:55 (UTC+1) — Profile, deck, sponsored create, full-chain Relay → RH
+
+- **Bridge**: Relay widget supports all Relay chains (dynamic `useRelayChains`). Destination defaults to Robinhood Chain (4663 is on Relay). ETH/Base/Solana are promoted source chips only. Page-aligned sherhood chrome.
+- **Profile**: Mark/PnL tile (sealed at deposit cost; revealed holdings marked with live `/api/stocks` prices) alongside deposits, cards, XP, streak, listings, pools, activity.
+- **Product deck**: `/deck` — 9 slides, glowing lines, keyboard nav, CTAs.
+- **Sponsored create**: `PotFactory.createFor(creator,…)` added; `/api/create-sponsored` uses `DEPLOYER_PRIVATE_KEY`/`SPONSOR_PRIVATE_KEY` after $SHRH ≥ $500 check. Create page routes waiver holders through sponsored path. **Requires factory redeploy** for createFor to exist on-chain.
+- **$SHRH buy widget**: Relay SwapWidget locked to $SHRH on RH when `SHRH_LAUNCHED`; Orynth until then.
+
+## 2026-07-19 09:35 (UTC+1) — \$5 mainnet mint-test basket
+
+- Deployer `createPot`: goal \$5 / min \$0.50 / entry \$0 / 3d — pot `0x1C9D462cd7401140436f2b2B0C9F630dc8208A02` (tx `0x5cc6de2128865b081ccf76121aca03f7d6d9e418117b69a7fbebe858dbbc241a`).
+- ETH deposits swap via EntryRouter → Uniswap V3 SwapRouter02 (WETH→USDG); 0.5% router fee to treasury. USDG deposits skip the swap.
+
+## 2026-07-19 09:40 (UTC+1) — Fund amount shows wallet balance
+
+- `useFundBalances` reads ETH / WETH / USDG. Basket detail + pot cards show Balance + Max above the amount input (ETH Max leaves a small gas buffer).
+
+## 2026-07-19 10:20 (UTC+1) — ETH fund gas/`--` fee root cause (USDG decimals)
+
+- OKX showed Network Fee `--` / Confirm disabled because `eth_estimateGas` reverted: EntryRouter swap succeeds in **6-dec USDG**, then `depositAmount >= minDeposit` fails when pots were created with **18-dec** (`parseEther`) mins.
+- Factory `minFundingGoal` set to `1e6` ($1); `creationFee` set to `5e6` ($5). Web create/deposit/fmt now use 6-dec USDG. Legacy Silent Arrow (`0x1C9D…`) remains unfundable via ETH until replaced.
+- Need deployer top-up (~0.001 ETH) to `createPot` a correct $5 / $0.50-min basket, then mint test works.
+
+## 2026-07-19 10:35 (UTC+1) — Correct \$5 pot + never create with 18-dec USDG again
+
+- **New mint-test basket (6-dec):** `0x91AA13F1f6e19930fD60F1a87211B0c6D7f3914B` (Crimson Talon) — goal \$5 / min \$0.50 / entry \$0 / 3d. `depositWithETH` estimateGas ~713k for 0.0004 ETH. Silent Arrow (`0x1C9D…`) remains legacy/unfundable via ETH.
+- **Create hardening:** all web create paths (`useCreateCommunityPot`, `/api/create-sponsored`) use `usdgAmountFromDollars` + assert against ≥1e15 (parseEther-scale). Create form preflight validates the same. `scripts/create-pot-rh.sh` converts dollar args → 6-dec and refuses wei-looking goals. Deploy seeds (`RhDeploy`/`RhUpgrade`) default to `100e6`/`1e6`.
+- **UX:** USDG wallet balances + creation fee use 6 decimals; legacy pots disable ETH/WETH and force USDG with amber warning on basket detail + discovery cards.
+- Live on sherhood.xyz.
+
+## 2026-07-19 10:45 (UTC+1) — Hide Silent Arrow from listings
+
+- Added `web/lib/hidden-pots.ts`; Silent Arrow (`0x1C9D…8A02`) filtered from pot discovery + `/api/pots` (landing live baskets). Direct basket URL still works.
+
+## 2026-07-19 10:50 (UTC+1) — Quiet ETH disable on legacy baskets
+
+- Removed amber legacy-warning copy on basket detail + discovery. ETH/WETH stay disabled when min is 18-dec scale; USDG only.
+
+## 2026-07-19 11:05 (UTC+1) — Vault TVL + Trade minted cards
+
+- Stats `fundingTvl` now includes Closed pots (USDG still in vault pre-purchase); app label → **Vault TVL**.
+- Trade page shows **Recently minted** cards (not only listings).
+- Crimson Talon is Closed with \$5 deposited; purchase/reveal blocked until USDG↔stock Uniswap pools exist for registry picks (swap router hit non-contract pool).
+
+## 2026-07-19 11:45 (UTC+1) — Multi-hop purchase + Sherds + OpenSea link
+
+- Deployed `MultiHopSwapAdapter` `0xdF00…539d`: USDG→WETH→stock when direct USDG pool is empty; AssetManager swapRouter pointed at it. EntryRouter WETH/USDG fee set to **100**.
+- Liquid pick universe (2 stocks for small pots): TSLA + USO registry `0x6051…8856`; default pick count **2**.
+- **Crimson Talon purchased + revealed**: holdings USO+TSLA; Sherd #1 ownership 100% Common; claim unlocked. Purchase tx `0x0526…14b1`, reveal `0xfc01…772f`.
+- Product noun **Sherds** in nav/inventory/basket copy. OpenSea nav → `opensea.io/assets/robinhood/0x646F…0773`.
+
+## 2026-07-19 12:05 (UTC+1) — Reveal confirmed, rarity=share, nav/profile, TradingView, Solana porting
+
+- Crimson Talon is **Revealed** (status 3) with USO+TSLA; Sherd #1 is 100% ownership (claimable).
+- Rarity now follows ownership share (UI+metadata+RevealEngine source): ≥40% Legendary. 100% solo shows Legendary (was Common from luck-mult bands).
+- Desktop nav: primary links + More menu. Profile reordered: Snapshot → Portfolio/Holdings → Sherds → Baskets/Listings → Activity → Account.
+- Stock tiles link to TradingView. Added `porting.md` for Solana port.
+
+## 2026-07-19 13:40 (UTC+1) — Dynamic SEO, share cards, banner OG
+
+- Brand banner at `web/public/brand/sherhood-banner.jpg`; layered OG images for site, `/basket/[slug]`, `/sherd/[id]`.
+- Dynamic `generateMetadata` + JSON-LD (Organization/WebSite/Product/Breadcrumb); sitemap includes open pots; `app/manifest.ts`.
+- Share basket / Share Sherd buttons (native share, copy, X, Telegram); inventory links to `/sherd/[id]`; card metadata `external_url` → Sherd page.
+- Landing hero full-bleed banner with layered brand copy.
+
+## 2026-07-19 14:40 (UTC+1) — Profiles (name/avatar) + onchain rarity for OpenSea
+
+- Metadata + UI prefer on-chain Sherd rarity (RevealEngine share bands); ownership math only as legacy fallback — OpenSea traits match chain.
+- Profile identity: display name + 10 hood SVG avatars (`web/public/avatars/hood-01..10.svg`); SIWE save via `/api/profiles`; localStorage cache.
+- Name/avatar shown on profile, leaderboard, basket deposits/creator, Trade sellers/owners.
+
+## 2026-07-19 14:55 (UTC+1) — People discovery, allow-receive sends, nav, OpenSea
+
+- Nav: **People** + **Leaderboard** on primary (landing + app header); footer links; Bridge moved under More.
+- Public profiles `/u/[address]`, directory `/people`, Allow receive opt-in — address only shown for send when enabled.
+- Send panel: Sherds / USDG / ETH to opted-in receivers. OpenSea collection metadata → Sherds + banner + share-based rarity copy.
+
+## 2026-07-19 15:00 (UTC+1) — Unique names, share profile, tighter UI
+
+- Profiles use unique names → `/u/neon-archer` (slug); taken names rejected. Address fallback still resolves.
+- Share on profile editor, public profile, People list (compact). Copy moved into tips/tooltips; send lists names only.
+
+## 2026-07-19 15:15 (UTC+1) — Cards UX, deck, prices/PnL, deploy
+
+- Inventory: staggered card motion, 3D hover on PotNftCard; claimable rows show amount · spot · USD value + TradingView mini.
+- Deck: full-viewport back-only chrome; banner + stock logos; responsive.
+- Profile Mark/PnL uses `usdgToDollars` (6/18-dec) + batch Yahoo quotes; holdings show price/value.
+- `/api/stocks/batch` for quote fan-in. Prod deploy via Vercel `web`.
+
+## 2026-07-19 16:00 (UTC+1) — Leaderboard, profile balances, send typeahead, wallet NFTs, hero
+
+- Leaderboard: always show wallet (name+truncated addr); People + Send actions; XP API uses block-time estimates so events are not dropped; seeds self from /api/profile when board empty.
+- People Send: type unique name → pfp + name + truncated wallet; select to send.
+- Profile: view-first identity (pencil/edit); Balances card (ETH/WETH/USDG price+value + Sherd NAV + total); Add Sherds to wallet on profile + inventory.
+- TradingView minis forced dark/transparent on Sherhood surfaces; landing hero restored to HeroPrism + orbiting stock logos.
+
+## 2026-07-19 16:20 (UTC+1) — Sherd pools rename, nav icons, Orynth #1
+
+- User-facing “baskets” → **Sherd pools** (nav: Pools). URLs `/basket/...` unchanged.
+- Header mobile + desktop nav icons (lucide).
+- Created **Orynth #1** on RH: `0x80D61011E00247c988C73B07fC5cDed54f075910` — $100 goal, $2 min, 5 days, $0.50 entry; named via `FEATURED_POOLS` + `NEXT_PUBLIC_ORYNTH_POOL_1`.
+
+## 2026-07-19 16:30 (UTC+1) — MongoDB profiles + perf + deploy
+
+- Profiles moved from ephemeral JSON file → **MongoDB Atlas** (`sherhood.profiles`) via `MONGODB_URI`.
+- Perf: lazy Relay kit (bridge/create/deck only), dynamic landing sections, fewer font weights, `optimizePackageImports`, long-cache for avatars/cards.
+- Prod deploy with Mongo env on Vercel project `web`.
+
+## 2026-07-19 16:45 (UTC+1) — Hero restore, Mongo XP/account, legal
+
+- Landing hero restored to Own-the-pool + sealed card + orbiting logos (reference layout).
+- MongoDB: profiles + wallet_scores + profile_stats + xp_events; leaderboard/profile APIs cache to DB.
+- Profile → **Delete my account** (signed) wipes off-chain Mongo data + browser.
+- Terms + Privacy rewritten for profiles, XP, MongoDB, deletion limits.
+
+## 2026-07-19 16:50 (UTC+1) — Detailed hood pfps
+
+- Rebuilt all 10 profile SVGs with gradients, eye glow, hood folds, unique marks (Archer/Star/Mask/Spade/Horns/Quiver/Owl/Rogue/Crown/Fox). Cache-bust `?v=2`.
+
+## 2026-07-19 16:55 (UTC+1) — Fix ETH deposit Pot: beneficiary
+
+- `estimateContractGas` for `depositWithETH` used `account: undefined` → router passed address(0) → `Pot: beneficiary`.
+- Now passes connected wallet; clearer toast for beneficiary/router errors.
+
+## 2026-07-19 17:00 (UTC+1) — Telegram on-chain activity bot
+
+- Cron `/api/cron/tg-broadcast` every minute (vercel.json).
+- Broadcasts: pool create, fund, claim, exit, close, reveal, stock buy, cancel, list/delist/sale, Sherd reveal + transfer.
+- Cursor in Mongo `tg_cursor`. Env: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `CRON_SECRET`.
+- Test: `POST /api/tg/test` with Bearer CRON_SECRET.
+
+## 2026-07-19 22:30 (UTC+1) — TG poll like Chessonchain + nav cleanup
+
+- Dropped Vercel cron + public CRON_SECRET chat-finder UI on `/telegram`.
+- Chessonchain pattern: Telegram **webhook** (`/api/telegram/webhook`) for `/start` `/help` `/whereami`; long-poll worker `pnpm tg:poll` → `/api/tg/broadcast` (Bearer bot token).
+- `/telegram` is community links only (hub + X + OpenSea).
+- Navbar: primary Pools/Create/Sherds/Trade/People; More for the rest; icon external links for X `@sherhood_xyz`, Telegram, OpenSea.
+
+## 2026-07-19 22:40 (UTC+1) — Bot live + TVL includes unclaimed
+
+- Registered Telegram webhook → `/api/telegram/webhook`; `/whoami` alias; flushed pending replies.
+- Vault TVL now includes book value of unclaimed Purchased/Revealed pots (was live-only → \$5 / \$10).
+- Set `TELEGRAM_CHAT_ID` on Vercel production.
+
+## 2026-07-19 22:45 (UTC+1) — Chat ID, Gacha Cards, nav/wallet, bot UX
+
+- `TELEGRAM_CHAT_ID=-1003534603443` (prod + local).
+- Pokémon → **Gacha Cards** copy app-wide (tagline, OG, roadmap, deck).
+- Desktop nav: 3 links (Pools/Create/Sherds) + 2-col More; closes on outside click/blur/Esc.
+- Wallet chip: profile avatar + name; removed chain chip; ETH ticker last on the right.
+- TG bot: inline menus, /stats live TVL, callback buttons, cleaner /start.
+
+## 2026-07-19 22:55 (UTC+1) — Dynamic pools UI, profile hero, onboarding
+
+- Pool cards: stagger motion, live pulse status, animated progress, glow hover, cleaner fund panel.
+- Profile: hero banner with large hood avatar + XP/streak chips.
+- First-visit skippable walkthrough (`sherhood.onboarding.v1`) + incomplete-profile dialog after connect.
+
+## 2026-07-19 23:05 (UTC+1) — Public profile inventory + buy/offer
+
+- `/u/[slug]` shows Listed / Sealed / Revealed Sherds via `useOwnerCards` + wallet from profile API.
+- Send panel only when viewer is connected; else Connect + Get your own profile.
+- Buy listed Sherds; Make offer (Mongo `card_offers`) on listed or unlisted.
+
+## 2026-07-19 23:20 (UTC+1) — Card CLS, TV dark multi-symbol, Sherd owner
+
+- PotNftCard: fixed 2:3 aspect + compact widths (no page-tall stretch).
+- Inventory: side-by-side compact tile; listings/claim stay in panel.
+- Ownership % displays as 100% not 100.0000%.
+- TradingView: forced dark, fixed height; tabs for all holdings.
+- /sherd/[id]: owner (profile or explorer wallet), asset share rows + charts.
+
+## 2026-07-19 23:30 (UTC+1) — $SHRH docs, OG/Twitter contrast
+
+- Docs: /docs/shrh (hold-only copy, no threshold amounts); allocation + fees updated.
+- Luck pill + buy widget: hold language only (no ETH/$500 amounts in UI).
+- OgFrame: heavy scrim + black copy plate + lime badges; Twitter site/creator @sherhood_xyz.
+- twitter-image re-exports for /basket and /sherd.
+
+## 2026-07-19 23:45 (UTC+1) — Twitter OG fix + hold-only docs polish
+
+- Fixed twitter-image build (no route-config re-export); shared `og-basket` / `og-sherd` renderers.
+- OgFrame: solid black plate + lime title/white subtitle for X contrast; seo maps twitter → `/twitter-image`.
+- Scrubbed threshold/amount mentions from $SHRH docs, allocation, roadmap sponsored-create copy.
+
+## 2026-07-19 23:50 (UTC+1) — V2 docs + distribution
+
+- Added /docs/v2: full product track + expanded distribution features (holders, XP seasons, referrals, creators, LP, bridge, social, packs, Elite).
+- Docs nav + $SHRH + roadmap link; knowledge mirror in cursor_project_rules/v2.md.
+
+## 2026-07-19 23:55 (UTC+1) — Form V2 docs
+
+- Restructured /docs/v2 into Form → Product → Distribution (A–H tables) → Ship order → Out of scope.
+- Synced cursor_project_rules/v2.md mirror.
+
+## 2026-07-20 00:05 (UTC+1) — Profile balances, charts, PnL share
+
+- Dynamic balances: allocation bar + asset tiles; denser profile grid.
+- Mark PnL: live quotes (30s), lime/red by profit/loss, day move on holdings, Mark vs Cost chart.
+- Charts: principal (fixed USDG decimals), allocation donut, holdings + TV.
+- Share PnL card: /share/pnl + /api/og/pnl high-contrast Twitter OG.
+
+## 2026-07-20 04:20 (UTC+1) — WebSpeed / landing UX
+
+- LCP: mystery-hero.webp (~90KB), preload + fetchPriority; hero SSR copy, CSS floats (no framer on LCP).
+- TTI: defer wagmi/RainbowKit on marketing routes until idle/interact; Connect stub boots wallet.
+- CLS: reserved ETH ticker width; font display optional for mono; fewer Poppins weights.
+- A11y: docs/footer link underline + lime contrast; longer cache for /cards /brand.
+
+## 2026-07-20 04:15 (UTC+1) — WebSpeed / CWV pass
+
+- LCP: compressed mystery-hero-lcp.webp (43KB), explicit dims, preload; orbit logos deferred.
+- TTI/JS: RainbowKit split via wallet-button-live dynamic; header dropped framer-motion; EthUsdTicker deferred; MotionConfig removed from boot path.
+- CLS: Poppins display optional; hero aspect reserved; wallet/ETH placeholders sized.
+- Skipped prod source maps (report noise — does not fix LCP).
+
+## 2026-07-20 16:35 (UTC+1) — Lifetime protocol fees
+
+- Stats API + /app ProtocolStats + TG /stats show lifetime USDG fees from TreasuryDirect.feesForwardedUSDG.
+- Fees docs: full schedule + fee wallet destination.
+- Live: treasury 0x62cb…325C → fee wallet 0xC24F…a251; lifetime ~$0.03 so far.
+
+## 2026-07-20 16:50 (UTC+1) — Fix Lifetime fees render
+
+- SSR loadProtocolStats into /app so Lifetime fees paints without client-only fetch.
+- Fee format keeps 4 decimals under \$1 (e.g. \$0.0259); no truncate on value.
+
+## 2026-07-20 17:00 (UTC+1) — Public profile denser layout
+
+- Compacted /u/[slug] hero + card grids; OpenSea collection button beside Share.
+- ProfileCardTile: denser padding + OpenSeaLink under View; buy/offer/send unchanged.
+
+## 2026-07-20 17:00 (UTC+1) — Profile tightness + OpenSea Sherds showcase
+
+- OpenSea collection default → https://opensea.io/collection/sherds; per-token openseaTokenUrl helper + OpenSeaLink CTA.
+- /inventory: OpenSea-style filter showcase + detail rail with OpenSea CTA.
+- Profile + /u/[slug]: denser grids; OpenSea on every Sherd tile; collection button in chrome.
+- Docs /docs/opensea updated to collection/sherds.
+
+## 2026-07-20 18:12 (UTC+1) — Inventory cards, profile links, footer
+
+- Inventory Sherds: card-fitted `fill` tiles (aspect 2/3), link to `/sherd/[id]`; hover peeks detail rail.
+- UserChip auto-links usernames to `/u/[slug]`; wallet chip name → profile; marketplace/basket/profile tiles link Sherds.
+- SiteFooter rebuilt: logo, product/community/legal columns, X/TG/OpenSea; risk copy demoted to fine print.
+
+## 2026-07-20 18:30 (UTC+1) — Card depth, profile hero, footer
+
+- PotNftCard: mouse-follow 3D tilt + specular glare + depth shadow.
+- Sherd grids (inventory/profile/u): card-first tiles, badges overlaid — no boxed meta stacks.
+- Profile: single hero with pencil edit handlers (merged duplicate banners).
+- Footer: compact logo + link row + icon socials, lime top edge.
+
+## 2026-07-20 21:00 (UTC+1) — Card motion, sfx, Buy $SHRH, account packaging
+
+- Cards: soft idle float + light shimmer (reduced-motion safe); 3D tilt unchanged.
+- SFX on mint/send via Web Audio; header mute toggle (localStorage).
+- Profile ↔ Collection AccountSubnav; Profile primary nav; Buy $SHRH dialog (Coming soon if CA not live) on pools/trade/profile/u.
+- /u hero: stacked Sherd fan + mark / today portfolio delta from batch quotes.
+- ETH ticker: 24h % + flash on price tick.
+
+## 2026-07-20 22:35 (UTC+1) — $SHERD live
+
+- On-chain token live: SHERD / Sherhood at 0xe429dbb6b55532685C7eAE41DbF052934449aCc1 (18 dec).
+- SHRH_SYMBOL → SHERD; SHRH_LAUNCHED default true; Buy dialog swaps via Relay.
+- Vercel env + docs updated to official CA.
+
+## 2026-07-20 22:50 (UTC+1) — Swap fix, less copy, fund with $SHERD
+
+- Buy $SHERD: Flap + Uniswap only (Relay embed removed); compact CA/Add.
+- Fund tabs: ETH / WETH / USDG / $SHERD — SHERD uses live Dexscreener mark → ETH deposit (Uniswap sell assist if ETH short).
+- Cut pool/basket/create/app copy; luck pill is `$SHERD luck` tooltip.
+
+## 2026-07-21 11:16 (UTC+1) — Vercel cleanup
+
+- Deleted mistaken `sherwood` Vercel project (sherwood-delta.vercel.app).
+- Prod stays on `web` → sherhood.xyz; deploy from `web/` only.
+
+- Buy buttons now open an in-app `/buy-shrd` swap screen (Relay SwapWidget under the hood).
+- Pool end behavior remains on-chain: Close = partial purchase + later claim; Cancelled = refund.
+
+## 2026-07-21 23:10 (UTC+1) — Pool rank, XP soundness, OpenSea, SEO
+
+- Pools on /app + /api/pots ranked by activity/volume (funding first, then deposited + people).
+- Positions docs + protocol claim rules: hold indefinitely, mark growth, tight interaction table.
+- XP/streak: UTC expiry, full-pot index, reveal XP, no self-trade XP, profile no longer pollutes leaderboard.
+- Profiles: leaderboard rank + pools created (private + /u).
+- Landing: OpenSea Sherds banner section (not hero); robots + sitemap hardened for public routes only.
+
+## 2026-07-22 02:25 (UTC+1) — Profile UX, Share PnL, dwell mint
+
+- OpenSea kept on landing/header/footer/profile/inventory (in-app Sherds primary).
+- Explicit Sign out on wallet chip menu + profile identity/wallet actions; unnamed name → /profile.
+- Portfolio: rename (drop Mix), multi-token RH stocks + $SHERD list with Show empty; Mark PnL larger type + 2-col/xl-5 stats.
+- Share PnL modal: All vs one Sherd, OG preview, share/download/copy; OG scope/tokenId.
+- ETH ticker always visible + popover (24h, refresh, bridge); dwell mint modal ~50s after onboarding.
+- Phase 2 Onboarding pool (~$100k / ~$0.10 min): design only — needs operator create + NEXT_PUBLIC_ONBOARDING_POT; no gas sponsorship / fake reveal this ship.
+
+## 2026-07-22 10:40 (UTC+1) — OG dynamics + allocation/ETH UX polish
+
+- OG pool cards now include live funding progress + deadline, with top holdings in footer.
+- OG Sherd cards now include owner label and dynamic asset snippets when revealed.
+- Profile allocation now includes wallet $SHERD exposure for full-portfolio breakdown.
+- ETH ticker popover/flash behavior retained with compact always-visible header button.
+
+## 2026-07-22 12:55 (UTC+1) — Pack-rip Sherd reveal (shippable)
+
+- Added WebGL2 foil-tear shader (`FoilTearGl`) + CSS fallback for reduced-motion / no-WebGL.
+- `<SherdReveal>` ritual: sealed → tear → rarity burst/rays → ownership stats → Share/Download/Replay.
+- Wired on `/sherd/[id]` (auto-open once per session) and inventory detail (`Rip pack`).
+- Reveal SFX by rarity tier; V2 compositor/DNA deferred — uses existing card art.
+
+## 2026-07-23 07:20 (UTC+1) — Nav / Market / Sherds / rip ownership
+
+- Footer anchored via min-h-dvh flex shell in root layout.
+- Primary nav: Pools · Sherds · Market · Create; My collection under More.
+- New `/sherds` catalog (live cards + listing prices); Market = listings only with sort/filters.
+- OpenSea vs Market clarified in inventory CTA + docs (in-app list ≠ OpenSea Seaport).
+- Rip: owner full ritual (auto-open); viewer preview mode; larger desktop CTA on `/sherd/[id]`.
+- Sherd detail: for-sale banner + buy, activity strip, sticky card rail with Rip.
+
+## 2026-07-23 07:35 (UTC+1) — Drag tear, rich activity, OpenSea Seaport
+
+- Pack rip: drag-up gesture to tear foil (tap still works); viewers auto-play, owners drag-first.
+- `/api/sherds/[id]/activity` — Transfer + Market Listed/Sold/Cancelled + deposit context; wired on Sherd page.
+- OpenSea Seaport listing via `@opensea/sdk` (`useOpenSeaList`); needs `NEXT_PUBLIC_OPENSEA_API_KEY`, else opens OpenSea item. Inventory has USDG Market + ETH OpenSea list panels.
+
+## 2026-07-23 08:00 (UTC+1) — XP deterministic + Mark PnL text
+
+- Root cause: profile re-index `Promise.all` over all pots failed → API returned xp/streak 0 and cached wipes.
+- XP now merges chain pull into persisted `xp_events` (id-keyed), scores deterministically, falls back to events/board/stale — never zero-wipes known XP.
+- Reveal XP attributed at reveal block owner (not current owner). Leaderboard/profile serve stale on RPC failure.
+- Mark PnL: removed truncate/overflow clipping; stacked Mark/Cost lines; wrapping StatTiles.
+- Repaired Mongo profile_stats rows that were wiped to 0 while wallet_scores still had XP.
+
+## 2026-07-23 15:40 (UTC+1) — Pool page layout
+
+- `/basket/[slug]`: registry charts + owner under fund rail; funders card raised under Raised with list rows.
+
+## 2026-07-24 16:30 (UTC+1) — Sherds / pools / reveal polish
+
+- Soft footer only at extra-low scroll; main min 100dvh.
+- Mobile reveal: non-passive pointer listeners + body scroll lock.
+- `/sherds` + `/sherds/[id]` merged routes; inspect modal = 360 spin, shimmer, vault mark $, mint deposit, charts.
+- Cards use “N-asset vault” labels (no ticker billboard); Market empty = faded card collage.
+- `/pools/:slug` rename (basket redirect); pool ops panel; “{pool} · Sherds” holders + thin scrollbar.
+
+## 2026-07-24 15:50 UTC — Pool close flow + details + footer
+
+- Pool owner/anyone: Seal vault (`close`) + cancel/refunds; auto-kick `/api/ops/advance-pool` (close→seeded purchase→allocateWithSeed).
+- Cron `/api/cron/advance-pools` (hourly when Pro + `CRON_SECRET` + ops key).
+- Pool page: holdings mark/PnL, pulse tx history, reveal share band ~0.5×–2× for sealed Sherds.
+- Copy: DROP IN / Mint Sherd; `/sherds/[id]` nav → pool + Open pool CTA.
+- Footer: `--footer-clearance` padding on `.site-main` so bottom details are not clipped by soft footer.
+
+## 2026-07-24 16:05 UTC — End pool + Orynth closed + Vercel ops keys
+
+- UI: mint only while accepting deposits; after deadline → **End pool** (no Fund input). Discovery + inventory copy scrubbed.
+- Vercel: `DEPLOYER_PRIVATE_KEY`, `OPS_PRIVATE_KEY`, `SPONSOR_PRIVATE_KEY`, `CRON_SECRET` synced from local.
+- Orynth #1 `0x80D6…5910`: `close` → purchase → reveal (status Revealed).
+
+## 2026-07-24 16:20 UTC — Pool tabs, claim flow, cautious footer, 3-stock picks
+
+- Soft footer more cautious (flush bottom only + larger clearance) + legal caution line.
+- Pool page tabs: Overview · Sherds · Claim (claim burns Sherd, sends stock share).
+- AssetManager min/default pick → 3; advance-pool buys 3 legs. Orynth #1 already locked at USO+TSLA (2).
+- Dividends coming soon footnotes on pool raise + holdings.
+
+## 2026-07-24 17:25 UTC — Fee sweep confirm, scrub pools, create review, chart UI
+
+- Orynth fees already at fee wallet (~$4.26 total; prior $0.23 dust + ~$3.98 pot fees). Advance flow auto-sweeps after buy/reveal.
+- Hidden all non-Orynth legacy pots from discovery; empty ongoing drafts scrubbed.
+- Leaderboard filters deployer/ops wallets (API + client).
+- Create already has name + review/confirm modal (kept/polished).
+- Discovery cards chart-first; mint panel leaner; pool copy trimmed.
+
+## 2026-07-24 18:45 UTC — Vault-plate NFT art, mint risk, UI polish, demo pack, V2 review
+
+### NFT art
+- Replaced AI photo faces in-app with procedural **SherdFace** vault plates (seeded by tokenId, rarity accents). OpenSea metadata JPGs still legacy until V2 art pipeline ships.
+
+### Mint risk
+- Confirm dialog before mint: “This action can result in loss of funds…”
+
+### Roadmap / onboarding language
+- Roadmap rewritten (Live / Building / Exploring). Walkthrough drops “gacha/hood” slang.
+
+### Profile / inventory
+- Profile lists use `scroll-mask-y` (thin lime thumbs).
+- Inventory: multi-select ✓ + action bar (Claim N / Open) + detail rail actions.
+
+### Demo share pack
+- https://sherhood.xyz/demo/demo-pools.png
+- https://sherhood.xyz/demo/demo-sherd-cards.png
+- https://sherhood.xyz/demo/demo-inventory.png
+
+### Demo video run (record ~90s)
+1. Open /app → Orynth #1 vault charts → Open vault
+2. Overview / Sherds / Claim tabs; holdings mark
+3. /sherds/[id] geometric card + Claim stocks
+4. /inventory select + claim bar
+5. /create Name → Review → Confirm
+6. /roadmap Live/Building/Exploring
+7. End on / with tagline + risk footer
+
+### V2 review (prep)
+**Keep:** pool lifecycle, Seaport list path, XP persistence, chart-first discovery, claim/burn clarity.
+**Fix next:** regenerate OpenSea metadata art to match vault plates; post-fee book in mark UI; empty-pool cancel before deadline (product); walkthrough less modal-blocking.
+**V2 build:** crafted generative art system (not stock AI), in-app Seaport fulfill, NAV redeem, 3+ stock default (done on AM), dividends routing.
+
+## 2026-07-24 19:20 UTC — Live browser demos; keep last-mint NFT art
+
+- Deleted AI-generated demo PNGs from `/public/demo`.
+- Reverted in-app cards to last-mint rarity WebPs (`/cards/*.webp`) via `next/image` — no vault-plate `SherdFace`. Full art + metadata refresh stays V2.
+- Captured live screenshots from the Cursor browser (not generative fills): `demo-pools.jpg`, `demo-vault.jpg`, `demo-sherds-tab.jpg`, `demo-sherd-card.jpg`, `demo-inventory.jpg`, `demo-roadmap.jpg`, `demo-landing.jpg`.
+- Roadmap Building item now: crafted art + metadata in V2; keep current mint set until then.
+
+## 2026-07-24 19:40 UTC — Footer, live vault after claims, create fee toggle, pool polling
+
+- Footer: SoftSiteFooter is in-flow again (always visible); removed fixed hide-on-short-pages behavior and huge clearance padding.
+- Claims: Pot.getHoldings() does not shrink after burn — UI now reads live ERC20 balanceOf(pot) for purchased/revealed vaults (`useVaultTokenBalances`), shows claimCount, labels remaining mark.
+- Create: USDG/ETH fee toggle no longer auto-flips away from USDG after click; respect manual choice; show balance hint.
+- Pool data: refetchInterval ~12s on factory list, pot views, vault detail, token ids/cards.
+
+## 2026-07-25 10:35 UTC — Revealed pools, public board, offers, pool visuals
+
+- Discovery now merges current-factory pools with verified live pools from earlier factories. Orynth #1 and revealed Crimson Talon are both read from their pot contracts and shown.
+- Leaderboard responses remove protocol wallets and zero-XP rows before caching reaches the UI; the deployer remains excluded in the client as a second guard.
+- Unlisted Sherds expose `Make offer` from the public catalog. Offers require a buyer wallet signature and current on-chain owner verification before storage.
+- Global new-pool toasts remain mounted in the wallet shell. Create uses the stock registry logo/chart rail; pool detail uses the orbiting stock logos plus per-stock and vault USD charts.
+
+## 2026-07-25 11:50 UTC — Orbit logos, second vault, Stock Gacha, random names
+
+- Pool orbit: HTML `StockLogo` nodes (spinning) instead of SVG `<image>` so USO/TSLA (and registry) PNGs paint on `/pools/[slug]`.
+- Discovery forces checksummed featured pots (Orynth #1 + Crimson Talon + Stock Gacha) via `allVisiblePots`.
+- Created live pool **Stock Gacha** `0xcD5efcCf00E9Fd9839919a9AD478621649FFceD4` ($100 / $2 / 5d / $0.50 entry); named in Mongo + FEATURED_POOLS.
+- `/create` Name field: **Random name** button (`randomBasketName`).
+- Production redeployed to sherhood.xyz.
+
+## 2026-07-25 12:55 UTC — Pause factory upgrade; V2 disclosure; UI to master
+
+- **No RH factory redeploy.** Pot / PrevRandao / Reveal hardenings remain on `audit/harden-findings-h1-l8` for V2.
+- Disclosure: roadmap banner + `/docs/v2` + footer “V2 coming soon”.
+- Web UI tree copied to `master` for production; contract changes stay on audit only.

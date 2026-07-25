@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/advance-pools",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

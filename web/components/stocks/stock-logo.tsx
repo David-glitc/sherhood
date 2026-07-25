@@ -31,7 +31,7 @@ export function StockLogo({
     (symbol ? stockBySymbol(symbol) : undefined) ||
     (address ? stockByAddress(address) : undefined)
   const sym = stock?.symbol ?? symbol?.toUpperCase() ?? "?"
-  const isShrh = sym === "SHRH"
+  const isShrh = sym === "SHRH" || sym === "SHERD"
   const [srcIndex, setSrcIndex] = useState(0)
 
   const sources = isShrh

@@ -18,10 +18,10 @@ export function StocksMarqueeSection() {
       >
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Supported stocks</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Twenty-five tokens. Several in every basket.</h2>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Twenty-five tokens. Several in every pool.</h2>
         </div>
         <p className="text-sm leading-6 text-muted-foreground sm:justify-self-end">
-          Each closed basket buys 2 to 5 supported Robinhood Chain stock tokens.
+          Each closed pool buys 2 to 5 supported Robinhood Chain stock tokens.
         </p>
       </motion.div>
 
@@ -48,7 +48,7 @@ export function StocksMarqueeSection() {
       <p className="page-container-wide mt-6 text-sm text-muted-foreground">
         See them all in the{" "}
         <Link href="/app" className="font-medium text-primary hover:underline">
-          basket app
+          pools app
         </Link>
         .
       </p>

@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 const pots = [
   { name: "NVIDIA Pot", badge: "Trending", progress: 87, accent: "text-robinhood border-robinhood/30" },
   { name: "Bitcoin Pot", badge: "Almost Full", progress: 96, accent: "text-amber-300 border-amber-500/30" },
-  { name: "AI Basket", badge: "Community", progress: 34, accent: "text-sky-300 border-sky-500/30" },
+  { name: "AI Pool", badge: "Community", progress: 34, accent: "text-sky-300 border-sky-500/30" },
   { name: "S&P 500 Pot", badge: "Platform", progress: 55, accent: "text-emerald-300 border-emerald-500/30" },
 ]
 

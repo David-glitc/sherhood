@@ -1,60 +1,38 @@
 ---
 title: OpenSea
-description: View and trade Sherhood cards on an external marketplace
+description: List in Sherhood — live on OpenSea (Robinhood Chain)
 ---
 
 # OpenSea
 
-Sherhood cards can appear on OpenSea after the collection goes live. Use Sherhood Trade when you want basket value, claim actions, and listing status in one place.
+Robinhood Chain is live on OpenSea. Sherhood Sherds are ERC-721s on chain **4663**.
 
-## Find the official collection
+## One listing path
 
-Use the OpenSea link in the Sherhood navigation. Do not trust collection links from direct messages or search ads.
+**List for sale** in Inventory or on a Sherd page posts a **Seaport** order through OpenSea’s SDK.
 
-Before buying, check:
+That same order:
 
-- The collection link came from sherhood.xyz.
-- The card belongs to the basket shown in its details.
-- The card still exists and has not been claimed or exited.
-- The wallet and network in OpenSea are correct.
+- Shows on [opensea.io/collection/sherds](https://opensea.io/collection/sherds)
+- Feeds **[/marketplace](/marketplace)** and prices on **[/sherds](/sherds)**
 
-## Card details
+OpenSea does **not** read our old `CardMarketplace.list` contract. App list = Seaport so both stay in sync.
 
-A sealed card shows its unrevealed artwork and basket information.
+## Collection
 
-A revealed card can show:
+[opensea.io/collection/sherds](https://opensea.io/collection/sherds)
 
-- Rarity.
-- Ownership percentage.
-- Basket.
-- Stocks in the basket.
-- Original deposit.
+## Open a specific Sherd
 
-OpenSea may cache older card details. Use its metadata refresh action if a revealed card still shows sealed artwork.
+`https://opensea.io/item/robinhood/{PotCard}/{tokenId}`
 
-## Buying on OpenSea
+## Setup
 
-OpenSea checkout does not show all Sherhood basket information.
-
-Before buying:
-
-1. Copy the card ID.
-2. Find the same card in Sherhood.
-3. Review its basket, state, ownership, and displayed value.
-4. Return to OpenSea and confirm the final price and fees.
-
-## Royalties
-
-The collection requests a 2.5% creator royalty. External marketplaces decide how creator fees are applied at checkout.
-
-Sherhood Trade applies its royalty directly and shows the card’s basket context beside the listing.
-
-## Removed cards
-
-Claiming or exiting removes the card permanently. It should disappear from marketplace listings.
+1. Connect the same wallet on OpenSea.
+2. Select **Robinhood Chain**.
+3. After reveal, refresh metadata on OpenSea if art looks stale.
 
 ## Next steps
 
-- [Compare Sherhood Trade and external listings](/docs/secondary-market).
-- [Understand card value](/docs/pricing).
-- [Review fees](/docs/fees).
+- [Secondary market](/docs/secondary-market)
+- [Pricing](/docs/pricing)

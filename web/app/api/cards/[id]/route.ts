@@ -2,8 +2,9 @@ import { NextResponse } from "next/server"
 import { createPublicClient, http, formatUnits } from "viem"
 import { potCardConfig, potAbi } from "@/lib/contracts"
 import { cardImageUrl, rarityKeyFromIndex } from "@/lib/card-art"
-import { ownershipPct } from "@/hooks/use-pots"
+import { ownershipPct, rarityIndexFromOwnership } from "@/hooks/use-pots"
 import { stockByAddress } from "@/lib/basket-stocks"
+import { basketName } from "@/lib/basket-name"
 
 const SITE = "https://sherhood.xyz"
 
@@ -103,13 +104,23 @@ export async function GET(_request: Request, context: RouteContext) {
       )
     }
 
-    const rarityKey = card.revealed ? rarityKeyFromIndex(Number(card.rarity)) : "unrevealed"
+    // Rarity is stored on-chain at reveal (share bands). Fall back to ownership math for legacy.
+    const rarityIdx = card.revealed
+      ? card.rarity >= 1 && card.rarity <= 4
+        ? Number(card.rarity)
+        : rarityIndexFromOwnership(card.ownershipWeight)
+      : 0
+    const rarityKey = card.revealed ? rarityKeyFromIndex(rarityIdx) : "unrevealed"
     const rarityLabel =
       rarityKey === "unrevealed"
         ? "Sealed"
         : rarityKey.charAt(0).toUpperCase() + rarityKey.slice(1)
-    const image = cardImageUrl(Number(card.rarity), card.revealed)
-    const depositUsdg = Number(formatUnits(card.depositAmount, 18))
+    const image = cardImageUrl(rarityIdx, card.revealed)
+    const depositUsdg = Number(
+      card.depositAmount >= 10n ** 15n
+        ? formatUnits(card.depositAmount, 18)
+        : formatUnits(card.depositAmount, 6)
+    )
     const state = card.revealed ? "Revealed" : "Unrevealed"
     const weightPct = ownershipPct(card.ownershipWeight)
     const { constituents, shares } = card.revealed
@@ -118,21 +129,23 @@ export async function GET(_request: Request, context: RouteContext) {
 
     const sharesLine = shares.map((s) => `${s.amount} ${s.symbol}`).join(", ")
 
+    const potName = basketName(card.pot)
     const metadata = {
       name: card.revealed
-        ? `Sherhood Card #${id} — ${rarityLabel}`
-        : `Sherhood Card #${id} — Sealed`,
+        ? `Sherhood Sherd #${id} — ${rarityLabel}`
+        : `Sherhood Sherd #${id} — Sealed`,
       description: card.revealed
-        ? `Revealed Sherhood basket card. Owns ${weightPct}% of basket ${card.pot}${
+        ? `Revealed Sherd from the ${potName} basket. Owns ${weightPct}% of ${card.pot}${
             sharesLine ? ` — redeems ${sharesLine}` : constituents ? ` (${constituents})` : ""
-          }.${card.claimed ? " Already claimed." : ""}`
-        : "Unrevealed Sherhood basket card. Ownership % and rarity are hidden until reveal.",
+          }. Rarity tracks ownership share.${card.claimed ? " Already claimed." : ""}`
+        : `Unrevealed Sherd from the ${potName} pool. Ownership % and rarity unlock at reveal. View at ${SITE}/sherds/${id}`,
       image,
-      external_url: `${SITE}/inventory`,
+      external_url: `${SITE}/sherds/${id}`,
       animation_url: undefined,
       attributes: [
         { trait_type: "State", value: state },
-        { trait_type: "Basket", value: card.pot },
+        { trait_type: "Basket", value: potName },
+        { trait_type: "Basket Address", value: card.pot },
         { trait_type: "Deposit (USDG)", value: Number(depositUsdg.toFixed(2)) },
         ...(card.revealed
           ? [

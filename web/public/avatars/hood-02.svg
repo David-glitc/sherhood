@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="g2" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1e2e12"/>
+      <stop offset="100%" stop-color="#050806"/>
+    </radialGradient>
+    <filter id="glow2"><feGaussianBlur stdDeviation="1.4"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="128" height="128" rx="64" fill="#050806"/>
+  <circle cx="64" cy="64" r="60" fill="url(#g2)"/>
+  <circle cx="64" cy="64" r="58" stroke="#ccff00" stroke-width="2.5"/>
+  <!-- pointed hood -->
+  <path d="M64 18L86 48c8 14 10 34 6 52-8 10-18 16-28 16s-20-6-28-16c-4-18-2-38 6-52z" fill="#0e160a" stroke="#334d18" stroke-width="1.5"/>
+  <path d="M64 28l16 24c6 12 7 28 4 42-6 7-12 10-20 10s-14-3-20-10c-3-14-2-30 4-42z" fill="#152010"/>
+  <path d="M48 72c6-14 12-20 16-20s10 6 16 20c-4 3-10 5-16 5s-12-2-16-5z" fill="#080e06" stroke="#ccff00" stroke-width="1"/>
+  <ellipse cx="64" cy="82" rx="14" ry="16" fill="#030503"/>
+  <g filter="url(#glow2)">
+    <circle cx="56" cy="80" r="3.5" fill="#ccff00"/>
+    <circle cx="72" cy="80" r="3.5" fill="#ccff00"/>
+  </g>
+  <path d="M64 34l3 8h9l-7 5 3 8-8-5-8 5 3-8-7-5h9z" fill="#ccff00"/>
+  <circle cx="64" cy="64" r="52" stroke="#ccff00" stroke-width=".6" stroke-dasharray="3 4" opacity=".35"/>
+</svg>
