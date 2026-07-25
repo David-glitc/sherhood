@@ -284,3 +284,6 @@ Created Stock Gacha pool on-chain; FEATURED merge shows all revealed pots; creat
 ### Phase 8.7 — Defer factory upgrade; V2 disclosure; UI → master — Done (2026-07-25)
 Factory/pot hardenings stay on `audit/harden-findings-h1-l8` (no RH redeploy). Site discloses V2 coming soon.
 UI/web tree promoted to `master` for production redeploy + perf.
+
+### Phase 8.8 — Orbit logos on dashed ring + pool UX — Done (2026-07-25)
+Logos sit on dashed-ring radius (cqmin) and spin with the SVG path; pool hero/mint/raised hierarchy cleaned up.
