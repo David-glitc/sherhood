@@ -923,3 +923,7 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 - `/create/instant` and `/create/pool` redirect to the matching tab.
 - Nav back to one Create link.
 
+## 2026-08-01 15:46 UTC — Production deploy
+
+- Pushed `10c4191` to master; Vercel prod aliased to https://sherhood.xyz (READY).
+
