@@ -17,10 +17,10 @@ type Item = {
 
 const ITEMS: Item[] = [
   {
-    status: "next",
-    title: "Sherhood V2 — protocol upgrade",
-    body: "Hardened factory, reveal entropy, and pot lifecycle fixes. Live pools keep running on today’s contracts; V2 ships the upgraded stack.",
-    href: "/docs/v2",
+    status: "now",
+    title: "Instant Mint",
+    body: "Solo $1.50–$2 vault. Deployer opens the pool (no $5 create fee). You fund, stocks buy, Sherd reveals in one flow.",
+    href: "/create?tab=instant",
   },
   {
     status: "now",
@@ -48,6 +48,12 @@ const ITEMS: Item[] = [
   },
   {
     status: "next",
+    title: "Sherhood V2 — protocol upgrade",
+    body: "Hardened factory, reveal entropy, and pot lifecycle fixes. Live pools keep running on today’s contracts; V2 ships the upgraded stack.",
+    href: "/docs/v2",
+  },
+  {
+    status: "next",
     title: "Crafted Sherd art + metadata",
     body: "V2 ships a full metadata refresh with in-house card art. Until then we keep the current mint rarity set.",
   },
@@ -58,8 +64,9 @@ const ITEMS: Item[] = [
   },
   {
     status: "next",
-    title: "One-swap Sherd mint",
-    body: "Swap a stock bundle into a tradable card in a single flow.",
+    title: "Any-token → $SHERD vault settle",
+    body: "Full on-chain denomination in $SHERD. Today quotes are $SHERD-first; vaults still settle USDG for stock buys.",
+    href: "/buy-shrd",
   },
   {
     status: "next",

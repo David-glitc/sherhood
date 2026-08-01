@@ -1,8 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAccount, useReadContract, useReadContracts } from "wagmi"
+import { useMemo } from "react"
+import { useReadContract, useReadContracts } from "wagmi"
 import { motion, useReducedMotion } from "framer-motion"
 import { potFactoryConfig, potAbi } from "@/lib/contracts"
 import { allVisiblePots } from "@/lib/hidden-pots"
@@ -11,19 +10,16 @@ import {
   POT_STATUSES,
   deadlineLabel,
   fmtUsdg,
-  holdingsLabel,
   isAcceptingDeposits,
   parseHoldings,
   type PotView,
 } from "@/hooks/use-pots"
 import { BASKET_STOCKS } from "@/lib/basket-stocks"
 import { basketName } from "@/lib/basket-name"
-import { MintRevealModal } from "@/components/cards/mint-reveal-modal"
 import { StockLogoStack } from "@/components/stocks/stock-logo"
 import { StockPriceChart } from "@/components/stocks/stock-price-chart"
 import { ShrhLuckPill } from "@/components/layout/shrh-luck-pill"
 import { BuyShrhButton } from "@/components/tokens/buy-shrh-dialog"
-import { FundAmountPanel } from "@/components/pots/fund-amount-panel"
 import { poolActivityScore } from "@/lib/pool-rank"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -126,13 +122,9 @@ function usePotView(address: `0x${string}`): PotView | null {
 
 function PotCardUi({
   address,
-  isConnected,
-  onMinted,
   index = 0,
 }: {
   address: `0x${string}`
-  isConnected: boolean
-  onMinted: (tokenId: bigint | undefined, stockLabel: string) => void
   index?: number
 }) {
   const pot = usePotView(address)
@@ -154,8 +146,6 @@ function PotCardUi({
   )
   const isRevealed = pot.status === 3
   const progress = Math.min(100, Number(pot.progressBps) / 100)
-
-  const label = holdingsLabel(pot.holdings)
 
   return (
     <motion.article
@@ -251,26 +241,23 @@ function PotCardUi({
         </p>
       </div>
 
-      {acceptingDeposits && (
-        <FundAmountPanel
-          className="relative mt-4"
-          dense
-          potAddress={pot.address}
-          minDeposit={pot.minDeposit}
-          entryFee={pot.entryFee}
-          isConnected={isConnected}
-          onMinted={(tokenId) => onMinted(tokenId, label)}
-        />
-      )}
+      {acceptingDeposits ? (
+        <Link
+          href={`/pools/${pot.address}`}
+          className="relative mt-4 flex h-11 items-center justify-center rounded-xl bg-[#ccff00] text-sm font-semibold text-black transition hover:brightness-110"
+        >
+          View pool
+        </Link>
+      ) : null}
 
-      {isFunding && !acceptingDeposits && (
+      {isFunding && !acceptingDeposits ? (
         <Link
           href={`/pools/${pot.address}`}
           className="relative mt-4 flex h-11 items-center justify-center rounded-xl bg-[#ccff00] text-sm font-semibold text-black transition hover:brightness-110"
         >
           End pool
         </Link>
-      )}
+      ) : null}
 
       {!acceptingDeposits && pot.status >= 2 ? (
         <Link
@@ -292,21 +279,10 @@ const DEMO_BASKETS = [
 
 export function PotDiscovery() {
   usePoolNamesHydration()
-  const { isConnected } = useAccount()
-  const router = useRouter()
   const { pots: rawPots, isLoading } = usePotAddresses()
   const pots = useRankedPotAddresses(rawPots)
-  const [mintOpen, setMintOpen] = useState(false)
-  const [mintTokenId, setMintTokenId] = useState<bigint | undefined>()
-  const [mintStock, setMintStock] = useState<string | undefined>()
   const zeroFactory =
     potFactoryConfig.address === "0x0000000000000000000000000000000000000000"
-
-  const handleMinted = (tokenId: bigint | undefined, stockLabel: string) => {
-    setMintTokenId(tokenId)
-    setMintStock(stockLabel)
-    setMintOpen(true)
-  }
 
   return (
     <div className="space-y-8">
@@ -314,17 +290,6 @@ export function PotDiscovery() {
         <BuyShrhButton />
         <ShrhLuckPill />
       </div>
-
-      <MintRevealModal
-        open={mintOpen}
-        tokenId={mintTokenId}
-        stockLabel={mintStock}
-        onClose={() => setMintOpen(false)}
-        onViewInventory={() => {
-          setMintOpen(false)
-          router.push("/inventory")
-        }}
-      />
 
       {zeroFactory && (
         <div className="space-y-6">
@@ -370,9 +335,14 @@ export function PotDiscovery() {
           <p className="mt-2 text-sm text-white/40">
             New and revealed pools appear here from on-chain data.
           </p>
-          <Link href="/create" className="mt-5 inline-block text-sm font-semibold text-[#ccff00]">
-            Create one →
-          </Link>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link href="/create?tab=instant" className="text-sm font-semibold text-[#ccff00]">
+              Mint Instant Sherd →
+            </Link>
+            <Link href="/create?tab=pool" className="text-sm font-semibold text-white/50 hover:text-[#ccff00]">
+              Create pool →
+            </Link>
+          </div>
         </div>
       )}
 
@@ -389,13 +359,7 @@ export function PotDiscovery() {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {pots.map((addr, i) => (
-          <PotCardUi
-            key={addr}
-            address={addr}
-            index={i}
-            isConnected={isConnected}
-            onMinted={handleMinted}
-          />
+          <PotCardUi key={addr} address={addr} index={i} />
         ))}
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useClosePot } from "@/hooks/use-close-pot"
@@ -37,7 +37,6 @@ export function PoolLifecycleOps({
 }: PoolLifecycleOpsProps) {
   const { close, cancel, isPending } = useClosePot()
   const [advancing, setAdvancing] = useState(false)
-  const autoTried = useRef(false)
 
   const canEnd = isReadyToEndPool(
     status,
@@ -51,6 +50,15 @@ export function PoolLifecycleOps({
     Math.floor(Date.now() / 1000) >= Number(deadline) &&
     totalDeposited < fundingGoal &&
     participantCount > 0n
+  const emptyPastDeadline =
+    status === 0 &&
+    Math.floor(Date.now() / 1000) >= Number(deadline) &&
+    participantCount === 0n
+  const emptyBeforeDeadline =
+    status === 0 &&
+    Math.floor(Date.now() / 1000) < Number(deadline) &&
+    participantCount === 0n &&
+    isCreator
   const needsOpsAdvance = status === 1 || status === 2
 
   const runAdvanceApi = useCallback(async () => {
@@ -65,6 +73,7 @@ export function PoolLifecycleOps({
         steps?: string[]
         message?: string
         error?: string
+        statusAfter?: number
       }
       if (!res.ok) throw new Error(json.error || "Advance failed")
       const moved = (json.steps ?? []).filter((s) => s !== "noop" && s !== "skipped")
@@ -74,20 +83,35 @@ export function PoolLifecycleOps({
         toast.message(json.message)
       }
       await onDone()
+      return json.statusAfter
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Advance failed")
+      return undefined
     } finally {
       setAdvancing(false)
     }
   }, [potAddress, onDone])
 
-  // Auto-end + buy/reveal whenever the pool is past funding or mid-pipeline.
+  // Auto buy/reveal while Closed/Purchased (up to 4 passes with delay).
   useEffect(() => {
-    if (autoTried.current) return
     if (!(canEnd || needsOpsAdvance)) return
-    autoTried.current = true
-    void runAdvanceApi()
-  }, [canEnd, needsOpsAdvance, runAdvanceApi])
+    if (status === 3 || status === 4) return
+    let cancelled = false
+    let passes = 0
+    const loop = async () => {
+      while (!cancelled && passes < 4) {
+        passes += 1
+        const after = await runAdvanceApi()
+        if (cancelled || after === 3 || after === 4) break
+        await new Promise((r) => setTimeout(r, 3_500))
+      }
+    }
+    void loop()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run when pot/status gate changes
+  }, [potAddress, status, canEnd, needsOpsAdvance])
 
   if (status === 3) {
     return (
@@ -115,7 +139,8 @@ export function PoolLifecycleOps({
     )
   }
 
-  if (!canEnd && !underfilled && !needsOpsAdvance) return null
+  if (!canEnd && !underfilled && !needsOpsAdvance && !emptyPastDeadline && !emptyBeforeDeadline)
+    return null
 
   const raisedUsd = usdgToDollars(totalDeposited)
   const goalUsd = usdgToDollars(fundingGoal)
@@ -129,14 +154,26 @@ export function PoolLifecycleOps({
       }
     >
       <p className="text-[11px] font-semibold tracking-[0.14em] text-[#ccff00]/80">
-        {needsOpsAdvance ? "FINISH POOL" : isCreator ? "END POOL" : "END POOL"}
+        {needsOpsAdvance
+          ? "FINISH POOL"
+          : emptyPastDeadline || underfilled
+            ? "CANCEL / END"
+            : emptyBeforeDeadline
+              ? "EMPTY VAULT"
+              : isCreator
+                ? "END POOL"
+                : "END POOL"}
       </p>
       <p className="mt-1 text-[12px] leading-relaxed text-white/40">
         {needsOpsAdvance
           ? "Pool ended — buying vault assets and revealing Sherds (auto when ops is live)."
-          : underfilled
-            ? `Deadline hit · $${raisedUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })} / $${goalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}. End to buy with what’s raised, or cancel for refunds.`
-            : "Goal or deadline hit. End the pool to buy stocks and unlock reveals."}
+          : emptyBeforeDeadline
+            ? "No Sherds minted yet. On-chain cancel opens after the funding window (V2 may allow earlier empty cancel)."
+            : emptyPastDeadline
+              ? "Empty vault past deadline — cancel to close it out."
+              : underfilled
+                ? `Deadline hit · $${raisedUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })} / $${goalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}. End to buy with what’s raised, or cancel for refunds.`
+                : "Goal or deadline hit. End the pool to buy stocks and unlock reveals."}
       </p>
 
       <div className="mt-4 flex flex-col gap-2">
@@ -214,7 +251,7 @@ export function PoolLifecycleOps({
           </Button>
         ) : null}
 
-        {underfilled ? (
+        {underfilled || emptyPastDeadline ? (
           <Button
             type="button"
             variant="outline"
@@ -223,14 +260,16 @@ export function PoolLifecycleOps({
             onClick={async () => {
               try {
                 await cancel(potAddress)
-                toast.success("Pool cancelled — refunds open")
+                toast.success(
+                  emptyPastDeadline ? "Empty vault cancelled" : "Pool cancelled — refunds open"
+                )
                 await onDone()
               } catch (e) {
                 toast.error(e instanceof Error ? e.message : "Cancel failed")
               }
             }}
           >
-            {isPending ? "…" : "Cancel · open refunds"}
+            {isPending ? "…" : emptyPastDeadline ? "Cancel empty vault" : "Cancel · open refunds"}
           </Button>
         ) : null}
 

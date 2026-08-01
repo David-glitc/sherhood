@@ -5,9 +5,9 @@ import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const facts = [
-  { value: "25", label: "stock tokens" },
-  { value: "2–5", label: "per pool" },
-  { value: "3", label: "ways to fund" },
+  { value: "$1.5–2", label: "Instant Mint" },
+  { value: "2–5", label: "stocks / vault" },
+  { value: "25", label: "registry tokens" },
 ]
 
 /**
@@ -39,32 +39,32 @@ export function CinematicHero() {
           </h1>
 
           <p className="mt-7 max-w-xl text-base leading-7 text-[#a3a3a3] sm:text-lg sm:leading-8">
-            Drop into one Sherd pool. Receive one sealed card. When the pool closes, your card reveals
-            the stock tokens and the share you own.
+            Fund a Sherd vault. Get a sealed card. When it seals, your card reveals real RH stock
+            tokens and your ownership share — or Instant Mint a solo vault for $1.50–$2.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
             <Link
-              href="/app"
+              href="/create?tab=instant"
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "group h-12 min-w-44 justify-between gap-5 bg-[#ccff00] px-5 text-black hover:bg-[#ccff00]/90"
               )}
             >
-              Explore pools
+              Instant Mint
               <ArrowRight
                 data-icon="inline-end"
                 className="transition-transform group-hover:translate-x-1"
               />
             </Link>
             <Link
-              href="/#how"
+              href="/app"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "h-12 min-w-40 border-white/25 bg-transparent text-white hover:bg-white/5"
               )}
             >
-              See the flow
+              Explore pools
               <ArrowDownRight data-icon="inline-end" />
             </Link>
           </div>

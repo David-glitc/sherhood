@@ -19,6 +19,8 @@ type PoolHoldingsMarkProps = {
   participantCount?: bigint
   /** When true, amounts are live vault ERC20 balances (post-claim remaining). */
   amountsAreLive?: boolean
+  /** Protocol fee bps — book uses post-fee capital (matches purchase pull). */
+  protocolFeeBps?: bigint
   className?: string
 }
 
@@ -30,6 +32,7 @@ export function PoolHoldingsMark({
   claimCount,
   participantCount,
   amountsAreLive = false,
+  protocolFeeBps = 0n,
   className,
 }: PoolHoldingsMarkProps) {
   const symbols = useMemo(() => holdings.map((h) => h.symbol).filter(Boolean), [holdings])
@@ -49,7 +52,12 @@ export function PoolHoldingsMark({
     return total
   }, [holdings, quotes])
 
-  const book = usdgToDollars(totalDeposited)
+  const grossBook = usdgToDollars(totalDeposited)
+  const feeBps = Number(protocolFeeBps)
+  const protocolFeeUsd =
+    feeBps > 0 && Number.isFinite(feeBps) ? (grossBook * feeBps) / 10_000 : 0
+  // Post-fee book = capital available for stock purchase (matches pullForPurchase).
+  const book = Math.max(0, grossBook - protocolFeeUsd)
   const claimsDone = claimCount != null ? Number(claimCount) : 0
   const claimsTotal = participantCount != null ? Number(participantCount) : 0
   // After any claims, vault mark is remaining stock — don't fake PnL vs full deposit book.
@@ -98,7 +106,9 @@ export function PoolHoldingsMark({
           </p>
         </div>
         <div className="rounded-[14px] border border-[#1a1a1a] bg-black/50 px-3 py-3">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-white/35">Book</p>
+          <p className="text-[10px] uppercase tracking-[0.12em] text-white/35">
+            Book{protocolFeeUsd > 0 ? " · net" : ""}
+          </p>
           <p className="mt-1 text-sm font-medium tabular-nums text-white/90">
             ${book.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
@@ -150,7 +160,9 @@ export function PoolHoldingsMark({
       <p className="mt-3 text-[10px] leading-relaxed text-white/30">
         {amountsAreLive
           ? "Amounts are live vault token balances — they drop when Sherds are claimed and burned."
-          : "Dividends coming soon — not included in mark."}
+          : protocolFeeUsd > 0
+            ? `Book is post-protocol-fee capital (~$${protocolFeeUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })} fee). Dividends not included.`
+            : "Dividends coming soon — not included in mark."}
       </p>
     </div>
   )

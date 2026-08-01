@@ -20,10 +20,19 @@ export default async function AppPage() {
         actions={
           <>
             <Link
-              href="/create"
-              className={cn(buttonVariants({ size: "lg" }), "min-w-32")}
+              href="/create?tab=instant"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "min-w-32 bg-[#ccff00] text-black hover:bg-[#ccff00]/90"
+              )}
             >
-              Create
+              Instant Sherd
+            </Link>
+            <Link
+              href="/create?tab=pool"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              Create pool
             </Link>
             <Link
               href="/inventory"

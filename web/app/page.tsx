@@ -15,6 +15,9 @@ const LiveBasketsSection = dynamic(
     ),
   }
 )
+const WhySection = dynamic(() =>
+  import("@/components/landing/why-section").then((m) => m.WhySection)
+)
 const HowItWorksSection = dynamic(() =>
   import("@/components/landing/how-it-works").then((m) => m.HowItWorksSection)
 )
@@ -67,6 +70,7 @@ export default function LandingPage() {
       <JsonLd data={collectionLd} />
       <CinematicHero />
       <LiveBasketsSection />
+      <WhySection />
       <OpenSeaCollectionSection />
       <HowItWorksSection />
       <ValuePropsSection />

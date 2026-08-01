@@ -35,7 +35,7 @@ import { toast } from "sonner"
 import { robinhood } from "@/lib/chain"
 import { cn } from "@/lib/utils"
 import { ShareButton } from "@/components/share/share-button"
-import { SHERHOOD_TAGLINE } from "@/lib/protocol"
+import { SHERHOOD_TAGLINE, SHRH_SYMBOL } from "@/lib/protocol"
 import { UserChip } from "@/components/profile/user-chip"
 import { useProfiles } from "@/hooks/use-profiles"
 
@@ -286,7 +286,7 @@ function BasketView({ address }: { address: `0x${string}` }) {
                   Mint a Sherd
                 </p>
                 <p className="mt-1.5 text-[13px] leading-5 text-[#777]">
-                  Drop USDG · sealed card until reveal
+                  Pay in ${SHRH_SYMBOL} · sealed until reveal
                 </p>
                 <FundAmountPanel
                   className="mt-4"
@@ -343,6 +343,7 @@ function BasketView({ address }: { address: `0x${string}` }) {
               claimCount={pot.claimCount}
               participantCount={pot.participantCount}
               amountsAreLive={useLiveVault}
+              protocolFeeBps={pot.protocolFeeBps}
             />
 
             {displayHoldings.length > 0 && pot.status >= 2 ? (

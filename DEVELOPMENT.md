@@ -894,3 +894,32 @@ Reviewed `shitty_v2.md` against live code; implemented pre-deploy fixes:
 
 - BasketOrbitSvg: logos placed at dashed-ring radius (142/340 via cqmin) and spin with the ring (72s); counter-spin keeps marks upright.
 - Pool page UX: orbit-first hero on mobile, cleaner raised/holders (no pill cluster), clearer Mint CTA, less card chrome.
+
+## 2026-08-01 14:40 UTC — Instant Mint + reveal harden + pool/landing UX
+
+- Stock Gacha `0xcD5efc…` diagnosed: **Closed** (~$4.37 raised), never purchased/revealed. Ops wallet `0x5F90…` needs ~0.001 ETH gas to finish buy+reveal.
+- `advance-pool`: prefer `allocateWithSeed` (no PrevRandao window); fulfill path keeps block-aware retries. Pool lifecycle auto-retries advance up to 4×.
+- Discovery: removed inline `FundAmountPanel` → **View pool** / **Open vault** only; mint stays on `/pools/[slug]`.
+- Instant Mint: `/api/instant-mint` + `useInstantMint` — deployer createPot ($1.50|$2, min=goal, entry 0) → user USDG deposit → advance to Revealed. Create wizard steps: Mode → Details → Pay → Review.
+- $SHERD-first mint panel (default pay tab + SHERD quote); any-token path via `/buy-shrd`. Vault still settles USDG.
+- Landing: Why Sherhood USP grid (6), Instant Mint in how-it-works + FAQ; deck slide updated.
+
+## 2026-08-01 14:48 UTC — Stock Gacha revealed
+
+- Deployer topped up; advance completed: purchase → allocateWithSeed reveal → fee sweep.
+- Stock Gacha `0xcD5efc…` status **Revealed** (3). Txs: `0x67e4…d2e3` (buy), `0x9974…7d94` (reveal), `0xd8b1…d870` (fees).
+
+## 2026-08-01 15:00 UTC — Phase 10 polish pass
+
+- Instant Mint pay: USDG / ETH / $SHERD via EntryRouter settle; create wizard pay toggle.
+- Holdings mark: **post-protocol-fee book** for PnL (matches AssetManager pull).
+- Walkthrough: non-modal bottom coach strip (page stays usable) + Instant Mint step.
+- Hero CTA → Instant Mint; roadmap Instant Mint = Live; any-token→$SHERD listed Building.
+- Empty vault UX: creator notice before deadline; Cancel empty after deadline.
+
+## 2026-08-01 15:40 UTC — Create tabs (not two pages)
+
+- Single `/create` with **Instant Sherd | Create pool** tabs (`?tab=instant|pool`).
+- `/create/instant` and `/create/pool` redirect to the matching tab.
+- Nav back to one Create link.
+

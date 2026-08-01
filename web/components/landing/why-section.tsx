@@ -1,59 +1,99 @@
 "use client"
 
-import { motion } from "framer-motion"
+import Link from "next/link"
+import { motion, useReducedMotion } from "framer-motion"
+import { SHRH_SYMBOL } from "@/lib/protocol"
 
-const features = [
+const usps = [
   {
-    title: "Ownership, Not Wipeouts",
-    desc: "Every card is a claim on the pool. Chance sets claim size — never zeroes your deposit into nothing.",
+    kicker: "01",
+    title: "Ownership for everyone",
+    body: "Every Sherd is a claim on the vault. Chance sets share size (~0.5×–2× deposit weight) — never a wipeout to zero.",
   },
   {
-    title: "Financial Collectibles",
-    desc: "After reveal you hold a unique NFT tied to real underlying assets — tradeable, collectible, and valuable.",
+    kicker: "02",
+    title: "Real Robinhood stock tokens",
+    body: "When a pool seals, AssetManager buys 2–5 liquid RH stocks into the vault. Your card redeems that basket.",
   },
   {
-    title: "Fair Allocation Math",
-    desc: "VRF multipliers normalize so total ownership is always 100%. Expected value tracks your deposit share.",
+    kicker: "03",
+    title: "Instant Mint",
+    body: "Bankroll a solo $1.50–$2 vault. Deployer opens it (no $5 create fee). Fund, buy, reveal in one flow.",
   },
   {
-    title: "Real Asset Pots",
-    desc: "Pots acquire stocks, ETFs, crypto, or tokenized RWAs once funding closes — then cards become claims.",
+    kicker: "04",
+    title: `$${SHRH_SYMBOL} unit of account`,
+    body: "Quotes lean on $SHERD. Bring any token via swap — vault still settles to USDG for stock purchases.",
+  },
+  {
+    kicker: "05",
+    title: "Trade or claim",
+    body: "Reveal unlocks ownership %. Claim stock shares or list the Sherd on OpenSea / in-app Trade.",
+  },
+  {
+    kicker: "06",
+    title: "Bridge in from anywhere",
+    body: "Relay bridge lands ETH, Base, Solana, and more onto Robinhood Chain — then mint.",
   },
 ]
 
 export function WhySection() {
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-32">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mb-16 text-center"
-      >
-        <h2 className="text-4xl font-black tracking-tight text-zinc-100 sm:text-5xl">
-          Why Sherwood
-        </h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-500">
-          Investing + collecting + suspense — without casino wipeouts.
-        </p>
-      </motion.div>
+  const reduceMotion = useReducedMotion() ?? false
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        {features.map((f, i) => (
-          <motion.div
-            key={f.title}
-            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
-            whileHover={{ scale: 1.02 }}
-            className="group rounded-2xl border border-zinc-800 bg-zinc-900/30 p-8 transition-colors hover:border-zinc-700"
+  return (
+    <section className="border-y border-border bg-card/30">
+      <div className="page-container-wide py-20 sm:py-28">
+        <div className="mb-12 max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            Why Sherhood
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+            Collectible finance.
+            <span className="block text-muted-foreground">Not a casino.</span>
+          </h2>
+          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+            Fractional stock vaults on Robinhood Chain — sealed cards, verifiable reveal,
+            claimable holdings.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {usps.map((u, i) => (
+            <motion.article
+              key={u.kicker}
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ delay: Math.min(i, 5) * 0.05, duration: 0.4 }}
+              className="product-surface flex flex-col gap-3 p-6 sm:p-7"
+            >
+              <p className="font-mono text-[11px] text-primary">{u.kicker}</p>
+              <h3 className="text-xl font-semibold tracking-tight text-foreground">{u.title}</h3>
+              <p className="text-sm leading-6 text-muted-foreground">{u.body}</p>
+            </motion.article>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link
+            href="/create?tab=instant"
+            className="inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground hover:brightness-110"
           >
-            <h3 className="text-xl font-bold text-zinc-200">{f.title}</h3>
-            <p className="mt-2 leading-relaxed text-zinc-500">{f.desc}</p>
-          </motion.div>
-        ))}
+            Instant Mint
+          </Link>
+          <Link
+            href="/app"
+            className="inline-flex h-11 items-center rounded-xl border border-border px-5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
+          >
+            View pools
+          </Link>
+          <Link
+            href="/docs/getting-started"
+            className="inline-flex h-11 items-center px-2 text-sm font-semibold text-primary hover:underline"
+          >
+            User guide
+          </Link>
+        </div>
       </div>
     </section>
   )

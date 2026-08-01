@@ -287,3 +287,30 @@ UI/web tree promoted to `master` for production redeploy + perf.
 
 ### Phase 8.8 — Orbit logos on dashed ring + pool UX — Done (2026-07-25)
 Logos sit on dashed-ring radius (cqmin) and spin with the SVG path; pool hero/mint/raised hierarchy cleaned up.
+
+## Phase 9 — Instant Mint + UX polish (2026-08-01)
+- [x] 9.1 Harden advance-pool reveal (allocateWithSeed + fulfill retries)
+- [x] 9.2 Discovery view-only cards (View pool / Open vault)
+- [x] 9.3 Instant Mint API + client flow ($1.50–$2, deployer create)
+- [x] 9.4 Create wizard (Instant vs Community)
+- [x] 9.5 $SHERD-first mint quotes + buy-shrd any-token path
+- [x] 9.6 Elite landing USP section + Instant Mint copy
+- [x] 9.7 Stock Gacha purchase+reveal
+
+### Phase 9 — Instant Mint + UX polish — Done (2026-08-01)
+Shipped Instant Mint path, create wizard, discovery view-only, SHERD-first fund panel, landing USPs, allocateWithSeed advance.
+Stock Gacha advanced to Revealed after deployer gas top-up (buy + reveal + fee sweep).
+
+## Phase 10 — Polish + Instant Mint upgrade (2026-08-01)
+- [x] 10.1 Instant Mint multi-pay (USDG / ETH / $SHERD)
+- [x] 10.2 Post-fee book on vault mark PnL
+- [x] 10.3 Soft (non-modal) walkthrough + Instant Mint tip
+- [x] 10.4 Hero + roadmap Instant Mint live CTAs
+- [x] 10.5 Empty vault cancel messaging (on-chain still needs deadline)
+
+### Phase 10 — Polish + Instant Mint upgrade — Done (2026-08-01)
+Instant Mint accepts USDG/ETH/$SHERD; vault mark uses net book; walkthrough is a bottom coach strip; landing/roadmap promote Instant Mint.
+Empty cancel before deadline remains V2 (Pot.cancel requires expired deadline).
+
+### Phase 10.6 — Create Instant vs pool as tabs — Done (2026-08-01)
+Single `/create` page with Instant Sherd | Create pool tabs; old subroutes redirect.

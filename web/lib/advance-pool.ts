@@ -45,6 +45,18 @@ const ASSET_MANAGER_ABI = [
 
 const REVEAL_ENGINE_ABI = [
   {
+    // Ops-seeded reveal (single tx). Prefer for Instant Mint + stuck pools so we never miss
+    // the PrevRandao fulfill window (maxDelayBlocks).
+    type: "function",
+    name: "allocateWithSeed",
+    inputs: [
+      { name: "pot", type: "address" },
+      { name: "seed", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
     // Request randomness from the coordinator. The reveal seed is bound to a future
     // blockhash (see PrevRandaoCoordinator), NOT a caller-supplied / time-based value, so a
     // participant cannot grind the reveal to inflate their own ownership share.
@@ -76,6 +88,34 @@ const REVEAL_ENGINE_ABI = [
     stateMutability: "view",
   },
 ] as const
+
+const COORD_VIEW_ABI = [
+  {
+    type: "function",
+    name: "requestBlock",
+    inputs: [{ type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "minDelayBlocks",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "maxDelayBlocks",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 const COORDINATOR_ABI = [
   {
@@ -148,7 +188,7 @@ async function readStatus(
   )
 }
 
-/** Close → purchase (seeded) → reveal (allocateWithSeed). Ops key required past close. */
+/** Close → purchase (seeded) → reveal (allocateWithSeed, or fulfill if already requested). */
 export async function advancePool(potRaw: string): Promise<AdvanceResult> {
   const pot = getAddress(potRaw) as Address
   const { publicClient, walletClient, account } = clients()
@@ -283,50 +323,12 @@ export async function advancePool(potRaw: string): Promise<AdvanceResult> {
       args: [pot],
     })
     if (!requested) {
-      // Phase 1: request randomness. The coordinator binds the seed to a future blockhash;
-      // the reveal itself finalizes a few blocks later via fulfill() below.
+      // Prefer allocateWithSeed — one tx, no PrevRandao window expiry.
       const hash = await walletClient.writeContract({
         address: revealEngine,
         abi: REVEAL_ENGINE_ABI,
-        functionName: "requestReveal",
-        args: [pot],
-        account,
-        chain: robinhood,
-      })
-      await publicClient.waitForTransactionReceipt({ hash })
-      txHashes.push(hash)
-      steps.push("reveal_requested")
-      return {
-        pot,
-        statusBefore,
-        statusAfter: await readStatus(publicClient, pot),
-        steps,
-        txHashes,
-        message: "Reveal requested — randomness finalizes in a few blocks, then advance again",
-      }
-    }
-    // Phase 2: randomness was requested earlier; try to finalize it via the coordinator.
-    // fulfill() reverts ("too early") until the target block passes, so this is retried on a
-    // later advance call (frontend auto-retry / cron) — it is never caller-timed.
-    const [coordinator, requestId] = await Promise.all([
-      publicClient.readContract({
-        address: revealEngine,
-        abi: REVEAL_ENGINE_ABI,
-        functionName: "vrfCoordinator",
-      }) as Promise<Address>,
-      publicClient.readContract({
-        address: revealEngine,
-        abi: REVEAL_ENGINE_ABI,
-        functionName: "potRequestId",
-        args: [pot],
-      }) as Promise<bigint>,
-    ])
-    try {
-      const hash = await walletClient.writeContract({
-        address: coordinator,
-        abi: COORDINATOR_ABI,
-        functionName: "fulfill",
-        args: [requestId],
+        functionName: "allocateWithSeed",
+        args: [pot, seedFor(pot, "reveal")],
         account,
         chain: robinhood,
       })
@@ -334,14 +336,87 @@ export async function advancePool(potRaw: string): Promise<AdvanceResult> {
       txHashes.push(hash)
       steps.push("revealed")
       status = await readStatus(publicClient, pot)
-    } catch {
-      return {
-        pot,
-        statusBefore,
-        statusAfter: status,
-        steps: [...steps, "skipped"],
-        txHashes,
-        message: "Randomness not ready yet — try again shortly",
+    } else {
+      // Legacy path: requestReveal already fired — fulfill with block-aware retries.
+      const [coordinator, requestId] = await Promise.all([
+        publicClient.readContract({
+          address: revealEngine,
+          abi: REVEAL_ENGINE_ABI,
+          functionName: "vrfCoordinator",
+        }) as Promise<Address>,
+        publicClient.readContract({
+          address: revealEngine,
+          abi: REVEAL_ENGINE_ABI,
+          functionName: "potRequestId",
+          args: [pot],
+        }) as Promise<bigint>,
+      ])
+      const [reqBlock, minDelay, maxDelay] = await Promise.all([
+        publicClient.readContract({
+          address: coordinator,
+          abi: COORD_VIEW_ABI,
+          functionName: "requestBlock",
+          args: [requestId],
+        }) as Promise<bigint>,
+        publicClient.readContract({
+          address: coordinator,
+          abi: COORD_VIEW_ABI,
+          functionName: "minDelayBlocks",
+        }) as Promise<bigint>,
+        publicClient.readContract({
+          address: coordinator,
+          abi: COORD_VIEW_ABI,
+          functionName: "maxDelayBlocks",
+        }) as Promise<bigint>,
+      ])
+      const readyAt = reqBlock + minDelay
+      const expireAt = reqBlock + maxDelay
+      let fulfilled = false
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const block = await publicClient.getBlockNumber()
+        if (block > expireAt) {
+          return {
+            pot,
+            statusBefore,
+            statusAfter: status,
+            steps: [...steps, "skipped"],
+            txHashes,
+            message:
+              "Reveal window expired (PrevRandao too late) — needs manual recovery",
+          }
+        }
+        if (block < readyAt) {
+          await sleep(2_500)
+          continue
+        }
+        try {
+          const hash = await walletClient.writeContract({
+            address: coordinator,
+            abi: COORDINATOR_ABI,
+            functionName: "fulfill",
+            args: [requestId],
+            account,
+            chain: robinhood,
+          })
+          await publicClient.waitForTransactionReceipt({ hash })
+          txHashes.push(hash)
+          steps.push("revealed")
+          status = await readStatus(publicClient, pot)
+          fulfilled = true
+          break
+        } catch {
+          await sleep(2_500)
+        }
+      }
+      if (!fulfilled) {
+        return {
+          pot,
+          statusBefore,
+          statusAfter: status,
+          steps: [...steps, "skipped"],
+          txHashes,
+          message: "Randomness not ready yet — try again shortly",
+        }
       }
     }
   }

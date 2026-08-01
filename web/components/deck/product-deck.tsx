@@ -47,13 +47,13 @@ const SLIDES: Slide[] = [
   },
   {
     kicker: "Next",
-    title: "Instant single-card swaps.",
-    body: "Turn a stock bundle into a tradable card in one flow — no full pool wait.",
+    title: "Instant Mint — solo vault, immediate reveal.",
+    body: "Pay $1.50–$2. Deployer opens the pool. You bankroll it, stocks buy, Sherd reveals — no $5 create fee.",
   },
   {
     kicker: "Token",
-    title: "$SHRH is the luck + access layer.",
-    body: "Holders unlock reveal boosts and fee-free pool creation once live.",
+    title: "$SHERD is the unit of account + luck layer.",
+    body: "Quotes in $SHERD. Holders unlock reveal boosts and fee-free community creation.",
   },
   {
     kicker: "Why now",

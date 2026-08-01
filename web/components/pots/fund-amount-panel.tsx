@@ -29,7 +29,7 @@ import { entryRouterConfig } from "@/lib/contracts"
 import { SHRH_SYMBOL, shrhUniswapSellUrl } from "@/lib/protocol"
 import { cn } from "@/lib/utils"
 
-const PAY_ASSETS: PayAsset[] = ["ETH", "WETH", "USDG", "SHERD"]
+const PAY_ASSETS: PayAsset[] = ["SHERD", "USDG", "ETH", "WETH"]
 
 function assetLabel(asset: PayAsset): string {
   if (asset === "SHERD") return `$${SHRH_SYMBOL}`
@@ -60,7 +60,7 @@ export function FundAmountPanel({
   const { maxFor, balanceOf } = useFundBalances()
   const sherdQuote = useSherdQuote()
   const [amountStr, setAmountStr] = useState("")
-  const [payWith, setPayWith] = useState<PayAsset>("ETH")
+  const [payWith, setPayWith] = useState<PayAsset>("SHERD")
   const [slippagePct, setSlippagePct] = useState(DEFAULT_SLIPPAGE_PCT)
   const [showSlip, setShowSlip] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -93,6 +93,12 @@ export function FundAmountPanel({
     }
     return usdOfEth(amountNum)
   }, [amountNum, payWith, sherdQuote, sherdEth, usdOfEth])
+
+  const sherdHint = useMemo(() => {
+    if (usdHint == null || !sherdQuote?.priceUsd || sherdQuote.priceUsd <= 0) return null
+    if (payWith === "SHERD") return amountNum
+    return usdHint / sherdQuote.priceUsd
+  }, [usdHint, sherdQuote, payWith, amountNum])
 
   const needsSwap =
     payWith === "SHERD" &&
@@ -266,16 +272,27 @@ export function FundAmountPanel({
         ) : null}
       </div>
 
-      {(usdHint != null || (entryFee > 0n && !dense)) && (
+      {(usdHint != null || sherdHint != null || (entryFee > 0n && !dense)) && (
         <p className="text-center text-[11px] tabular-nums text-white/35">
+          {sherdHint != null
+            ? `≈ ${sherdHint.toLocaleString(undefined, { maximumFractionDigits: 2 })} $${SHRH_SYMBOL}`
+            : null}
           {usdHint != null
-            ? `≈ $${usdHint.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            ? `${sherdHint != null ? " · " : ""}$${usdHint.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
             : null}
           {entryFee > 0n && !dense
-            ? `${usdHint != null ? " · " : ""}+$${fmtUsdg(entryFee)}`
+            ? `${usdHint != null || sherdHint != null ? " · " : ""}+$${fmtUsdg(entryFee)}`
             : null}
         </p>
       )}
+
+      <p className="text-center text-[10px] leading-relaxed text-white/30">
+        Unit of account: ${SHRH_SYMBOL}. Other tokens →{" "}
+        <a href="/buy-shrd" className="text-[#ccff00]/80 hover:underline">
+          swap in
+        </a>
+        , then mint (settles to USDG in the vault).
+      </p>
 
       {payWith !== "USDG" && (
         <>

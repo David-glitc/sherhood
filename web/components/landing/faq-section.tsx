@@ -6,27 +6,33 @@ import { Plus } from "lucide-react"
 const faqs = [
   {
     question: "What do I need to fund a pool?",
-    answer: "Connect a wallet on Robinhood Chain. You need ETH for network fees and USDG, ETH, or WETH for the deposit.",
+    answer:
+      "Wallet on Robinhood Chain. Quotes are in $SHERD; deposits settle to USDG in the vault. Pay with $SHERD, USDG, ETH, or WETH — or swap any token via Buy $SHERD / Bridge first.",
+  },
+  {
+    question: "What is Instant Mint?",
+    answer:
+      "A $1.50 or $2 solo vault you fully bankroll. The deployer opens the pool (you skip the $5 create fee), you deposit, then stocks buy and your Sherd reveals in the same flow.",
   },
   {
     question: "What does the sealed card represent?",
-    answer: "It records your deposit and your claim on the pool. After reveal, it shows the exact ownership percentage and stock amounts behind that claim.",
+    answer:
+      "It records your deposit and claim on the pool. After reveal it shows ownership % and the stock amounts behind that claim.",
   },
   {
     question: "Do I choose the stocks?",
-    answer: "No. You choose the pool and deposit amount. When funding closes, the pool buys 2 to 5 stocks from the supported pool.",
+    answer:
+      "No. You choose the pool (or Instant Mint) and amount. At seal the vault buys 2 to 5 stocks from the supported registry.",
   },
   {
     question: "Can the pool value fall?",
-    answer: "Yes. The value moves with the stock tokens held by the pool. Sherhood is experimental, and you can lose some or all of the value you deposit.",
-  },
-  {
-    question: "Can I leave before reveal?",
-    answer: "You can exit while funding is open and receive the refund shown in the app. After funding closes, wait for reveal and then claim or trade.",
+    answer:
+      "Yes. Value tracks the stock tokens in the vault. Sherhood is experimental — you can lose some or all of what you deposit.",
   },
   {
     question: "Is Sherhood audited?",
-    answer: "No external audit has been completed. Review the terms, contract addresses, fees, and transaction details before funding.",
+    answer:
+      "No external audit has been completed. Review terms, contract addresses, fees, and txs before funding.",
   },
 ]
 

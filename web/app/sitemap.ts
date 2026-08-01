@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/create`,
       lastModified: new Date(),
       changeFrequency: "weekly",
-      priority: 0.65,
+      priority: 0.8,
     },
     {
       url: `${SITE_URL}/people`,

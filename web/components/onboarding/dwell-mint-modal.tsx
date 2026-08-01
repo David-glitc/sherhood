@@ -132,9 +132,16 @@ export function DwellMintModal() {
             </Link>
           )}
           <Link
-            href="/create"
+            href="/create?tab=instant"
             onClick={dismiss}
             className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-full")}
+          >
+            Mint Instant Sherd
+          </Link>
+          <Link
+            href="/create?tab=pool"
+            onClick={dismiss}
+            className={cn(buttonVariants({ variant: "ghost" }), "min-h-11 w-full")}
           >
             Or create a pool
           </Link>

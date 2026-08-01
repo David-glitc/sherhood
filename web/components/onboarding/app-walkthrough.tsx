@@ -3,17 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { Layers, LayoutGrid, UserRound, Sparkles } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Layers, LayoutGrid, UserRound, Sparkles, Zap } from "lucide-react"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { readOnboardingState, writeOnboardingState } from "@/lib/onboarding"
-import { SHERHOOD_TAGLINE } from "@/lib/protocol"
+import { SHERHOOD_TAGLINE, SHRH_SYMBOL } from "@/lib/protocol"
 import { cn } from "@/lib/utils"
 
 const STEPS = [
@@ -24,10 +17,18 @@ const STEPS = [
     body: `${SHERHOOD_TAGLINE}. Mint a Sherd in a pool, then claim your share when it reveals.`,
   },
   {
+    id: "instant",
+    icon: Zap,
+    title: "Instant Mint",
+    body: `Solo $1.50–$2 vault — deployer opens it, you fund, stocks buy, Sherd reveals. No $5 create fee.`,
+    href: "/create?tab=instant",
+    cta: "Mint Instant Sherd",
+  },
+  {
     id: "pools",
     icon: Layers,
     title: "Sherd pools",
-    body: "Open pools buy 2–5 Robinhood Chain stocks when they end. Pay with ETH, WETH, or USDG.",
+    body: `Open pools buy 2–5 Robinhood Chain stocks when they end. Quotes in $${SHRH_SYMBOL}; settle with USDG, ETH, or $${SHRH_SYMBOL}.`,
     href: "/app",
     cta: "Browse pools",
   },
@@ -53,6 +54,7 @@ type AppWalkthroughProps = {
   onFinished?: () => void
 }
 
+/** Soft coach strip — non-modal so pools stay usable underneath. */
 export function AppWalkthrough({ onFinished }: AppWalkthroughProps) {
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)
@@ -68,59 +70,53 @@ export function AppWalkthrough({ onFinished }: AppWalkthroughProps) {
     onFinished?.()
   }
 
+  if (!open) return null
+
   const current = STEPS[step]!
   const Icon = current.icon
   const isLast = step === STEPS.length - 1
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) finish("skipped")
-      }}
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-3 sm:p-4"
+      role="complementary"
+      aria-label="Sherhood walkthrough"
     >
-      <DialogContent
-        showCloseButton={false}
-        className="overflow-hidden border-border bg-[#080808] p-0 sm:max-w-md"
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="pointer-events-auto w-full max-w-lg overflow-hidden rounded-2xl border border-[#ccff00]/25 bg-[#0a0a0a]/95 shadow-[0_-12px_40px_rgba(0,0,0,0.55)] backdrop-blur-md"
       >
-        <div className="relative overflow-hidden px-6 pb-6 pt-7">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-10 -top-16 size-48 rounded-full bg-[#ccff00]/15 blur-3xl"
-          />
-          <div className="relative flex items-start justify-between gap-3">
-            <DialogHeader className="gap-1 text-left">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ccff00]/80">
-                Step {step + 1} / {STEPS.length}
+        <div className="relative px-4 pb-4 pt-4 sm:px-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ccff00]/80">
+                Tip {step + 1} / {STEPS.length}
               </p>
-              <DialogTitle className="text-xl text-foreground">{current.title}</DialogTitle>
-              <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
-                {current.body}
-              </DialogDescription>
-            </DialogHeader>
+              <p className="mt-1 text-base font-semibold text-foreground">{current.title}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{current.body}</p>
+            </div>
             <button
               type="button"
               onClick={() => finish("skipped")}
               className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
             >
-              Skip
+              Dismiss
             </button>
           </div>
 
-          <div className="relative mt-6 flex items-center gap-4">
+          <div className="mt-3 flex items-center gap-3">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
-                initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="flex size-14 items-center justify-center rounded-2xl border border-[#ccff00]/25 bg-[#ccff00]/10 text-[#ccff00]"
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex size-10 items-center justify-center rounded-xl border border-[#ccff00]/25 bg-[#ccff00]/10 text-[#ccff00]"
               >
-                <Icon className="size-6" aria-hidden />
+                <Icon className="size-5" aria-hidden />
               </motion.div>
             </AnimatePresence>
-            <div className="flex flex-1 gap-1.5" aria-hidden>
+            <div className="flex flex-1 gap-1" aria-hidden>
               {STEPS.map((s, i) => (
                 <span
                   key={s.id}
@@ -133,9 +129,9 @@ export function AppWalkthrough({ onFinished }: AppWalkthroughProps) {
             </div>
           </div>
 
-          <div className="relative mt-7 flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             {step > 0 ? (
-              <Button type="button" variant="ghost" onClick={() => setStep((s) => s - 1)}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setStep((s) => s - 1)}>
                 Back
               </Button>
             ) : (
@@ -148,13 +144,14 @@ export function AppWalkthrough({ onFinished }: AppWalkthroughProps) {
                   onClick={() => {
                     if (isLast) finish("done")
                   }}
-                  className={buttonVariants({ variant: "outline" })}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
                   {current.cta}
                 </Link>
               ) : null}
               <Button
                 type="button"
+                size="sm"
                 onClick={() => {
                   if (isLast) finish("done")
                   else setStep((s) => s + 1)
@@ -165,7 +162,7 @@ export function AppWalkthrough({ onFinished }: AppWalkthroughProps) {
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </motion.div>
+    </div>
   )
 }
